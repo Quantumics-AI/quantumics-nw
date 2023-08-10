@@ -340,11 +340,11 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.6.0</version>
 			</plugin>-->
-			<!--<plugin>
+			<plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.8.0.2131</version>
-            </plugin>-->
+                <version>3.4.0.905</version>
+            </plugin>
 		</plugins>
 		<finalName>QuantumSparkServiceAPI</finalName>
 		<resources>
