@@ -7,6 +7,7 @@ import { Quantumfacade } from 'src/app/state/quantum.facade';
 import { takeUntil } from 'rxjs/operators';
 import { SourceDataService } from '../../services/source-data.service';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
+import { AwsConfirmationComponent } from '../aws-confirmation/aws-confirmation.component';
 
 @Component({
   selector: 'app-list-aws',
@@ -22,6 +23,17 @@ export class ListAwsComponent {
   projectId: string;
   userId: number;
   loading: boolean;
+
+  searchTerm: any = { name: '' };
+  public searchDiv: boolean = false;
+  public searchString: string;
+  public awsListData = [
+    {id:1, name : "AWS1", access_type: "IAM", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
+    {id:2, name : "AWS2", access_type: "IAM", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
+    {id:3, name : "AWS3", access_type: "IAM", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
+    {id:4, name : "AWS4", access_type: "IAM", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
+    {id:5, name : "AWS5", access_type: "IAM", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' }
+  ];
 
   constructor(
     private router: Router,
@@ -44,5 +56,39 @@ export class ListAwsComponent {
 
   ngOnInit(): void {
     this.projectId = localStorage.getItem('project_id');
+  }
+
+  public edit(d: any): void {
+
+  }
+
+  public delete(id:number): void {
+    const modalRef = this.modalService.open(AwsConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false });
+    modalRef.componentInstance.userId = this.userId;
+    modalRef.componentInstance.projectId = this.projectId;
+    modalRef.componentInstance.awsId = id;
+
+    modalRef.result.then((result) => {
+      this.loading = true;
+      const idx = this.awsListData.findIndex(x => x.id === id);
+      this.awsListData.splice(idx, 1);
+      
+    }, (result) => {
+      
+     });
+  }
+
+  searchInput(str) {
+    this.searchString = str;
+    if (str.length == 0) {
+      this.searchDiv = false;
+    } else {
+      this.searchDiv = true;
+    }
+  }
+
+  clearSearhInput() {
+    this.searchTerm = { folderName: '' };
+    this.searchDiv = false;
   }
 }

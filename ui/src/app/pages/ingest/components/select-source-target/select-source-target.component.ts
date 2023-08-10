@@ -8,35 +8,35 @@ import { Certificate } from 'src/app/models/certificate';
 import { Quantumfacade } from 'src/app/state/quantum.facade';
 
 @Component({
-  selector: 'app-create-aws',
-  templateUrl: './create-aws.component.html',
-  styleUrls: ['./create-aws.component.css']
+  selector: 'app-select-source-target',
+  templateUrl: './select-source-target.component.html',
+  styleUrls: ['./select-source-target.component.css']
 })
-export class CreateAwsComponent {
+export class SelectSourceTargetComponent {
   private certificate$: Observable<Certificate>;
   private certificateData: Certificate;
   private unsubscribe: Subject<void> = new Subject();
-  private projectId: number;
+  public projectId: number;
 
   public fg: FormGroup;
-  public loading: boolean;
-  public queryFolders: boolean = true;
-  public selectedPolicyName: string;
-  public policyData: any = [
-    {
-      id: 1,
-      policyName: "IAM",
-    },
-    {
-      id: 2,
-      policyName: "Resource Policy",
-    },
-    {
-      id: 3,
-      policyName: "Secret Key / Access Key"
-    }
+  public fgt: FormGroup;
+
+  public sourceData = [
+    {id:1, name:'Bucket1'},
+    {id:2, name:'Bucket2'},
+    {id:3, name:'Bucket3'},
+    {id:4, name:'Bucket4'},
+    {id:5, name:'Bucket5'}
   ];
-  public connection: boolean = false;
+
+  public targetData = [
+    {id:1, name:'Bucket1'},
+    {id:2, name:'Bucket2'},
+    {id:3, name:'Bucket3'},
+    {id:4, name:'Bucket4'},
+    {id:5, name:'Bucket5'}
+  ];
+  public queryFolders: boolean;
 
   constructor(
     private fb: FormBuilder,
@@ -59,24 +59,17 @@ export class CreateAwsComponent {
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
 
     this.fg = this.fb.group({
-      folderName: new FormControl('', Validators.required),
-      markAsDefault: [false],
-      policyName: new FormControl('', Validators.required),
-      roleName: new FormControl('', Validators.required),
+      // source: [false],
+      source: new FormControl('', Validators.required),
+    });
+
+    this.fgt = this.fb.group({
+      target: new FormControl('', Validators.required),
     });
   }
 
-
-  public onSelectPipeline(connectorName: any): void {
-
-  }
-
-  public continue(): void {
-    this.router.navigate([`projects/${this.projectId}/ingest/select-source-target`]);
-  }
-
-  public testConnection(): void {
-    this.snakbar.open("Test connection succesfully");
-    this.connection = true;
+  public save(): void {
+    this.snakbar.open("Saved succesfully");
+    this.router.navigate([`projects/${this.projectId}/ingest/aws`]);
   }
 }

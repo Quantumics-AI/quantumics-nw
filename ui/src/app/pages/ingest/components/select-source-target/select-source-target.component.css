@@ -1,3 +1,4 @@
+
 input[type=radio]{
     accent-color: #00977C;
 }
@@ -71,4 +72,13 @@ input[type=radio]:checked{
 .validBtn {
     background-color: #01B798;
     color: white;
+}
+
+.mr-a {
+    margin: 0 auto;
+    width: 750px;
+}
+
+.mr-t-30 {
+    margin-top: 30px;
 }

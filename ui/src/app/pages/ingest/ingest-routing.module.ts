@@ -22,6 +22,7 @@ import { FolderDatasetComponent } from './components/folder-dataset/folder-datas
 import { ViewIngestPipelineComponent } from './components/view-ingest-pipeline/view-ingest-pipeline.component';
 import { CreateAwsComponent } from './components/create-aws/create-aws.component';
 import { ListAwsComponent } from './components/list-aws/list-aws.component';
+import { SelectSourceTargetComponent } from './components/select-source-target/select-source-target.component';
 
 const routes: Routes = [
   {
@@ -68,6 +69,7 @@ const routes: Routes = [
   { path: 'view', component: ViewIngestComponent },
   { path: 'select-source-type', component: SelectSourceTypeComponent },
   { path: 'generate-aws', component: CreateAwsComponent },
+  { path: 'select-source-target', component: SelectSourceTargetComponent},
   {
     path: '',
     component: WizardFolderComponent,

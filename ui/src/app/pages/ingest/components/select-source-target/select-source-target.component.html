@@ -1,0 +1,73 @@
+<div class="main-container">
+    <div class="page-header1">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item breadcrumb-top">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type' ]">Dataset</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Import dataset</li>
+                </ol>
+            </li>
+        </ol>
+    </div>
+
+    <div class="source-div">
+        <p class="local-file">
+            <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg">
+            Select Source - Target
+        </p>
+        <div class="card mr-a">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="card-main-text">Source</p>
+                        <div>
+                            <form [formGroup]="fg">
+                                <ul class="list-group">
+                                    <li class="list-group-item p2">Bucket</li>
+                                    <li class="list-group-item" *ngFor="let item of sourceData">
+                                        <div class="form-group mr-b-0">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input cp" type="radio" name="inlineRadioOptions" 
+                                                [value]="item.name" formControlName="source">
+                                                <label class="form-check-label p1" for="inlineRadio1">{{item.name}}</label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                  </ul>
+                            </form>
+                        </div>
+                        
+                    </div>
+                    <div class="col-md-6">
+                        <p class="card-main-text">Target</p>
+                        <div>
+                            <form [formGroup]="fgt">
+                                <ul class="list-group">
+                                    <li class="list-group-item p2">Bucket</li>
+                                    <li class="list-group-item" *ngFor="let item of targetData">
+                                        <div class="form-group mr-b-0">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input cp" type="radio" name="inlineRadioOptions" 
+                                                [value]="item.name" formControlName="target">
+                                                <label class="form-check-label p1" for="inlineRadio1">{{item.name}}</label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                  </ul>
+                            </form>
+                        </div>
+                        
+                    </div>
+
+                    <div class="col-md-12 mr-t-30 text-center">
+                        <button type="button" class="btn btn-outline-success connectionBtns" [disabled]="fg.invalid || fgt.invalid"
+                        [ngClass]="{'validBtn': fg.valid || fgt.valid}" (click)="save()">Save</button>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
