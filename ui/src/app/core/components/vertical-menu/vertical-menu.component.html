@@ -90,6 +90,16 @@
             </ul>
         </li>
 
+        <li routerLinkActive="active" #rladq="routerLinkActive">
+            <img *ngIf="rladq.isActive" src="assets/img/side-bar/active-left-content.svg" class="active-link">
+            <a [routerLink]="['projects', projectId, 'data-quality']">
+                <span class="w-30px">
+                    <img [src]="rladq.isActive ? 'assets/img/side-bar/profile-active.svg' : 'assets/img/side-bar/new-profile.svg'">
+                </span>
+                <span>Data Quality</span>
+            </a>
+        </li>
+
         <li routerLinkActive="active" #rlap="routerLinkActive">
             <img *ngIf="rlap.isActive" src="assets/img/side-bar/active-left-content.svg" class="active-link">
             <a [routerLink]="['projects',projectId,'delta']" (click)="expandCollapseMenu('profile')">
