@@ -60,7 +60,7 @@ export class CreateAwsComponent {
 
     this.fg = this.fb.group({
       folderName: new FormControl('', Validators.required),
-      markAsDefault: [false],
+      // markAsDefault: [false],
       policyName: new FormControl('', Validators.required),
       roleName: new FormControl('', Validators.required),
     });

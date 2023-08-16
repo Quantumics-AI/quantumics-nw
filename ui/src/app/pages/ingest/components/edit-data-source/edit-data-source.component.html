@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <h5 class="modal-title">Edit</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form [formGroup]="fg">
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                Data source name
+            </label>
+            <input type="text" class="form-control input-design" id="sourceName" #source
+                formControlName="sourceName" autocomplete="off" placeholder="Data source Name" >
+        </div>
+
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                Select a policy
+            </label>
+            <select class="form-control input-design" formControlName="policyName" #policyName
+                [(ngModel)]="accessType">
+                <option value="" [value]="undefined" disabled selected > --Select Policy-- </option>
+                <option *ngFor="let item of policyData" [value]="item.policyName">
+                    {{item.policyName}}
+                </option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                Role name
+            </label>
+            <input type="text" class="form-control input-design" id="role" #role
+                formControlName="roleName" autocomplete="off" placeholder="Role Name" disabled>
+        </div>
+
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-success connectionBtns" 
+            [ngClass]="{'validBtn': fg.invalid}" [disabled]="!fg.invalid"
+            >Update</button>
+        </div>
+    </form>
+</div>

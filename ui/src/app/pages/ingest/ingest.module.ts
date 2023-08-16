@@ -51,6 +51,7 @@ import { CreateAwsComponent } from './components/create-aws/create-aws.component
 import { ListAwsComponent } from './components/list-aws/list-aws.component';
 import { AwsConfirmationComponent } from './components/aws-confirmation/aws-confirmation.component';
 import { SelectSourceTargetComponent } from './components/select-source-target/select-source-target.component';
+import { EditDataSourceComponent } from './components/edit-data-source/edit-data-source.component';
 
 @NgModule({
   declarations: [
@@ -98,6 +99,7 @@ import { SelectSourceTargetComponent } from './components/select-source-target/s
     ListAwsComponent,
     AwsConfirmationComponent,
     SelectSourceTargetComponent,
+    EditDataSourceComponent,
   ],
   imports: [
     CommonModule,
