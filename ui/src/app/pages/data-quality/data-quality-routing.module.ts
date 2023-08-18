@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { DataQualityComponent } from './data-quality.component';
 import { DataQualityListComponent } from './components/data-quality-list/data-quality-list.component';
 import { DataQualityCreateComponent } from './components/data-quality-create/data-quality-create.component';
+import { DataQualityEditComponent } from './components/data-quality-edit/data-quality-edit.component';
 
 const routes: Routes = [
     {
@@ -12,6 +13,10 @@ const routes: Routes = [
     {
         path: 'create',
         component: DataQualityCreateComponent
+    },
+    {
+        path: 'edit',
+        component: DataQualityEditComponent
     }
     //   {
     //     path: '',

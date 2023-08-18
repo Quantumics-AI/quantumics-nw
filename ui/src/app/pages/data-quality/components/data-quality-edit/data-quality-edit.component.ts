@@ -1,25 +1,38 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DataQuailtyListResponse } from '../../models/data-quality-list-response';
+import { ActivatedRoute, Router } from '@angular/router';
+
 
 @Component({
-  selector: 'app-data-quality-create',
-  templateUrl: './data-quality-create.component.html',
-  styleUrls: ['./data-quality-create.component.scss']
+  selector: 'app-data-quality-edit',
+  templateUrl: './data-quality-edit.component.html',
+  styleUrls: ['./data-quality-edit.component.scss']
 })
-export class DataQualityCreateComponent implements OnInit {
-
+export class DataQualityEditComponent {
   public fg: FormGroup;
   public sourceTargetType: string = 'target';
   public isShowData: boolean = false;
 
-  constructor(private fb: FormBuilder) {
+  private projectId: number;
 
+  constructor(private readonly fb: FormBuilder,
+    private readonly router: Router,
+    private readonly activatedRoute: ActivatedRoute) {
+    this.projectId = +this.activatedRoute.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
+    const dataQuailty = JSON.parse(sessionStorage.getItem('editDataQuality')) as DataQuailtyListResponse;
+
+    if (!dataQuailty) {
+      this.router.navigate([`projects/${this.projectId}/data-quality`]);
+      return;
+    }
+
     this.fg = this.fb.group({
-      ruleName: new FormControl('', Validators.required),
-      ruleDescription: new FormControl('', Validators.required),
+      ruleName: new FormControl(dataQuailty?.ruleName, Validators.required),
+      ruleDescription: new FormControl(dataQuailty?.ruleDescription, Validators.required),
       type: ['target'],
       sourceDataSource: new FormControl('aws'),
       sourceDataConnection: new FormControl('aws1'),

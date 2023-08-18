@@ -1,10 +1,32 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-data-quality-show-data',
   templateUrl: './data-quality-show-data.component.html',
-  styleUrls: ['./data-quality-show-data.component.css']
+  styleUrls: ['./data-quality-show-data.component.scss']
 })
-export class DataQualityShowDataComponent {
+export class DataQualityShowDataComponent implements OnInit {
 
+  @Input() sourceTargetType: string;
+  @Output() close = new EventEmitter<void>();
+  public active = 1;
+
+  public tableData1 = [
+    { id: 1, name: 'John Doe', age: 30, city: 'New York', country: 'USA', occupation: 'Engineer', status: 'Active' },
+    { id: 2, name: 'Jane Smith', age: 28, city: 'Los Angeles', country: 'USA', occupation: 'Designer', status: 'Inactive' },
+    { id: 3, name: 'Michael Johnson', age: 35, city: 'Chicago', country: 'USA', occupation: 'Manager', status: 'Active' },
+  ];
+
+  public tableData2 = [
+    { id: 4, name: 'Alice Johnson', age: 25, city: 'San Francisco', country: 'USA', occupation: 'Developer', status: 'Active' },
+    { id: 5, name: 'Robert Williams', age: 32, city: 'Toronto', country: 'Canada', occupation: 'Accountant', status: 'Inactive' },
+    { id: 6, name: 'Emily Davis', age: 28, city: 'London', country: 'UK', occupation: 'Writer', status: 'Active' },
+  ];
+
+  public tableDataColumn1 = Object.keys(this.tableData1[0]);
+  public tableDataColumn2 = Object.keys(this.tableData2[0]);
+
+  ngOnInit(): void {
+
+  }
 }

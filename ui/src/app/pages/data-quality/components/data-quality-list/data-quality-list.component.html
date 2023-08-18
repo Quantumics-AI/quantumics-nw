@@ -17,7 +17,7 @@
                         </div>
                     </div>
                     <div class="col-3">
-                        <button class="btn btn-design btn-dq-create">Create</button>
+                        <a class="btn btn-design btn-dq-create" [routerLink]="['./create']">Create</a>
                     </div>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                         </thead>
                         <tbody>
                             <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
-                                <td class="fn">{{ dataQuality?.ruleName }}</td>
+                                <td class="fn">{{dataQuality?.ruleName }}</td>
                                 <td class="cp">{{dataQuality?.ruleType}}</td>
                                 <td class="cp">{{dataQuality?.createdBy}}</td>
                                 <td class="cp">{{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a'}}</td>
@@ -52,7 +52,7 @@
                                         </a>
 
                                         <div ngbDropdownMenu class="dr-m">
-                                            <button ngbDropdownItem class="h-37">Edit</button>
+                                            <button ngbDropdownItem class="h-37" (click)="edit(dataQuality);">Edit</button>
                                             <button ngbDropdownItem class="h-37">Delete</button>
                                         </div>
                                     </div>

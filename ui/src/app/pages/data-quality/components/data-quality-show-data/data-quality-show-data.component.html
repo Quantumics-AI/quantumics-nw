@@ -1,1 +1,43 @@
-<p>data-quality-show-data works!</p>
+<div class="close-icon" (click)="close.emit();">
+    <img src="assets/img/profile/cancel.svg">
+</div>
+
+<ngb-tabset class="tabs-custom">
+    <ngb-tab title="Table1">
+        <ng-template ngbTabContent>
+            <div class="table-responsive br-r">
+                <table class="table m-0 table-fixed table-striped">
+                    <thead class="thead-light">
+                        <tr class="fixed-th">
+                            <th class="" *ngFor="let column of tableDataColumn1  ">{{column}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="td-text" *ngFor="let item of tableData1">
+                            <td class="text-center" *ngFor="let column of tableDataColumn1">{{ item[column] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </ng-template>
+    </ngb-tab>
+
+    <ngb-tab title="Table2" *ngIf="sourceTargetType === 'sourceAndTarget'">
+        <ng-template ngbTabContent>
+            <div class="table-responsive br-r">
+                <table class="table m-0 table-fixed table-striped">
+                    <thead class="thead-light">
+                        <tr class="fixed-th">
+                            <th class="" *ngFor="let column of tableDataColumn2">{{column}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="td-text" *ngFor="let item of tableData2">
+                            <td class="text-center" *ngFor="let column of tableDataColumn2">{{ item[column] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </ng-template>
+    </ngb-tab>
+</ngb-tabset>
