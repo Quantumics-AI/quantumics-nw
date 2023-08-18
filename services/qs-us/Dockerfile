@@ -3,6 +3,6 @@ RUN apt-get update && apt-get upgrade -y
 #COPY services/qs-us /usr/src/app/qs-us
 COPY . /usr/src/app/qs-us
 WORKDIR /usr/src/app/qs-us
-RUN mvn clean install
+RUN mvn compile
 EXPOSE 8081
 ENTRYPOINT java -jar target/QSUserServiceApi.jar
