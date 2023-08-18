@@ -11,6 +11,7 @@ import { DataQualityCreateComponent } from './components/data-quality-create/dat
 import { DataQualityShowDataComponent } from './components/data-quality-show-data/data-quality-show-data.component';
 import { DataQualityEditComponent } from './components/data-quality-edit/data-quality-edit.component';
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
+import { RuleTypesComponent } from './components/rule-types/rule-types.component';
 
 @NgModule({
     declarations: [
@@ -20,6 +21,7 @@ import { ConfirmationComponent } from './components/confirmation/confirmation.co
         DataQualityShowDataComponent,
         DataQualityEditComponent,
         ConfirmationComponent,
+        RuleTypesComponent
     ],
     imports: [
         CommonModule,
