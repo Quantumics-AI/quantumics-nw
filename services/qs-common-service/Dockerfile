@@ -4,9 +4,9 @@
 FROM maven:3.9.3-ibmjava-8
 RUN apt-get update && apt-get upgrade -y
 #COPY qs-common-service /usr/src/app/qs-common-service
-COPY . /usr/src/app/qs-common-service
+COPY ./qs-common-service /usr/src/app/qs-common-service
 WORKDIR /usr/src/app/qs-common-service
-RUN mvn compile
+RUN mvn install -DskipTests -DskipITs -T 4
 ## ADD target/QSCommonService.jar /QSCommonService.jar
 ## ML Modules
 RUN apt-get update
@@ -32,5 +32,5 @@ EXPOSE 8090 8083 485 587
 
 ## Setting up entrypoint
 #COPY qs-common-service/src/main/resources /
-COPY ./src/main/resources /
+COPY ./qs-common-service/src/main/resources /
 ENTRYPOINT  java -Dspring.profiles.active=sat  -jar target/QSCommonService.jar
