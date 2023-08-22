@@ -6,7 +6,7 @@ RUN apt-get update && apt-get upgrade -y
 #COPY qs-common-service /usr/src/app/qs-common-service
 COPY ./qs-common-service /usr/src/app/qs-common-service
 WORKDIR /usr/src/app/qs-common-service
-RUN mvn compile
+RUN mvn install -DskipTests -DskipITs -T 4
 ## ADD target/QSCommonService.jar /QSCommonService.jar
 ## ML Modules
 RUN apt-get update

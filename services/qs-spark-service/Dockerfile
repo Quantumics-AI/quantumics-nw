@@ -16,7 +16,7 @@ FROM base AS stage1
 
 COPY ./qs-spark-service /usr/src/app/qs-spark-service
 WORKDIR /usr/src/app/qs-spark-service
-RUN mvn compile
+RUN mvn install -DskipTests -DskipITs -T 4
 
 ## Exposed required ports
 EXPOSE 8090 8082 485 587
