@@ -127,8 +127,8 @@ services:
   userservice:
     image: qsai/userservice
     build:
-      context: .
-      dockerfile: ../quantumics-opensource/services/qs-us/Dockerfile
+      context: services
+      dockerfile: ../services/qs-us/Dockerfile
     environment:
       AWS_REGION: ${AWS_REGION}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
