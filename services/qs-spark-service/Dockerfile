@@ -14,14 +14,14 @@ RUN apt-get update && apt-get upgrade -y \
 
 FROM base AS stage1
 
-COPY . /usr/src/app/qs-spark-service
+COPY ./qs-spark-service /usr/src/app/qs-spark-service
 WORKDIR /usr/src/app/qs-spark-service
 RUN mvn compile
 
 ## Exposed required ports
 EXPOSE 8090 8082 485 587
 
-COPY ./src/main/resources /usr/src/app/qs-spark-service
+COPY ./qs-spark-service/src/main/resources /usr/src/app/qs-spark-service
 ENTRYPOINT  java -Dspring.profiles.active=sat -jar target/QuantumSparkServiceAPI.jar
 
 ## Installing and setting up python modules
