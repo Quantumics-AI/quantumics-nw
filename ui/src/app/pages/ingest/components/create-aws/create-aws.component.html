@@ -10,12 +10,19 @@
             </li>
         </ol>
     </div>
-
+    <nav class="navbar navbar-light src-nav">
+        <div class="bck">
+            <a class="navbar-brand back-func" (click)="back()">
+                <img src="assets/img/db-connectors/back-arrow.svg" alt="">&nbsp;
+                GO BACK
+            </a>
+        </div>
+    </nav>
     <div class="aws-div">
-        <!-- <p class="local-file">
-            <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg">
-            AWS
-        </p> -->
+        <p class="local-file">
+            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg"> -->
+            Configure Data Source
+        </p>
         <form [formGroup]="fg">
             <div class="row gutters justify-content-center mt-5 rounded-lg ">
                 <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 ">
@@ -52,20 +59,21 @@
                                             <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
                                             Select a policy
                                         </label>
-                                        <select class="form-control input-design" formControlName="policyName" #policyName
+                                        <input type="text" class="form-control input-design" id="sourceName" #policyName
+                                            formControlName="policyName" autocomplete="off" placeholder="Policy name" [value]="'IAM'">
+                                        <!-- <select class="form-control input-design" formControlName="policyName" #policyName
                                             (change)="onSelectPipeline(policyName.value)" [(ngModel)]="selectedPolicyName">
                                             <option value="" [value]="undefined" disabled selected > --Select Policy-- </option>
                                             <option *ngFor="let item of policyData" [value]="item.policyName">
                                                 {{item.policyName}}
                                             </option>
-                                        </select>
+                                        </select> -->
                                     </div>
                                 </div>
-                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-                                *ngIf="fg.get('policyName').valid && fg.get('policyName').dirty">
+                                <!-- *ngIf="fg.get('policyName').valid && fg.get('policyName').dirty" -->
+                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
-                                            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
                                             Role name
                                         </label>
                                         <input type="text" class="form-control input-design" id="sourceName" #folder

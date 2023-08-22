@@ -7,11 +7,23 @@
         </li>
     </ol>
 
-    <div style="position: absolute;top: 10%; left: 15px;">
+    <!-- <div style="position: absolute;top: 10%; left: 15px;">
         <a class="btn" [routerLink]="['..']">Go Back</a>
-    </div>
-    <div class="row m-0 justify-content-center rounded-lg">
+    </div> -->
+    <nav class="navbar navbar-light src-nav">
+        <div class="bck">
+            <a class="navbar-brand back-func" (click)="back()">
+                <img src="assets/img/db-connectors/back-arrow.svg" alt="">&nbsp;
+                GO BACK
+            </a>
+        </div>
+    </nav>
+    <div class="row justify-content-center rounded-lg mr-t-35">
+        
         <div [class.col-7]="sourceTargetType === 'sourceAndTarget'" class="col-5">
+            <p class="local-file">
+                Create Rule
+            </p>
             <div class="card">
                 <div class="card-body">
                     <div class="row">

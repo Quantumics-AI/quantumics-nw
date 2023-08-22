@@ -6,7 +6,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 @Component({
   selector: 'app-edit-data-source',
   templateUrl: './edit-data-source.component.html',
-  styleUrls: ['./edit-data-source.component.css']
+  styleUrls: ['./edit-data-source.component.scss']
 })
 export class EditDataSourceComponent {
   @Input() projectId: number;

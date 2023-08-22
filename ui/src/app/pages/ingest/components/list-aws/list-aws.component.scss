@@ -347,3 +347,11 @@ input[type=text]::-moz-focus-inner {
   font-size: 14px;
   line-height: 20px;
 }
+
+.pointer-none {
+  pointer-events: none;
+}
+
+.pd-16 {
+  padding: 16px !important;
+}

@@ -7,7 +7,7 @@
 <div class="page-content pd-20">
     <ng-container *ngIf="awsListData.length > 0">
         <div class="card card-d">
-            <div class="card-header ch">
+            <div class="card-header ch pd-16">
                 <div class="di mr-t-6" *ngIf="!searchDiv">
                     <p class="card-main-text">AWS</p>
                     <!-- <p class="p1 mr-b-0">Folders have same metadata dataset. To create new folder, go to import dataset.</p> -->
@@ -16,7 +16,7 @@
                     <p class="card-main-text">Search result</p>
                 </div>
                 <div class="pull-right">
-                    <div class="input-group mr-t-18 br-bx-a">
+                    <div class="input-group br-bx-a">
                         <div class="input-group-prepend h36">
                             <span class="input-group-text search-icon br-bx-n" id="basic-addon1">
                                 <img src="assets/img/govern/search.svg">
@@ -39,6 +39,7 @@
                                             src="assets/img/govern/down-arrow.svg"></span>
                                 </th>
                                 <th class="pd-l-24">Access type</th>
+                                <th class="pd-l-24">IAM Role</th>
                                 <th class="pd-l-24">Created date</th>
                                 <th class="pd-l-24">Modified date</th>
                                 <th class="pd-l-24">Actions</th>
@@ -50,18 +51,19 @@
                                     <span><img src="assets/img/project-stats/folder-i.svg"></span>
                                     {{ aws?.name }}</td>
                                 <td >{{aws.access_type}}</td>
+                                <td >{{aws.iam_role}}</td>
                                 <td >
-                                    {{aws.createdDate}}
+                                    {{aws?.createdDate | date: 'dd-MM-yy, hh:mm a'}}
                                 </td>
-                                <td >{{aws.modifiedDate}}</td>
+                                <td >{{aws.modifiedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
                                     <td>
-                                        <a id="lnkEdit"
+                                    <a id="lnkEdit" class="pointer-none"
                                         (click)="edit(aws)" placement="top" ngbTooltip="Edit">
                                         <em><img src="assets/img/edit.svg" width="18" alt=""></em>
                                     </a> &nbsp;
 
                                     <a id="lnkDeleteFlow" (click)="delete(aws.id)" placement="top"
-                                        ngbTooltip="Delete">
+                                        ngbTooltip="Delete" class="pointer-none">
                                         <em><img src="assets/img/delete.svg" width="18" alt=""></em>
                                     </a>
                                 </td>

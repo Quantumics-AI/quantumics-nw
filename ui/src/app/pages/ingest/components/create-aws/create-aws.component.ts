@@ -6,11 +6,12 @@ import { takeUntil } from 'rxjs/operators';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
 import { Certificate } from 'src/app/models/certificate';
 import { Quantumfacade } from 'src/app/state/quantum.facade';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-create-aws',
   templateUrl: './create-aws.component.html',
-  styleUrls: ['./create-aws.component.css']
+  styleUrls: ['./create-aws.component.scss']
 })
 export class CreateAwsComponent {
   private certificate$: Observable<Certificate>;
@@ -44,6 +45,7 @@ export class CreateAwsComponent {
     private activatedRoute: ActivatedRoute,
     private quantumFacade: Quantumfacade,
     private router: Router,
+    private location: Location,
   ){
     this.certificate$ = this.quantumFacade.certificate$;
     this.certificate$
@@ -61,7 +63,7 @@ export class CreateAwsComponent {
     this.fg = this.fb.group({
       folderName: new FormControl('', Validators.required),
       // markAsDefault: [false],
-      policyName: new FormControl('', Validators.required),
+      policyName: new FormControl({value: 'IAM', disabled: true}, Validators.required),
       roleName: new FormControl('', Validators.required),
     });
   }
@@ -78,5 +80,9 @@ export class CreateAwsComponent {
   public testConnection(): void {
     this.snakbar.open("Test connection succesfully");
     this.connection = true;
+  }
+
+  public back(): void {
+    this.location.back();
   }
 }

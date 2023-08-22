@@ -6,7 +6,7 @@ import { SnackbarService } from 'src/app/core/services/snackbar.service';
 @Component({
   selector: 'app-aws-confirmation',
   templateUrl: './aws-confirmation.component.html',
-  styleUrls: ['./aws-confirmation.component.css']
+  styleUrls: ['./aws-confirmation.component.scss']
 })
 export class AwsConfirmationComponent {
   @Input() projectId: number;

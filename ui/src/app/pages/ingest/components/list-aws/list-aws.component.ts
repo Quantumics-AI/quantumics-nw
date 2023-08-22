@@ -13,7 +13,7 @@ import { EditDataSourceComponent } from '../edit-data-source/edit-data-source.co
 @Component({
   selector: 'app-list-aws',
   templateUrl: './list-aws.component.html',
-  styleUrls: ['./list-aws.component.css']
+  styleUrls: ['./list-aws.component.scss']
 })
 export class ListAwsComponent {
 
@@ -29,11 +29,11 @@ export class ListAwsComponent {
   public searchDiv: boolean = false;
   public searchString: string;
   public awsListData = [
-    {id:1, name : "AWS1", access_type: "IAM", role: "user", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
-    {id:2, name : "AWS2", access_type: "IAM", role: "user", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
-    {id:3, name : "AWS3", access_type: "IAM", role: "user", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
-    {id:4, name : "AWS4", access_type: "IAM", role: "user", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' },
-    {id:5, name : "AWS5", access_type: "IAM", role: "user", createdDate: "08-08-23, 02:08 PM", modifiedDate: '' }
+    {id:1, name : "AWS1", access_type: "IAM", role: "user", iam_role: "Naveen", createdDate: new Date(), modifiedDate: new Date() },
+    {id:2, name : "AWS2", access_type: "IAM", role: "user", iam_role: "Naveen", createdDate: new Date(), modifiedDate: new Date() },
+    {id:3, name : "AWS3", access_type: "IAM", role: "user", iam_role: "Naveen", createdDate: new Date(), modifiedDate: new Date() },
+    {id:4, name : "AWS4", access_type: "IAM", role: "user", iam_role: "Naveen", createdDate: new Date(), modifiedDate: new Date() },
+    {id:5, name : "AWS5", access_type: "IAM", role: "user", iam_role: "Naveen", createdDate: new Date(), modifiedDate: new Date() }
   ];
 
   constructor(

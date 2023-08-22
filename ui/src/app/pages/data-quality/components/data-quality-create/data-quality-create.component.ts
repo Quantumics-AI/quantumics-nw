@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SnackbarService } from 'src/app/core/services/snackbar.service';
+import { Certificate } from 'src/app/models/certificate';
+import { Quantumfacade } from 'src/app/state/quantum.facade';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-data-quality-create',
@@ -7,16 +14,33 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
   styleUrls: ['./data-quality-create.component.scss']
 })
 export class DataQualityCreateComponent implements OnInit {
-
+  private certificate$: Observable<Certificate>;
+  private certificateData: Certificate;
+  private unsubscribe: Subject<void> = new Subject();
   public fg: FormGroup;
   public sourceTargetType: string = 'target';
   public isShowData: boolean = false;
+  public projectId: number;
 
-  constructor(private fb: FormBuilder) {
-
+  constructor(
+    private fb: FormBuilder,
+    private snakbar: SnackbarService,
+    private activatedRoute: ActivatedRoute,
+    private quantumFacade: Quantumfacade,
+    private router: Router,
+    private location: Location,) {
+      this.certificate$ = this.quantumFacade.certificate$;
+      this.certificate$
+        .pipe(takeUntil(this.unsubscribe))
+        .subscribe(certificate => {
+          if (certificate) {
+            this.certificateData = certificate;
+          }
+        });
   }
 
   ngOnInit(): void {
+    this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({
       ruleName: new FormControl('', Validators.required),
       ruleDescription: new FormControl('', Validators.required),
@@ -53,7 +77,7 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   public continue(): void {
-
+    this.router.navigate([`projects/${this.projectId}/data-quality/rule-types`]);
   }
 
   public showData(): void {
@@ -63,4 +87,9 @@ export class DataQualityCreateComponent implements OnInit {
     }
 
   }
+
+  public back(): void {
+    this.location.back();
+  }
+
 }

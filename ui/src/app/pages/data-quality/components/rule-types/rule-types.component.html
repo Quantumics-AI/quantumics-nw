@@ -23,9 +23,14 @@
         <div class="card card-d">
             <div class="card-body">
                 <form [formGroup]="fg">
+                    <div class="p2 mr-b-8 fw-600">
+                        <span>Rule Types</span>
+                        <span class="pull-right"> Acceptance Percentage </span>
+                    </div>
                     <div class="row row-mr">
+                        
                         <div class="col">
-                            <p class="p2 mr-b-8 fw-600">Rule Types</p>
+                            <!-- <p class="p2 mr-b-8 fw-600">Rule Types</p> -->
                             <div class="form-group">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
@@ -35,7 +40,6 @@
                             </div>
                         </div>
                         <div class="col">
-                            <p class="p2 mr-b-8 fw-600">Sub checks</p>
                             <div class="form-group">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input cp" type="radio" [attr.disabled]="this.queryRuleTypes !== 'dc'"
@@ -53,7 +57,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group mr-t-30">
+                            <div class="form-group">
                                 <!-- <ng-select id="attributes" class="custom" [clearable]="false" formControlName="relatedAttributes" [multiple]="true"
                                     placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="completenessData">
                                     <ng-template ng-option-tmp let-item="item">
@@ -69,7 +73,8 @@
                             </div>
                         </div>
                         <div class="col mx-w-140">
-                            <div class="form-group mr-t-30">
+                            <!-- <p class="p2 mr-b-8 fw-600">Acceptance Percentage</p> -->
+                            <div class="form-group">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
                                     formControlName="columnName" autocomplete="off" placeholder="%" >
                             </div>

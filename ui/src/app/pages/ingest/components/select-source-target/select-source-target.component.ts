@@ -6,11 +6,12 @@ import { takeUntil } from 'rxjs/operators';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
 import { Certificate } from 'src/app/models/certificate';
 import { Quantumfacade } from 'src/app/state/quantum.facade';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-select-source-target',
   templateUrl: './select-source-target.component.html',
-  styleUrls: ['./select-source-target.component.css']
+  styleUrls: ['./select-source-target.component.scss']
 })
 export class SelectSourceTargetComponent {
   private certificate$: Observable<Certificate>;
@@ -44,6 +45,7 @@ export class SelectSourceTargetComponent {
     private activatedRoute: ActivatedRoute,
     private quantumFacade: Quantumfacade,
     private router: Router,
+    private location: Location,
   ){
     this.certificate$ = this.quantumFacade.certificate$;
     this.certificate$
@@ -71,5 +73,9 @@ export class SelectSourceTargetComponent {
   public save(): void {
     this.snakbar.open("Saved succesfully");
     this.router.navigate([`projects/${this.projectId}/ingest/aws`]);
+  }
+
+  public back(): void {
+    this.location.back();
   }
 }

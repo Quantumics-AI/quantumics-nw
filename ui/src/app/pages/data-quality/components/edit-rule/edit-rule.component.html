@@ -1,0 +1,223 @@
+<div class="modal-header">
+    <!-- <h5 class="modal-title">Edit</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+    </button> -->
+    <div class="btn-div">
+        <button class="btn btn-design">Run</button>
+        <button class="btn btn-design mr-l-10" (click)="modal.dismiss('Cross click')">Cancel</button>
+    </div>
+</div>
+
+<div class="modal-body">
+    <form [formGroup]="fg">
+        <div class="row row-mr">
+            <div class="col">
+                <p class="p2 mr-b-8 fw-600">Rule Types</p>
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                        [(ngModel)]="queryRuleTypes" value="dc" formControlName="ruleType">
+                        <label class="form-check-label p2" for="inlineRadio1">Data Completeness</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <p class="p2 mr-b-8 fw-600">Sub checks</p>
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio"
+                        [(ngModel)]="queryDcLevel" value="dcrl" formControlName="dcLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Row level</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio"
+                        [(ngModel)]="queryDcLevel" value="dccl" formControlName="dcLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Column level</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group mr-t-30">
+                    <!-- <ng-select id="attributes" class="custom" [clearable]="false" formControlName="relatedAttributes" [multiple]="true"
+                        placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="completenessData">
+                        <ng-template ng-option-tmp let-item="item">
+                            <span [title]="item">{{item}}</span>
+                        </ng-template>
+                    </ng-select> -->
+                    <select id="cd" class="form-control input-design in-text" formControlName="relatedAttributes" [(ngModel)]="selectedCompleteName" placeholder="Select Attributes">
+                        <option [value]="undefined" disabled selected> Select Attributes </option>
+                        <option *ngFor="let i of completenessData" [value]="i">
+                            {{i}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col mx-w-140">
+                <div class="form-group mr-t-30">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+            </div>
+        </div>
+
+        <!--  -->
+        <div class="row row-mr">
+            <div class="col">
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                        [(ngModel)]="queryRuleTypes" value="dp" formControlName="ruleType">
+                        <label class="form-check-label p2" for="inlineRadio1">Data Profiler</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" 
+                        [(ngModel)]="queryDpLevel" value="dptl" formControlName="dpLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Table level</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" 
+                        [(ngModel)]="queryDpLevel" value="dpcl" formControlName="dpLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Column level</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <!-- <ng-select id="dp" class="custom" [clearable]="false" formControlName="relatedDataProfiler" [multiple]="true"
+                        placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="dataProfiler">
+                        <ng-template ng-option-tmp let-item="item">
+                            <span [title]="item">{{item}}</span>
+                        </ng-template>
+                    </ng-select> -->
+
+                    <select id="dp" class="form-control input-design in-text" formControlName="relatedDataProfiler" [(ngModel)]="selectedDataProfiler" placeholder="Select Attributes">
+                        <option [value]="undefined" disabled selected> Select Attributes </option>
+                        <option *ngFor="let i of dataProfiler" [value]="i">
+                            {{i}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col mx-w-140">
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+            </div>
+        </div>
+        <!--  -->
+        <div class="row row-mr">
+            <div class="col">
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                        [(ngModel)]="queryRuleTypes" value="nu" formControlName="ruleType">
+                        <label class="form-check-label p2" for="inlineRadio1">Null Value</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col mx-w-140">
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+            </div>
+        </div>
+        <!--  -->
+        <div class="row row-mr">
+            <div class="col">
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                        [(ngModel)]="queryRuleTypes" value="dv" formControlName="ruleType">
+                        <label class="form-check-label p2" for="inlineRadio1">Duplicate Value</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio"
+                        [(ngModel)]="queryDvLevel" value="dvdr" formControlName="dvLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Duplicate Row</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio"
+                        [(ngModel)]="queryDvLevel" value="dvc" formControlName="dvLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Column</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input cp" type="radio" 
+                        [(ngModel)]="queryDvLevel" value="dvmc" formControlName="dvLevel">
+                        <label class="form-check-label p2" for="inlineRadio1">Multiple Column</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <!-- <ng-select id="dpo" class="custom" [clearable]="false" formControlName="relatedDuplicateDataOne" [multiple]="true"
+                        placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="duplicateDataOne">
+                        <ng-template ng-option-tmp let-item="item">
+                            <span [title]="item">{{item}}</span>
+                        </ng-template>
+                    </ng-select> -->
+                    <select id="dpo" class="form-control input-design in-text" formControlName="relatedDuplicateDataOne" [(ngModel)]="selectedDuplicateDataOne" placeholder="Select Attributes">
+                        <option [value]="undefined" disabled selected> Select Attributes </option>
+                        <option *ngFor="let i of duplicateDataOne" [value]="i">
+                            {{i}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <ng-select id="dpt" class="custom" [clearable]="false" formControlName="relatedDuplicateDataTwo" [multiple]="true"
+                        placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="duplicateDataTwo">
+                        <ng-template ng-option-tmp let-item="item">
+                            <span [title]="item">{{item}}</span>
+                        </ng-template>
+                    </ng-select>
+                </div>
+
+            </div>
+            <div class="col mx-w-140">
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control input-design" id="columnName" #folder
+                        formControlName="columnName" autocomplete="off" placeholder="%" >
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

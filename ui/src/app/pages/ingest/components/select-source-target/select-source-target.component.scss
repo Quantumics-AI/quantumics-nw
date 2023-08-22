@@ -82,3 +82,38 @@ input[type=radio]:checked{
 .mr-t-30 {
     margin-top: 30px;
 }
+
+// nav 
+.src-nav {
+    padding: 20px;
+    position: fixed;
+    width: -webkit-fill-available;
+    margin-top: -31px;
+    z-index: 1;
+    background-color: #ffffff;
+}
+
+.bck {
+    position: absolute;
+}
+
+.back-func {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    letter-spacing: -0.02em;
+    color: #0A0A15;
+    display: inline-flex;
+}
+
+.navbar-light {
+    border-bottom: 1px solid #eee;
+}
+//
+
+.source-div {
+    margin-top: 55px;
+}

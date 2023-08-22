@@ -103,16 +103,15 @@ export class RuleTypesComponent {
   }
 
   public saveRules(): void {
-
+    this.snakbar.open("Rule saved");
   }
 
   public runRules(): void {
-
+    this.router.navigate([`projects/${this.projectId}/data-quality`]);
   }
 
   public onItemChange(value: string): void {
     console.log(this.queryRuleTypes);
-    this.queryRuleTypes = value;
     
   }
 }
