@@ -47,3 +47,28 @@
     right: 10px;
     cursor: pointer;
 }
+
+.table-h {
+    overflow: auto;
+    height: 175px;
+}
+
+.mr-r-20 {
+    margin-right: 20px;
+}
+
+.cancel-b {
+    height: 36px;
+    border-radius: 4px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+}
+
+.s-t-btn {
+    margin-top: 30px;
+    padding-left: 20px;
+}

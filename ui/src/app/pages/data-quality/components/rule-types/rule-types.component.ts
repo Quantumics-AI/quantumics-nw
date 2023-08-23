@@ -104,6 +104,7 @@ export class RuleTypesComponent {
 
   public saveRules(): void {
     this.snakbar.open("Rule saved");
+    this.router.navigate([`projects/${this.projectId}/data-quality`]);
   }
 
   public runRules(): void {

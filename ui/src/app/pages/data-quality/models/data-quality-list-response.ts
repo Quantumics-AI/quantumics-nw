@@ -7,4 +7,5 @@ export interface DataQuailtyListResponse {
     createdDate: Date;
     modifiedDate: Date;
     status: string;
+    selected: boolean;
 }

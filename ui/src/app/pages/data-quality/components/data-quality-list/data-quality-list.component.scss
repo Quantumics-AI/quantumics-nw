@@ -102,3 +102,92 @@
 .pointer-none {
     pointer-events: none;
 }
+
+.tp1 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    color: #101828;
+}
+
+.wm {
+    width: 443px;
+    margin: auto;
+    margin-top: 40px;
+}
+
+.mr-b-24 {
+    margin-bottom: 24px !important;
+}
+
+.mr-b-56 {
+    margin-bottom: 56px;
+}
+
+.view-list {
+    padding-top: 14px;
+    padding-bottom: 5px;
+    color: blue;
+    text-decoration: underline;
+}
+
+// pagination 
+.pg-tr td {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+::ng-deep .pagination {
+  justify-content: space-between;
+}
+::ng-deep .page-item:first-child {
+  margin-right: auto;
+  margin-top: 0;
+}
+::ng-deep .page-item:last-child {
+  margin-left: auto;
+  margin-top: 0;
+}
+
+::ng-deep .page-link {
+  border: none;
+  color: #000;
+}
+::ng-deep .page-link:focus {
+  box-shadow: none;
+}
+  
+::ng-deep .page-item.active .page-link {
+    background-color: #F9FAFB;
+    // background-color: #EAECF0;
+    border-radius: 8px;
+    color: #000;
+}
+  
+::ng-deep .page-link:hover {
+    background-color: #F9FAFB;
+    border-radius: 8px;
+    color: #000;
+}
+  
+.dropdown-toggle::after {
+    display: none !important;
+}
+  
+::ng-deep .page-item {
+    margin-top: 10px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+// .table-height {
+//     height: calc(100vh - 310px);
+// }

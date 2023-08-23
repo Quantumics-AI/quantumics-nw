@@ -41,13 +41,14 @@ export class EditDataSourceComponent {
 
   ngOnInit(): void {
     this.fg = this.fb.group({
-      sourceName : [{ value: this.sourceName, disabled: true }],
+      sourceName : [this.sourceName, Validators.required],
       policyName:[{ value: this.accessType, disabled: true }],
       roleName:[{ value: this.role, disabled: true }]
     })
   }
 
-  public deleteFolder(): void {
+  public updateData(): void {
+    this.snakbar.open("Data source updated successfully!")
     this.modal.close();
   }
 }

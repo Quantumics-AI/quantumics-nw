@@ -78,7 +78,7 @@ export class CreateAwsComponent {
   }
 
   public testConnection(): void {
-    this.snakbar.open("Test connection succesfully");
+    this.snakbar.open("Connection established successfully!!!");
     this.connection = true;
   }
 

@@ -84,6 +84,7 @@ export class ListAwsComponent {
 
     modalRef.result.then((result) => {
       this.loading = true;
+      this.snakbar.open("Data source deleted successfully!");
       const idx = this.awsListData.findIndex(x => x.id === id);
       this.awsListData.splice(idx, 1);
       

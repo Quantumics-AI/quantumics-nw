@@ -18,7 +18,7 @@ export class DataQualityCreateComponent implements OnInit {
   private certificateData: Certificate;
   private unsubscribe: Subject<void> = new Subject();
   public fg: FormGroup;
-  public sourceTargetType: string = 'target';
+  public sourceTargetType: string = 'sourceAndTarget';
   public isShowData: boolean = false;
   public projectId: number;
 
@@ -44,7 +44,7 @@ export class DataQualityCreateComponent implements OnInit {
     this.fg = this.fb.group({
       ruleName: new FormControl('', Validators.required),
       ruleDescription: new FormControl('', Validators.required),
-      type: ['target'],
+      type: ['sourceAndTarget'],
       sourceDataSource: new FormControl('aws'),
       sourceDataConnection: new FormControl('aws1'),
       sourceBucket: new FormControl('bucket1'),

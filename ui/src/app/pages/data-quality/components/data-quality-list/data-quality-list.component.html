@@ -8,13 +8,16 @@
 <div class="page-content pd-20">
     <ng-container *ngIf="dataQualityList?.length > 0; else noDataQualityRules">
         <div class="card card-d">
-            <div class="card-header ch">
+            <div class="card-header ch pd-b-0">
                 <div class="di mr-t-6">
                     <p class="card-main-text">Data Quality</p>
                     <p class="p1 mr-b-0">Set Data Quality rules to datasets, To set click on create</p>
                 </div>
                 <div class="pull-right">
                     <button class="btn btn-design" [routerLink]="['./create']">Create</button>
+                </div>
+                <div>
+                    <p class="view-list pull-right cp mr-b-0">View running rules</p>
                 </div>
                 <!-- <div class="row align-item">
                     <div class="col-9">
@@ -33,17 +36,23 @@
                     <table class="table m-0 table-fixed table-striped">
                         <thead class="thead-light">
                             <tr class="fixed-th">
-                                <th class="pd-l-24">Rule Name</th>
-                                <th class="pd-l-24">Rule Type</th>
-                                <th class="pd-l-24">Created By</th>
-                                <th class="pd-l-24">Created Date</th>
-                                <th class="pd-l-24">Modified Date</th>
+                                <th class="pd-l-24"><label class="mr-b-0">
+                                    <input type="checkbox" [(ngModel)]="selectAllChecked" (change)="selectRuleAll($event)"></label>
+                                </th>
+                                <th class="pd-l-24">Rule name</th>
+                                <th class="pd-l-24">Rule type</th>
+                                <th class="pd-l-24">Created by</th>
+                                <th class="pd-l-24">Created date</th>
+                                <th class="pd-l-24">Modified date</th>
                                 <th class="pd-l-24">Status</th>
                                 <th class="float-right">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
+                                <td class="pt-2"> <label>
+                                    <input type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
+                                </label></td>
                                 <td class="fn">{{dataQuality?.ruleName }}</td>
                                 <td class="cp">{{dataQuality?.ruleType}}</td>
                                 <td class="cp">{{dataQuality?.createdBy}}</td>
@@ -53,7 +62,7 @@
 
                                 <td class="float-right">
                                     <div ngbDropdown container="body">
-                                        <a ngbDropdownToggle class="menu-icon pointer-none">
+                                        <a ngbDropdownToggle class="menu-icon">
                                             <img src="assets/img/project-stats/menu.svg" class="default-img">
                                             <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
                                         </a>
@@ -66,24 +75,41 @@
                                     </div>
                                 </td>
                             </tr>
+                            <tr *ngIf="(dataQualityList)?.length > 10"
+                                style="background-color: white !important;" class="pg-tr">
+                                <td colspan="8" class="pg-pd">
+                                    <div class="text-center">
+                                        <ngb-pagination [collectionSize]="dataQualityList?.length" [(page)]="page"
+                                            [pageSize]="pageSize" [maxSize]="5" [rotate]="true"
+                                            aria-label="Custom pagination" (pageChange)="onPageChange($event)">
+                                            <ng-template ngbPaginationPrevious>
+                                                <span class="btn nextBtn">
+                                                    <img src="assets/img/govern/arrow-left.svg">Previous
+                                                </span></ng-template>
+                                            <ng-template ngbPaginationNext><span class="btn nextBtn">
+                                                    Next <img src="assets/img/govern/arrow-right.svg">
+                                                </span></ng-template>
+                                        </ngb-pagination>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        <div class="btn-div text-center">
+            <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run rule</button>
+        </div>
     </ng-container>
     <ng-template #noDataQualityRules>
         <div class="connect-source-div">
             <div class="card card-d mr-t-16">
-                <div class="card-header ch pd-t-b-20">
-                    <p class="card-main-text">Data Quality</p>
-                    <p class="p1 mr-b-0">Set Data Quality rules to datasets, To set click on create</p>
-                </div>
                 <div class="card-body">
                     <div class="connect-s text-center">
                         <img src="assets/img/govern/no-dq.svg" class="img-fluid">
-                        <p class="tp2 mr-b-0">Set business related rules for your dataset.</p>
-                        <p class="tp2 mr-b-24">Monitor your dataset quality.</p>
+                        <p class="tp1 mr-b-0 wm">Set business related rules for your dataset.</p>
+                        <p class="tp1 mr-b-24">There is no Data Quality Rule created. Please create one.</p>
                         <a [routerLink]="['/projects', 'projectId', 'ingest', 'select-source-type']"
                             class="btn btn-design mr-b-56">Create</a>
                     </div>

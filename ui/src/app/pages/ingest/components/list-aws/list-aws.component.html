@@ -12,7 +12,7 @@
                     <p class="card-main-text">AWS</p>
                     <!-- <p class="p1 mr-b-0">Folders have same metadata dataset. To create new folder, go to import dataset.</p> -->
                 </div>
-                <div class="di" *ngIf="searchDiv">
+                <!-- <div class="di" *ngIf="searchDiv">
                     <p class="card-main-text">Search result</p>
                 </div>
                 <div class="pull-right">
@@ -27,7 +27,7 @@
                             (ngModelChange)="searchInput($event)">
                     </div>
 
-                </div>
+                </div> -->
             </div>
             <div class="card-body pd-0">
                 <div class="table-responsive br-r">
@@ -39,7 +39,7 @@
                                             src="assets/img/govern/down-arrow.svg"></span>
                                 </th>
                                 <th class="pd-l-24">Access type</th>
-                                <th class="pd-l-24">IAM Role</th>
+                                <th class="pd-l-24">IAM role</th>
                                 <th class="pd-l-24">Created date</th>
                                 <th class="pd-l-24">Modified date</th>
                                 <th class="pd-l-24">Actions</th>
@@ -57,13 +57,13 @@
                                 </td>
                                 <td >{{aws.modifiedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
                                     <td>
-                                    <a id="lnkEdit" class="pointer-none"
+                                    <a id="lnkEdit"
                                         (click)="edit(aws)" placement="top" ngbTooltip="Edit">
                                         <em><img src="assets/img/edit.svg" width="18" alt=""></em>
                                     </a> &nbsp;
 
                                     <a id="lnkDeleteFlow" (click)="delete(aws.id)" placement="top"
-                                        ngbTooltip="Delete" class="pointer-none">
+                                        ngbTooltip="Delete">
                                         <em><img src="assets/img/delete.svg" width="18" alt=""></em>
                                     </a>
                                 </td>
@@ -83,6 +83,20 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+    <ng-container  *ngIf="awsListData.length == 0">
+        <div class="connect-source-div">
+            <div class="card card-d mr-t-16">
+                <div class="card-body">
+                    <div class="connect-s text-center">
+                        <img src="assets/img/govern/no-dq.svg" class="img-fluid">
+                        <p class="tp1 wm">There arre no Valid Data Source Connections available.</p>
+                        <p class="tp1 mr-b-24">Please create one!</p>
+                        <a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type']" class="btn btn-design mr-b-56">Create connection</a>
+                    </div>
                 </div>
             </div>
         </div>

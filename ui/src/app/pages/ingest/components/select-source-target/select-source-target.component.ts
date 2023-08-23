@@ -71,7 +71,7 @@ export class SelectSourceTargetComponent {
   }
 
   public save(): void {
-    this.snakbar.open("Saved succesfully");
+    this.snakbar.open("Data source saved succesfully");
     this.router.navigate([`projects/${this.projectId}/ingest/aws`]);
   }
 

@@ -40,9 +40,9 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group">
+                            <div class="form-group mr-t-25">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input cp" type="radio" [attr.disabled]="this.queryRuleTypes !== 'dc'"
+                                    <input class="form-check-input cp" type="radio"
                                     [(ngModel)]="queryDcLevel" value="dcrl" formControlName="dcLevel">
                                     <label class="form-check-label p2" for="inlineRadio1">Row level</label>
                                 </div>
@@ -50,14 +50,14 @@
         
                             <div class="form-group">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input cp" type="radio" [attr.disabled]="queryRuleTypes != 'dc'"
+                                    <input class="form-check-input cp" type="radio"
                                     [(ngModel)]="queryDcLevel" value="dccl" formControlName="dcLevel">
                                     <label class="form-check-label p2" for="inlineRadio1">Column level</label>
                                 </div>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group">
+                            <div class="form-group mr-b-0 mr-t-66">
                                 <!-- <ng-select id="attributes" class="custom" [clearable]="false" formControlName="relatedAttributes" [multiple]="true"
                                     placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="completenessData">
                                     <ng-template ng-option-tmp let-item="item">
@@ -74,13 +74,15 @@
                         </div>
                         <div class="col mx-w-140">
                             <!-- <p class="p2 mr-b-8 fw-600">Acceptance Percentage</p> -->
-                            <div class="form-group">
+                            <div class="form-group mr-b-5 mr-t-25 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off">
+                                <span class="pr">%</span>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mr-b-0 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off" >
+                                <span class="pr">%</span>
                             </div>
                         </div>
                     </div>
@@ -97,7 +99,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group">
+                            <div class="form-group mr-t-25">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input cp" type="radio" 
                                     [(ngModel)]="queryDpLevel" value="dptl" formControlName="dpLevel">
@@ -114,7 +116,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group">
+                            <div class="form-group mr-b-0 mr-t-66">
                                 <!-- <ng-select id="dp" class="custom" [clearable]="false" formControlName="relatedDataProfiler" [multiple]="true"
                                     placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="dataProfiler">
                                     <ng-template ng-option-tmp let-item="item">
@@ -131,13 +133,15 @@
                             </div>
                         </div>
                         <div class="col mx-w-140">
-                            <div class="form-group">
+                            <div class="form-group mr-b-5 mr-t-25 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off">
+                                <span class="pr">%</span>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mr-b-0 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off">
+                                <span class="pr">%</span>
                             </div>
                         </div>
                     </div>
@@ -153,9 +157,10 @@
                             </div>
                         </div>
                         <div class="col mx-w-140">
-                            <div class="form-group">
+                            <div class="form-group dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off">
+                                <span class="pr">%</span>
                             </div>
                         </div>
                     </div>
@@ -171,7 +176,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group">
+                            <div class="form-group mr-t-25">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input cp" type="radio"
                                     [(ngModel)]="queryDvLevel" value="dvdr" formControlName="dvLevel">
@@ -196,7 +201,7 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="form-group">
+                            <div class="form-group mr-t-66">
                                 <!-- <ng-select id="dpo" class="custom" [clearable]="false" formControlName="relatedDuplicateDataOne" [multiple]="true"
                                     placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="duplicateDataOne">
                                     <ng-template ng-option-tmp let-item="item">
@@ -211,7 +216,7 @@
                                 </select>
                             </div>
         
-                            <div class="form-group">
+                            <div class="form-group mr-b-0">
                                 <ng-select id="dpt" class="custom" [clearable]="false" formControlName="relatedDuplicateDataTwo" [multiple]="true"
                                     placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="duplicateDataTwo">
                                     <ng-template ng-option-tmp let-item="item">
@@ -222,27 +227,30 @@
         
                         </div>
                         <div class="col mx-w-140">
-                            <div class="form-group">
+                            <div class="form-group mr-b-5 mr-t-25 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off">
+                                <span class="pr">%</span>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mr-b-5 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off">
+                                <span class="pr">%</span>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mr-b-0 dif">
                                 <input type="text" class="form-control input-design" id="columnName" #folder
-                                    formControlName="columnName" autocomplete="off" placeholder="%" >
+                                    formControlName="columnName" autocomplete="off" >
+                                <span class="pr">%</span>
                             </div>
                         </div>
                     </div>
         
-                    <div class="float-right">
+                    <div>
                         <button type="button" class="btn btn-outline-success connectionBtns"
-                            (click)="saveRules()">Save</button>
+                       (click)="saveRules()">Save</button>
         
-                        <button type="button" class="btn btn-outline-success connectionBtns mr-l-10" 
-                            (click)="runRules()">Run</button>
+                        <!-- <button type="button" class="btn btn-outline-success connectionBtns mr-l-10" 
+                             [ngClass]="{'validBtn': !fg.invalid}"  (click)="runRules()">Run</button> -->
                     </div>
                 </form>
             </div>

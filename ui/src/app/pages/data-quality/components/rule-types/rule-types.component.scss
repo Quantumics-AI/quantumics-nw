@@ -85,7 +85,9 @@ input[type=radio]:checked{
     /* font-size: 18px; */
     line-height: 22px;
     letter-spacing: -0.015em;
-    color: #009C82;
+    // color: #009C82;
+    background-color: #01B798;
+    color: white;
 }
 
 .mr-l-10 {
@@ -113,4 +115,27 @@ input[type=radio]:checked{
 
 .fw-600 {
     font-weight: 600;
+}
+
+.mr-t-66 {
+    margin-top: 66px;
+}
+
+.mr-b-5 {
+    margin-bottom: 5px;
+}
+
+.dif {
+    display: inline-flex;
+}
+
+.pr {
+    line-height: 34px;
+    margin-left: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.mr-t-25 {
+    margin-top: 25px;
 }

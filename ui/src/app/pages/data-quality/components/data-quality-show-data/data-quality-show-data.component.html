@@ -1,11 +1,14 @@
 <div class="close-icon" (click)="close.emit();">
     <img src="assets/img/profile/cancel.svg">
 </div>
-
+<div class="s-t-btn">
+    <button class="btn mr-r-20 btn-outline-dark cancel-b" *ngIf="sourceTargetType === 'sourceAndTarget'">Source</button>
+    <button class="btn btn-outline-dark cancel-b">Target</button>
+</div>
 <ngb-tabset class="tabs-custom">
     <ngb-tab title="Table1">
         <ng-template ngbTabContent>
-            <div class="table-responsive br-r">
+            <div class="table-responsive br-r table-h">
                 <table class="table m-0 table-fixed table-striped">
                     <thead class="thead-light">
                         <tr class="fixed-th">
@@ -24,7 +27,7 @@
 
     <ngb-tab title="Table2" *ngIf="sourceTargetType === 'sourceAndTarget'">
         <ng-template ngbTabContent>
-            <div class="table-responsive br-r">
+            <div class="table-responsive br-r table-h">
                 <table class="table m-0 table-fixed table-striped">
                     <thead class="thead-light">
                         <tr class="fixed-th">
@@ -41,3 +44,8 @@
         </ng-template>
     </ngb-tab>
 </ngb-tabset>
+
+<div class="btn-div text-center">
+    <button class="btn btn-design mr-r-20">Okay</button>
+    <button class="btn btn-outline-dark cancel-b" (click)="close.emit();">Cancel</button>
+</div>

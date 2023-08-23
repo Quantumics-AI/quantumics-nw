@@ -19,10 +19,74 @@ export class DataQualityListComponent implements OnInit {
   private certificate$: Observable<Certificate>;
   private unsubscribe: Subject<void> = new Subject();
   private certificateData: Certificate;
-  public dataQualityList: Array<DataQuailtyListResponse> = [];
+  public dataQualityList: Array<DataQuailtyListResponse> = [
+    {
+      id: 1,
+      ruleName: 'DQ Name1',
+      ruleType: 'Data completeness-Row',
+      ruleDescription: 'This is added test rules',
+      createdBy: 'Naveen',
+      createdDate: new Date(),
+      modifiedDate: new Date(),
+      status: 'Active',
+      selected: false
+    },
+    {
+      id: 2,
+      ruleName: 'DQ Name2',
+      ruleType: 'Data completeness-Row',
+      ruleDescription: 'This is added test rules',
+      createdBy: 'Naveen',
+      createdDate: new Date(),
+      modifiedDate: new Date(),
+      status: 'Active',
+      selected: false
+    },
+    {
+      id: 3,
+      ruleName: 'DQ Name3',
+      ruleType: 'Data completeness-Row',
+      ruleDescription: 'This is added test rules',
+      createdBy: 'Naveen',
+      createdDate: new Date(),
+      modifiedDate: new Date(),
+      status: 'Active',
+      selected: false
+    },
+    {
+      id: 4,
+      ruleName: 'DQ Name4',
+      ruleType: 'Data completeness-Row',
+      ruleDescription: 'This is added test rules',
+      createdBy: 'Naveen',
+      createdDate: new Date(),
+      modifiedDate: new Date(),
+      status: 'Active',
+      selected: false
+    },
+    {
+      id: 5,
+      ruleName: 'DQ Name5',
+      ruleType: 'Data completeness-Row',
+      ruleDescription: 'This is added test rules',
+      createdBy: 'Naveen',
+      createdDate: new Date(),
+      modifiedDate: new Date(),
+      status: 'Active',
+      selected: false
+    }
+  ];
 
   public projectId: number;
   userId: number;
+  selectAllChecked: boolean = false;
+  anyCheckboxSelected: boolean = false;
+
+  // pagination
+  public startIndex: number = 0;
+  public pageSize: number = 10;
+  public endIndex: number = this.pageSize;
+  public page = 1;
 
   constructor(
     private readonly router: Router,
@@ -44,19 +108,19 @@ export class DataQualityListComponent implements OnInit {
 
   ngOnInit(): void {
 
-    const dataQuality1 = {
-      id: 1,
-      ruleName: 'DQ Name1',
-      ruleType: 'Data completeness-Row',
-      ruleDescription: 'This is added test rules',
-      createdBy: 'Naveen',
-      createdDate: new Date(),
-      modifiedDate: new Date(),
-      status: 'Active'
+    // const dataQuality1 = {
+    //   id: 1,
+    //   ruleName: 'DQ Name1',
+    //   ruleType: 'Data completeness-Row',
+    //   ruleDescription: 'This is added test rules',
+    //   createdBy: 'Naveen',
+    //   createdDate: new Date(),
+    //   modifiedDate: new Date(),
+    //   status: 'Active'
 
-    } as DataQuailtyListResponse;
+    // } as DataQuailtyListResponse;
 
-    this.dataQualityList.push(dataQuality1);
+    // this.dataQualityList.push(dataQuality1);
   }
 
   public edit(dataQuality: DataQuailtyListResponse): void {
@@ -76,5 +140,35 @@ export class DataQualityListComponent implements OnInit {
 
     // sessionStorage.setItem('editDataQuality', JSON.stringify(dataQuality));
     // this.router.navigate([`projects/${this.projectId}/data-quality/edit`]);
+  }
+
+  selectRuleAll(event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    this.selectAllChecked = isChecked;
+    this.anyCheckboxSelected = isChecked;
+    // Loop through your dataQualityList and update the selected state of each item
+    this.dataQualityList.map(dataQuality => {
+      dataQuality.selected = isChecked;
+    });
+  }
+  
+
+  selectRule(evt: Event, dataQuality: DataQuailtyListResponse): void {
+    dataQuality.selected = (evt.target as HTMLInputElement).checked;
+  // Check if any checkbox is selected
+  this.anyCheckboxSelected = this.dataQualityList.some(item => item.selected);
+    // Check if all checkboxes are selected and update the "Select All" checkbox accordingly
+    this.selectAllChecked = this.dataQualityList.every(item => item.selected);
+  }
+
+  public runRule(): void {
+
+  }
+  
+
+  // pagination 
+  public onPageChange(currentPage: number): void {
+    this.startIndex = (currentPage - 1) * this.pageSize;
+    this.endIndex = this.startIndex + this.pageSize;
   }
 }

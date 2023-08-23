@@ -1,13 +1,9 @@
-<div class="modal-header">
-    <!-- <h5 class="modal-title">Edit</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-    </button> -->
+<!-- <div class="modal-header">
     <div class="btn-div">
         <button class="btn btn-design">Run</button>
         <button class="btn btn-design mr-l-10" (click)="modal.dismiss('Cross click')">Cancel</button>
     </div>
-</div>
+</div> -->
 
 <div class="modal-body">
     <form [formGroup]="fg">
@@ -218,6 +214,11 @@
                         formControlName="columnName" autocomplete="off" placeholder="%" >
                 </div>
             </div>
+        </div>
+
+        <div class="btn-div float-right">
+            <button class="btn btn-design">Run</button>
+            <button class="btn btn-design mr-l-10" (click)="modal.dismiss('Cross click')">Cancel</button>
         </div>
     </form>
 </div>
