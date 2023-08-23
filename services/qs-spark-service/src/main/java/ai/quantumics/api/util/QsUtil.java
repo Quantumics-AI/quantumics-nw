@@ -24,12 +24,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -594,7 +590,7 @@ public class QsUtil {
 						data.append(cell.getBooleanCellValue()).append(",");
 						break;
 					case NUMERIC:
-						if(HSSFDateUtil.isCellDateFormatted(cell.getRow().getCell(j))){
+						if(DateUtil.isCellDateFormatted(cell.getRow().getCell(j))){
 							if(cell.getRow().getCell(j).getCellStyle().getDataFormatString().length()==11){
 								SimpleDateFormat sdfs = new SimpleDateFormat(cell.getRow().getCell(j).getCellStyle().getDataFormatString()+":ss");
 								data.append(sdfs.format(cell.getDateCellValue())).append(",");
