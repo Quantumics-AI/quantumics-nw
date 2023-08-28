@@ -1,12 +1,33 @@
-.btn-div {
-    padding: 1rem 1rem;
-    margin: -1rem -1rem -1rem auto;
+// nav 
+.src-nav {
+    padding: 20px;
+    position: fixed;
+    width: -webkit-fill-available;
+    margin-top: -31px;
+    z-index: 1;
+    background-color: #ffffff;
 }
 
-.btn:focus{
-    outline: none;
-    box-shadow: none;
+.bck {
+    position: absolute;
 }
+
+.back-func {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    letter-spacing: -0.02em;
+    color: #0A0A15;
+    display: inline-flex;
+}
+
+.navbar-light {
+    border-bottom: 1px solid #eee;
+}
+//
 
 // radio button 
 input[type=radio]{
@@ -64,7 +85,9 @@ input[type=radio]:checked{
     /* font-size: 18px; */
     line-height: 22px;
     letter-spacing: -0.015em;
-    color: #009C82;
+    // color: #009C82;
+    background-color: #01B798;
+    color: white;
 }
 
 .mr-l-10 {
@@ -75,8 +98,8 @@ input[type=radio]:checked{
 //row mr
 
 .row-mr {
-    margin-left: 0;
-    margin-right: 0;
+    // margin-left: 0;
+    // margin-right: 0;
     margin-bottom: 25px;
 }
 //
@@ -92,4 +115,32 @@ input[type=radio]:checked{
 
 .fw-600 {
     font-weight: 600;
+}
+
+.mr-t-66 {
+    margin-top: 66px;
+}
+
+.mr-b-5 {
+    margin-bottom: 5px;
+}
+
+.dif {
+    display: inline-flex;
+}
+
+.pr {
+    line-height: 34px;
+    margin-left: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.mr-t-25 {
+    margin-top: 25px;
+}
+
+.mr-t-10 {
+    margin-top: 10px;
+    
 }

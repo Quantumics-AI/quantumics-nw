@@ -8,6 +8,7 @@ import { Quantumfacade } from 'src/app/state/quantum.facade';
 import { takeUntil } from 'rxjs/operators';
 import { EditRuleComponent } from '../edit-rule/edit-rule.component';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
+import { ViewRunningRulesComponent } from '../view-running-rules/view-running-rules.component';
 
 @Component({
   selector: 'app-data-quality-list',
@@ -124,22 +125,38 @@ export class DataQualityListComponent implements OnInit {
   }
 
   public edit(dataQuality: DataQuailtyListResponse): void {
-    const modalRef = this.modalService.open(EditRuleComponent, { size: 'lg', windowClass: 'modal-size', scrollable: false });
-    modalRef.componentInstance.userId = this.userId;
-    modalRef.componentInstance.projectId = this.projectId;
-    modalRef.componentInstance.ruleData = dataQuality;
+
+    this.router.navigate([`projects/${this.projectId}/data-quality/create`]);
+    // const modalRef = this.modalService.open(EditRuleComponent, { size: 'lg', windowClass: 'modal-size', scrollable: false });
+    // modalRef.componentInstance.userId = this.userId;
+    // modalRef.componentInstance.projectId = this.projectId;
+    // modalRef.componentInstance.ruleData = dataQuality;
 
 
-    modalRef.result.then((result) => {
+    // modalRef.result.then((result) => {
       
-    }, (result) => {
+    // }, (result) => {
       
-    });
+    // });
 
 
 
     // sessionStorage.setItem('editDataQuality', JSON.stringify(dataQuality));
     // this.router.navigate([`projects/${this.projectId}/data-quality/edit`]);
+  }
+
+  public viewRunning(): void {
+    this.router.navigate([`projects/${this.projectId}/data-quality/view-rules`]);
+    // const modalRef = this.modalService.open(ViewRunningRulesComponent, { size: 'lg', windowClass: 'modal-size', scrollable: false });
+    // modalRef.componentInstance.userId = this.userId;
+    // modalRef.componentInstance.projectId = this.projectId;
+
+
+    // modalRef.result.then((result) => {
+      
+    // }, (result) => {
+      
+    // });
   }
 
   selectRuleAll(event: Event): void {

@@ -69,8 +69,16 @@ export class EditRuleComponent {
       dvLevel: new FormControl('', Validators.required),
       relatedAttributes: new FormControl('', Validators.required),
       relatedDataProfiler: new FormControl('', Validators.required),
-      relatedDuplicateDataOne: new FormControl('', Validators.required),
-      relatedDuplicateDataTwo: new FormControl('', Validators.required),
+      relatedDuplicateDataOne: new FormControl('',),
+      relatedDuplicateDataTwo: new FormControl('',),
+      dcRowPercentage: new FormControl('',),
+      dcColumnPercentage: new FormControl('',),
+      dpColumnPercentage: new FormControl('',),
+      dpTablePercentage: new FormControl('',),
+      nullPercentage: new FormControl('',),
+      dvDuplicatePercentage: new FormControl('',),
+      dvColumnPercentage: new FormControl('',),
+      dvMultColumnPercentage: new FormControl('',),
       // dvLevel: new FormControl('', Validators.required),
     });
   }

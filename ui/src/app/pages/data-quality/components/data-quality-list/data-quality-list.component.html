@@ -1,7 +1,7 @@
 <div class="page-header1 pd-l-20">
     <ol class="breadcrumb breadcrumb-top">
-        <li class="breadcrumb-item">Dataset</li>
-        <li class="breadcrumb-item active" aria-current="page">Folders</li>
+        <!-- <li class="breadcrumb-item">Dataset</li> -->
+        <li class="breadcrumb-item active" aria-current="page">Rules</li>
     </ol>
 </div>
 
@@ -17,7 +17,9 @@
                     <button class="btn btn-design" [routerLink]="['./create']">Create</button>
                 </div>
                 <div>
-                    <p class="view-list pull-right cp mr-b-0">View running rules</p>
+                    <p class="view-list pull-right cp mr-b-0">
+                        <span (click)="viewRunning()">View running rules</span>
+                    </p>
                 </div>
                 <!-- <div class="row align-item">
                     <div class="col-9">

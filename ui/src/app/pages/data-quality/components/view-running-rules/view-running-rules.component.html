@@ -1,0 +1,54 @@
+<div class="page-header1">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-top pd-l-0">
+            <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'data-quality']">Rule</a></li>
+            <li class="breadcrumb-item active" aria-current="page">View</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="pipe-dataset-div">
+    <div class="card card-d">
+        <div class="card-header ch">
+            <div class="di mr-t-6" >
+                <a class="card-main-text mr-b-0" (click)="back()">
+                    <span><img src="/assets/img/pipline/back-pipe.svg" class="cp"></span>
+                    Back to runRules
+                </a>
+            </div>
+        </div>
+        <div class="card-body pd-0">
+            <div class="table-responsive br">
+                <table class="table m-0 table-fixed table-striped">
+                    <thead class="thead-light">
+                        <tr class="fixed-th">
+                            <th class="pd-l-24">Rule name</th>
+                            <th class="pd-l-24"></th>
+                            <th class="pd-l-24">Status</th>
+                            <th class="pd-l-24">View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="td-text" *ngFor="let view of runningList">
+                            <td>
+                                {{view?.ruleName}}
+                            </td>
+                            <td>
+                                {{view?.status}}
+                            </td>
+                            <td>
+                                {{view?.match}}
+                            </td>
+                            <td>
+                                <span class="cp vr" (click)="viewResult()">View result</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="btn-div text-center">
+        <button class="btn btn-design" (click)="back()">Okay</button>
+    </div>
+</div>

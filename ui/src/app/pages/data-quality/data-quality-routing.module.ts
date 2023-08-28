@@ -5,6 +5,7 @@ import { DataQualityListComponent } from './components/data-quality-list/data-qu
 import { DataQualityCreateComponent } from './components/data-quality-create/data-quality-create.component';
 import { DataQualityEditComponent } from './components/data-quality-edit/data-quality-edit.component';
 import { RuleTypesComponent } from './components/rule-types/rule-types.component';
+import { ViewRunningRulesComponent } from './components/view-running-rules/view-running-rules.component';
 
 const routes: Routes = [
     {
@@ -23,6 +24,10 @@ const routes: Routes = [
         path: 'rule-types',
         component: RuleTypesComponent
     },
+    {
+        path:'view-rules',
+        component :ViewRunningRulesComponent
+    }
     //   {
     //     path: '',
     //     component: FileProfileComponent,

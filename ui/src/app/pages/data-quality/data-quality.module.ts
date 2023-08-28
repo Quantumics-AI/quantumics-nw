@@ -13,6 +13,8 @@ import { DataQualityEditComponent } from './components/data-quality-edit/data-qu
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
 import { RuleTypesComponent } from './components/rule-types/rule-types.component';
 import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
+import { ViewRunningRulesComponent } from './components/view-running-rules/view-running-rules.component';
+import { ViewResultComponent } from './components/view-result/view-result.component';
 
 @NgModule({
     declarations: [
@@ -23,7 +25,9 @@ import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
         DataQualityEditComponent,
         ConfirmationComponent,
         RuleTypesComponent,
-        EditRuleComponent
+        EditRuleComponent,
+        ViewRunningRulesComponent,
+        ViewResultComponent
     ],
     imports: [
         CommonModule,

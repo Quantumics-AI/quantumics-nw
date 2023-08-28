@@ -86,6 +86,15 @@ export class RuleTypesComponent {
         relatedDataProfiler: [''],
         relatedDuplicateDataOne: [''],
         relatedDuplicateDataTwo: [''],
+        dcRowPercentage: [''],
+        dcColumnPercentage: [''],
+        dpColumnPercentage: [''],
+        dpTablePercentage: [''],
+        nullPercentage: [''],
+        dvDuplicatePercentage: [''],
+        dvColumnPercentage: [''],
+        dvMultColumnPercentage: [''],
+
         // dvLevel: new FormControl('', Validators.required),
       });
   }
