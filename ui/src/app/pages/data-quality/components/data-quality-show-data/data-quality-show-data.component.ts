@@ -10,6 +10,7 @@ export class DataQualityShowDataComponent implements OnInit {
   @Input() sourceTargetType: string;
   @Output() close = new EventEmitter<void>();
   public active = 1;
+  public validBtn: boolean;
 
   public tableData1 = [
     { id: 1, name: 'John Doe', age: 30, city: 'New York', country: 'USA', occupation: 'Engineer', status: 'Active' },
@@ -27,6 +28,18 @@ export class DataQualityShowDataComponent implements OnInit {
   public tableDataColumn2 = Object.keys(this.tableData2[0]);
 
   ngOnInit(): void {
+    if(this.sourceTargetType == "sourceAndTarget"){
+      this.validBtn = true;
+    } else {
+      this.validBtn = false;
+    }
+  }
 
+  target(): void {
+    this.validBtn = false;
+  }
+
+  source(): void {
+    this.validBtn = true;
   }
 }

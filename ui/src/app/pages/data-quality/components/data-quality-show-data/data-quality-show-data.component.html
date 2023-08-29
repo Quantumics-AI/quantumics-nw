@@ -2,8 +2,10 @@
     <img src="assets/img/profile/cancel.svg">
 </div>
 <div class="s-t-btn">
-    <button class="btn mr-r-20 btn-outline-dark cancel-b" *ngIf="sourceTargetType === 'sourceAndTarget'">Source</button>
-    <button class="btn btn-outline-dark cancel-b">Target</button>
+    <button class="btn mr-r-20 btn-outline-success cancel-b connectionBtns" (click)="source()"
+    [ngClass]="{'validBtn': validBtn}" *ngIf="sourceTargetType === 'sourceAndTarget'">Source</button>
+    <button class="btn btn-outline-success cancel-b connectionBtns"
+    [ngClass]="{'validBtn': !validBtn}" (click)="target()">Target</button>
 </div>
 <ngb-tabset class="tabs-custom">
     <ngb-tab title="Table1">

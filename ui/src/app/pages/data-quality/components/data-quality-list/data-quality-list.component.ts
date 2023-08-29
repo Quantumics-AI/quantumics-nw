@@ -126,7 +126,7 @@ export class DataQualityListComponent implements OnInit {
 
   public edit(dataQuality: DataQuailtyListResponse): void {
 
-    this.router.navigate([`projects/${this.projectId}/data-quality/create`]);
+    this.router.navigate([`projects/${this.projectId}/data-quality/edit`]);
     // const modalRef = this.modalService.open(EditRuleComponent, { size: 'lg', windowClass: 'modal-size', scrollable: false });
     // modalRef.componentInstance.userId = this.userId;
     // modalRef.componentInstance.projectId = this.projectId;

@@ -6,6 +6,7 @@ import { DataQualityCreateComponent } from './components/data-quality-create/dat
 import { DataQualityEditComponent } from './components/data-quality-edit/data-quality-edit.component';
 import { RuleTypesComponent } from './components/rule-types/rule-types.component';
 import { ViewRunningRulesComponent } from './components/view-running-rules/view-running-rules.component';
+import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
 
 const routes: Routes = [
     {
@@ -18,7 +19,7 @@ const routes: Routes = [
     },
     {
         path: 'edit',
-        component: DataQualityEditComponent
+        component: EditRuleComponent
     },
     {
         path: 'rule-types',

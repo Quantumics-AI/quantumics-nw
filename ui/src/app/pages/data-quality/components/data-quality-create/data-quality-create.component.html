@@ -2,7 +2,7 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item breadcrumb-top">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item active" aria-current="page">AWS</li>
+                <li class="breadcrumb-item active" aria-current="page">Rule</li>
             </ol>
         </li>
     </ol>
@@ -20,7 +20,7 @@
     </nav>
     <div class="row justify-content-center rounded-lg mr-t-35">
         
-        <div [class.col-7]="sourceTargetType === 'sourceAndTarget'" class="col-5">
+        <div class="col-9">
             <p class="local-file">
                 Create Rule
             </p>
@@ -210,13 +210,225 @@
                             </div>
                         </ng-template>
 
-                        <div class="col-12 mt-2">
-                            <div class="text-center">
-                                <button type="button" class="btn btn-outline-success mr-3 connectionBtns" (click)="showData();"
-                                [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Show Data</button>
-                                <button type="button" class="btn btn-outline-success connectionBtns"
-                                    (click)="continue();" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Continue</button>
+                        
+                    </div>
+                    <!--  -->
+                    <p class="rule-t p2">Rule types:</p>
+                    <div class="row">
+                        <div class="col max-w pd-col">
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                                    [(ngModel)]="queryRuleTypes" value="dc" formControlName="ruleType">
+                                    <label class="form-check-label p2" for="inlineRadio1">Data Completeness</label>
+                                </div>
                             </div>
+                        </div>
+                        <div class="col max-w pd-l-0" *ngIf="showDcRow">
+                            <div class="form-group mr-t-25">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio"
+                                    [(ngModel)]="queryDcLevel" value="dcrl" formControlName="dcLevel" (change)="onSubDcRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Row level</label>
+                                </div>
+                            </div>
+        
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio"
+                                    [(ngModel)]="queryDcLevel" value="dccl" formControlName="dcLevel" (change)="onSubDcRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Column level</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col" *ngIf="showDCCL">
+                            <div class="form-group mr-b-0 mr-t-60">
+                                
+                                <select id="cd" class="form-control input-design in-text" formControlName="relatedAttributes" [(ngModel)]="selectedCompleteName" placeholder="Select Attributes">
+                                    <option [value]="undefined" disabled selected> Select Attributes </option>
+                                    <option *ngFor="let i of completenessData" [value]="i">
+                                        {{i}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col mx-w-140">
+                            <!-- <p class="p2 mr-b-8 fw-600">Acceptance Percentage</p> -->
+                            <div class="form-group mr-b-5 mr-t-25 dif" *ngIf="showDcRowLevel">
+                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                    formControlName="dcRowPercentage" autocomplete="off">
+                                <span class="pr">%</span>
+                            </div>
+                            <div class="form-group mr-b-0 dif" [ngClass]="{'mr-t-60': showDcColumnLevel}" *ngIf="showDcColumnLevel">
+                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                    formControlName="dcColumnPercentage" autocomplete="off" >
+                                <span class="pr">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!--2nd  -->
+                    <div class="row">
+                        <div class="col max-w pd-col">
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                                    [(ngModel)]="queryRuleTypes" value="dp" formControlName="ruleType">
+                                    <label class="form-check-label p2" for="inlineRadio1">Data Profiler</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col max-w pd-l-0" *ngIf="showDpRow">
+                            <div class="form-group mr-t-25">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" 
+                                    [(ngModel)]="queryDpLevel" value="dptl" formControlName="dpLevel" (change)="onSubDpRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Table level</label>
+                                </div>
+                            </div>
+        
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" 
+                                    [(ngModel)]="queryDpLevel" value="dpcl" formControlName="dpLevel" (change)="onSubDpRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Column level</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col" *ngIf="showDPCL">
+                            <div class="form-group mr-b-0 mr-t-60">
+
+                                <select id="dp" class="form-control input-design in-text" formControlName="relatedDataProfiler" [(ngModel)]="selectedDataProfiler" placeholder="Select Attributes">
+                                    <option [value]="undefined" disabled selected> Select Attributes </option>
+                                    <option *ngFor="let i of dataProfiler" [value]="i">
+                                        {{i}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col mx-w-140">
+                            <div class="form-group mr-b-5 mr-t-25 dif" *ngIf="showDpRowLevel">
+                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                    formControlName="dpTablePercentage" autocomplete="off">
+                                <span class="pr">%</span>
+                            </div>
+                            <div class="form-group mr-b-0 dif" [ngClass]="{'mr-t-60': showDpColumnLevel}" *ngIf="showDpColumnLevel">
+                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                    formControlName="dpColumnPercentage" autocomplete="off">
+                                <span class="pr">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3rd -->
+
+                    <div class="row">
+                        <div class="col max-w pd-col">
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                                    [(ngModel)]="queryRuleTypes" value="nu" formControlName="ruleType">
+                                    <label class="form-check-label p2" for="inlineRadio1">Null Value</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mx-w-140" *ngIf="showNull">
+                            <div class="form-group dif">
+                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                    formControlName="nullPercentage" autocomplete="off">
+                                <span class="pr">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4th -->
+
+                    <div class="row">
+                        <div class="col max-w pd-col">
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" (change)="onItemChange($event.target.value)"
+                                    [(ngModel)]="queryRuleTypes" value="dv" formControlName="ruleType">
+                                    <label class="form-check-label p2" for="inlineRadio1">Duplicate Value</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col max-w pd-l-0" *ngIf="showDvRow">
+                            <div class="form-group mr-t-25">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio"
+                                    [(ngModel)]="queryDvLevel" value="dvdr" formControlName="dvLevel" (change)="onSubDvRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Duplicate Row</label>
+                                </div>
+                            </div>
+        
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio"
+                                    [(ngModel)]="queryDvLevel" value="dvc" formControlName="dvLevel" (change)="onSubDvRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Column</label>
+                                </div>
+                            </div>
+        
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input cp" type="radio" 
+                                    [(ngModel)]="queryDvLevel" value="dvmc" formControlName="dvLevel" (change)="onSubDvRadioChange($event.target.value)">
+                                    <label class="form-check-label p2" for="inlineRadio1">Multiple Column</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col" *ngIf="selectColumnMultiRadio">
+                            <div class="form-group" *ngIf="showDVCL" [ngClass]="{'mr-t-60': showDVCL}">
+                                <select id="dpo" class="form-control input-design in-text" formControlName="relatedDuplicateDataOne" [(ngModel)]="selectedDuplicateDataOne" placeholder="Select Attributes">
+                                    <option [value]="undefined" disabled selected> Select Attributes </option>
+                                    <option *ngFor="let i of duplicateDataOne" [value]="i">
+                                        {{i}}
+                                    </option>
+                                </select>
+                            </div>
+        
+                            <div class="form-group mr-b-0" *ngIf="showDVMulti" [ngClass]="{'mr-t-100': showDVMulti}">
+                                <ng-select id="dpt" class="custom" [clearable]="false" formControlName="relatedDuplicateDataTwo" [multiple]="true"
+                                    placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="duplicateDataTwo">
+                                    <ng-template ng-option-tmp let-item="item">
+                                        <span [title]="item">{{item}}</span>
+                                    </ng-template>
+                                </ng-select>
+                            </div>
+        
+                        </div>
+
+                        <div class="col mx-w-140">
+                            <div class="form-group mr-b-5 mr-t-25 dif" *ngIf="showDupRow">
+                                <input type="text" class="form-control input-design"
+                                    formControlName="dvDuplicatePercentage" autocomplete="off"
+                                    placeholder="Acceptance Percentage">
+                                <span class="pr">%</span>
+                            </div>
+                            <div class="form-group dif" *ngIf="showDupCol" [ngClass]="{'mr-t-60': showDupCol}">
+                                <input type="text" class="form-control input-design" 
+                                    formControlName="dvColumnPercentage" autocomplete="off"
+                                    placeholder="Acceptance Percentage">
+                                <span class="pr">%</span>
+                            </div>
+                            <div class="form-group mr-b-0 dif" *ngIf="showDupMulCol" [ngClass]="{'mr-t-100': showDupMulCol}">
+                                <input type="text" class="form-control input-design"
+                                    formControlName="dvMultColumnPercentage" autocomplete="off" 
+                                    placeholder="Acceptance Percentage">
+                                <span class="pr">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  -->
+
+                    <div class="mt-2">
+                        <div class="text-center">
+                            <button type="button" class="btn btn-outline-success mr-3 connectionBtns" (click)="showData();"
+                            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Show Data</button>
+                            <button type="button" class="btn btn-outline-success connectionBtns"
+                                (click)="continue();" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Save</button>
                         </div>
                     </div>
                 </div>

@@ -6,15 +6,31 @@
 </div>
 
 <div class="page-content pd-20">
+    <ng-container>
+        <div class="connect-source-div">
+            <div class="card card-d mr-t-16">
+                <div class="card-body">
+                    <div class="connect-s text-center">
+                        <p class="tp1 fs-26">Rule</p>
+                        <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid">
+                        <!-- <p class="tp1 mr-b-0 wm">Set business related rules for your dataset.</p> -->
+                        <p class="tp1 mr-b-24 mr-t-40">There is no Data Quality Rule created. Please create one.</p>
+                        <a [routerLink]="['/projects', 'projectId', 'ingest', 'select-source-type']"
+                            class="btn btn-design mr-b-56">Create</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
     <ng-container *ngIf="dataQualityList?.length > 0; else noDataQualityRules">
         <div class="card card-d">
             <div class="card-header ch pd-b-0">
                 <div class="di mr-t-6">
-                    <p class="card-main-text">Data Quality</p>
-                    <p class="p1 mr-b-0">Set Data Quality rules to datasets, To set click on create</p>
+                    <p class="card-main-text">Data Quality Rule</p>
+                    <p></p>
                 </div>
                 <div class="pull-right">
-                    <button class="btn btn-design" [routerLink]="['./create']">Create</button>
+                    <button class="btn btn-design" [routerLink]="['./create']">Create rule</button>
                 </div>
                 <div>
                     <p class="view-list pull-right cp mr-b-0">
