@@ -13,9 +13,12 @@ export class DataQualityShowDataComponent implements OnInit {
   public validBtn: boolean;
 
   public tableData1 = [
-    { id: 1, name: 'John Doe', age: 30, city: 'New York', country: 'USA', occupation: 'Engineer', status: 'Active' },
-    { id: 2, name: 'Jane Smith', age: 28, city: 'Los Angeles', country: 'USA', occupation: 'Designer', status: 'Inactive' },
-    { id: 3, name: 'Michael Johnson', age: 35, city: 'Chicago', country: 'USA', occupation: 'Manager', status: 'Active' },
+    { id: 1, name: 'John Doe', lastname: 'Doe', role: 'dev', age: 30, city: 'New York', country: 'USA', occupation: 'Engineer', status: 'Active' },
+    { id: 2, name: 'Jane Smith', lastname: 'Doe', role: 'dev', age: 28, city: 'Los Angeles', country: 'USA', occupation: 'Designer', status: 'Inactive' },
+    { id: 3, name: 'Michael Johnson', lastname: 'Doe', role: 'dev', age: 35, city: 'Chicago', country: 'USA', occupation: 'Manager', status: 'Active' },
+    { id: 4, name: 'John Doe', lastname: 'Doe', role: 'dev', age: 30, city: 'New York', country: 'USA', occupation: 'Engineer', status: 'Active' },
+    { id: 5, name: 'Jane Smith', lastname: 'Doe', role: 'dev', age: 28, city: 'Los Angeles', country: 'USA', occupation: 'Designer', status: 'Inactive' },
+    { id: 6, name: 'Michael Johnson', lastname: 'Doe', role: 'dev', age: 35, city: 'Chicago', country: 'USA', occupation: 'Manager', status: 'Active' },
   ];
 
   public tableData2 = [

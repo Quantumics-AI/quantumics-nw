@@ -69,14 +69,16 @@ export class DataQualityCreateComponent implements OnInit {
 		"Basic",
 		"Gross",
 		"Age"
-  ]
+  ];
 
   public duplicateDataTwo: any = [
     "Salary",
 		"Basic",
 		"Gross",
 		"Age"
-  ]
+  ];
+
+  selectedColumn = [];
 
   constructor(
     private fb: FormBuilder,

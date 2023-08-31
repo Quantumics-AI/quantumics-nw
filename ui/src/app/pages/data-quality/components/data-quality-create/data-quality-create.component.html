@@ -212,6 +212,10 @@
 
                         
                     </div>
+                    <div class="showdataBtn mt-3">
+                        <button type="button" class="btn btn-outline-success mr-3 connectionBtns" (click)="showData();"
+                            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Show Data</button>
+                    </div>
                     <!--  -->
                     <p class="rule-t p2">Rule types:</p>
                     <div class="row">
@@ -390,10 +394,21 @@
                             </div>
         
                             <div class="form-group mr-b-0" *ngIf="showDVMulti" [ngClass]="{'mr-t-100': showDVMulti}">
-                                <ng-select id="dpt" class="custom" [clearable]="false" formControlName="relatedDuplicateDataTwo" [multiple]="true"
-                                    placeholder="Select Attributes" [dropdownPosition]="'bottom'" [closeOnSelect]="true" [items]="duplicateDataTwo">
-                                    <ng-template ng-option-tmp let-item="item">
+                                <ng-select id="dpt" class="custom"
+                                    formControlName="relatedDuplicateDataTwo" [multiple]="true"
+                                    placeholder="Select Attributes" 
+                                    bindLabel="name" groupBy="item" [selectableGroup]="true"
+                                    bindValue="id" [(ngModel)]="selectedColumn"
+                                    [closeOnSelect]="false" [items]="duplicateDataTwo">
+                                    <!-- <ng-template ng-option-tmp let-item="item">
                                         <span [title]="item">{{item}}</span>
+                                    </ng-template> -->
+                                    
+                                    <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item">{{item}}</span>
+                                    </ng-template>
+                                    <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item">{{item}}</span>
                                     </ng-template>
                                 </ng-select>
                             </div>
@@ -425,8 +440,6 @@
 
                     <div class="mt-2">
                         <div class="text-center">
-                            <button type="button" class="btn btn-outline-success mr-3 connectionBtns" (click)="showData();"
-                            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Show Data</button>
                             <button type="button" class="btn btn-outline-success connectionBtns"
                                 (click)="continue();" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Save</button>
                         </div>
