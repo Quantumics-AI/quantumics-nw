@@ -23,9 +23,15 @@
                     <thead class="thead-light">
                         <tr class="fixed-th">
                             <th class="pd-l-24">Rule name</th>
-                            <th class="pd-l-24"></th>
-                            <th class="pd-l-24">Status</th>
-                            <th class="pd-l-24">View</th>
+                            <th class="pd-l-24">Status
+                                <em>
+                                    <a id="lnkRefresh" placement="top" container="body" ngbTooltip="Refresh">
+                                        <img src="assets/img/refresh.svg" width="18" alt="refresh" (click)="refresh()">
+                                    </a>
+                                </em>
+                            </th>
+                            <th class="pd-l-24">Result</th>
+                            <th class="pd-l-24">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,7 +54,7 @@
             </div>
         </div>
     </div>
-    <div class="btn-div text-center">
+    <!-- <div class="btn-div text-center">
         <button class="btn btn-design" (click)="back()">Okay</button>
-    </div>
+    </div> -->
 </div>

@@ -72,7 +72,7 @@ export class ViewRunningRulesComponent implements OnInit {
   }
 
   public viewResult(): void {
-    const modalRef = this.modalService.open(ViewResultComponent, { size: 'md', windowClass: 'modal-size', scrollable: false });
+    const modalRef = this.modalService.open(ViewResultComponent, { size: 'sm', windowClass: 'modal-size', scrollable: false });
     modalRef.componentInstance.userId = this.userId;
     modalRef.componentInstance.projectId = this.projectId;
 
@@ -82,6 +82,10 @@ export class ViewRunningRulesComponent implements OnInit {
     }, (result) => {
       
     });
+  }
+
+  public refresh(): void {
+    // call get function
   }
 
   public back(): void {

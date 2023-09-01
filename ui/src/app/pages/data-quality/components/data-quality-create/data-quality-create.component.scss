@@ -73,8 +73,8 @@
 }
 
 
-.mr-t-60 {
-    margin-top: 60px;
+.mr-t-70 {
+    margin-top: 70px;
 }
 
 .mr-b-5 {
@@ -136,4 +136,38 @@
 
 .pd-l-0 {
     padding-left: 0;
+}
+
+.pd-mr {
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.form-div {
+    border: 1px solid #E2E8F2;
+    border-radius: 8px;
+}
+
+.pd-15 {
+    padding-left: 15px;
+    padding-bottom: 15px;
+}
+
+.mr-l-50 {
+    margin-left: -50px;
+    margin-top: 10px;
+}
+
+.mr-l-8 {
+    margin-left: 8px;
+}
+
+input[type=checkbox]{
+    accent-color: #00977C;
+  }
+  
+input[type=checkbox]:checked{
+    accent-color: #00977C;
 }
