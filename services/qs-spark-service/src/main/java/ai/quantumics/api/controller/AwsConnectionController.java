@@ -8,7 +8,6 @@ import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,28 +17,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/connection")
 public class AwsConnectionController {
-
-    @Autowired
-    private AwsConnectionService awsConnectionService;
-
-    @Autowired
+    private final AwsConnectionService awsConnectionService;
     private final DbSessionUtil dbUtil;
+    private final ValidatorUtils validatorUtils;
 
-    @Autowired
-    private ValidatorUtils validatorUtils;
-
-    @Autowired
     private final ControllerHelper controllerHelper;
 
     public AwsConnectionController(AwsConnectionService awsConnectionService, DbSessionUtil dbUtil,
-                                   ControllerHelper controllerHelper) {
+                                   ValidatorUtils validatorUtils, ControllerHelper controllerHelper) {
         this.awsConnectionService = awsConnectionService;
         this.dbUtil = dbUtil;
+        this.validatorUtils = validatorUtils;
         this.controllerHelper = controllerHelper;
     }
 
     @PostMapping("/saveConnection")
-    public ResponseEntity<Object> saveConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest)
+    public ResponseEntity<AWSDatasource> saveConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest)
             throws Exception {
 
         dbUtil.changeSchema("public");
@@ -54,8 +47,8 @@ public class AwsConnectionController {
 
     }
 
-    @GetMapping("/getAllConnection/{projectId}/{userId}")
-    public ResponseEntity<Object> getConnectionInfo(@PathVariable(value = "projectId") final int projectId,
+    @GetMapping("/getConnections/{projectId}/{userId}")
+    public ResponseEntity<List<AWSDatasource>> getConnectionInfo(@PathVariable(value = "projectId") final int projectId,
                                                     @PathVariable(value = "userId") final int userId) throws Exception {
 
         dbUtil.changeSchema("public");
@@ -69,11 +62,11 @@ public class AwsConnectionController {
 
     }
 
-    @GetMapping("/getConnection/{projectId}/{userId}/{dsname}")
-    public ResponseEntity<Object> getConnectionByName(
+    @GetMapping("/getConnections/{projectId}/{userId}/{datasourceName}")
+    public ResponseEntity<List<AWSDatasource>> getConnectionByName(
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
-            @PathVariable(value = "dsname") final String dsname)
+            @PathVariable(value = "datasourceName") final String datasourceName)
             throws Exception {
 
         dbUtil.changeSchema("public");
@@ -81,7 +74,7 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
 
-        List<AWSDatasource> allConnection = awsConnectionService.getDataSourceByName(dsname);
+        List<AWSDatasource> allConnection = awsConnectionService.getConnectionByName(datasourceName);
 
         return ResponseEntity.status(HttpStatus.OK).body(allConnection);
 

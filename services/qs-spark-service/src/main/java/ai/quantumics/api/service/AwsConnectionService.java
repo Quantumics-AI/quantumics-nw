@@ -13,6 +13,6 @@ public interface AwsConnectionService {
 
     List<AWSDatasource> getAllConnection();
 
-    List<AWSDatasource> getDataSourceByName(String dataSource);
+    List<AWSDatasource> getConnectionByName(String datasourceName);
 
 }

@@ -1,20 +1,16 @@
 package ai.quantumics.api.service.impl;
 
-
 import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
 import ai.quantumics.api.model.AWSDatasource;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.service.AwsConnectionService;
-import kong.unirest.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
 
@@ -43,8 +39,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public List<AWSDatasource> getDataSourceByName(String dataSource) {
-        return awsConnectionRepo.findByDataSourceName(dataSource);
+    public List<AWSDatasource> getConnectionByName(String datasourceName) {
+        return awsConnectionRepo.findByDataSourceName(datasourceName);
     }
 
     private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, Projects project) {
