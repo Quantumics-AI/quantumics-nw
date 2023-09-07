@@ -45,7 +45,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	// other exception handlers below
 
 	@ExceptionHandler(EntityNotFoundException.class)
-		protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
+	protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
 		log.error(ex.getLocalizedMessage());
 		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
 		apiError.setMessage(ex.getMessage());
@@ -55,7 +55,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(NullPointerException.class)
 	protected ResponseEntity<Object> handleNullPointer(NullPointerException ex) {
 		log.error(ex.getLocalizedMessage());
-        	ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
+		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
 		apiError.setMessage(ex.getLocalizedMessage());
 		return buildResponseEntity(apiError);
 	}
@@ -83,24 +83,25 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		apiError.setMessage(ex.getLocalizedMessage());
 		return buildResponseEntity(apiError);
 	}
-
+	
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(
-		org.springframework.web.bind.MethodArgumentNotValidException ex,
-		HttpHeaders headers,
-		HttpStatus status,
-		WebRequest request) {
+	  org.springframework.web.bind.MethodArgumentNotValidException ex, 
+	  HttpHeaders headers, 
+	  HttpStatus status, 
+	  WebRequest request) {
 		List<String> errorList = new ArrayList<>();
 		ex.getBindingResult().getFieldErrors().forEach(error -> {
 		errorList.add(error.getDefaultMessage());
 	});
 
-	ApiError apiError =
-		new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
-			return handleExceptionInternal(
-			ex, apiError, headers, apiError.getStatus(), request);
+	    ApiError apiError = 
+	      new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
+	    return handleExceptionInternal(
+	      ex, apiError, headers, apiError.getStatus(), request);
 	}
-
+	
+	
 	@ExceptionHandler(InvalidConnectionTypeException.class)
 	protected ResponseEntity<Object> invalidConnectionTypeException(Exception ex) {
 		log.error(ex.getLocalizedMessage());
