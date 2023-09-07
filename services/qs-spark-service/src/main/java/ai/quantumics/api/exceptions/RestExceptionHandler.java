@@ -8,7 +8,8 @@
 
 package ai.quantumics.api.exceptions;
 
-import lombok.extern.slf4j.Slf4j;
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,11 +90,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatus status,
             WebRequest request) {
-
         List<String> errorList = new ArrayList<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             errorList.add(error.getDefaultMessage());
         });
+
         ApiError apiError =
                 new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
         return handleExceptionInternal(

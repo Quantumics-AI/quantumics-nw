@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static ai.quantumics.api.enums.AwsAccessType.IAM;
+
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
-
-    public static final String CONNECTION_TYPE = "IAM";
 
     @Autowired
     private AwsConnectionRepo awsConnectionRepo;
@@ -33,7 +33,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
         String connectionType = awsDatasourceRequest.getConnectionType();//access Type
 
-        if (CONNECTION_TYPE.equals(connectionType)) {
+        if (IAM.getAccessType().equals(connectionType)) {
             AWSDatasource awsDatasource = awsConnectionRepo.saveAndFlush(awsDatasourceMapper(awsDatasourceRequest, project));
 
             return createResponse(awsDatasource);
