@@ -31,89 +31,89 @@ import java.util.List;
 @Slf4j
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-        @Override
+	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 		String error = "Malformed JSON request";
 		return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error));
 	}
 
-       private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
-        return new ResponseEntity<>(apiError, apiError.getStatus());
-    }
+	private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+		return new ResponseEntity<>(apiError, apiError.getStatus());
+	}
 
-    // other exception handlers below
+	// other exception handlers below
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
-        apiError.setMessage(ex.getMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(EntityNotFoundException.class)
+		protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getMessage());
+		return buildResponseEntity(apiError);
+	}
 
-    @ExceptionHandler(NullPointerException.class)
-    protected ResponseEntity<Object> handleNullPointer(NullPointerException ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
-        apiError.setMessage(ex.getLocalizedMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(NullPointerException.class)
+	protected ResponseEntity<Object> handleNullPointer(NullPointerException ex) {
+		log.error(ex.getLocalizedMessage());
+        	ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 
-    @ExceptionHandler(ProjectNotFoundException.class)
-    protected ResponseEntity<Object> projectNotFoundException(Exception ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
-        apiError.setMessage(ex.getLocalizedMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(ProjectNotFoundException.class)
+	protected ResponseEntity<Object> projectNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 
-    @ExceptionHandler(QuantumsparkUserNotFound.class)
-    protected ResponseEntity<Object> userNotFoundException(Exception ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
-        apiError.setMessage(ex.getLocalizedMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(QuantumsparkUserNotFound.class)
+	protected ResponseEntity<Object> userNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 
-    @ExceptionHandler(BadRequestException.class)
-    protected ResponseEntity<Object> badRequestException(Exception ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
-        apiError.setMessage(ex.getLocalizedMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(BadRequestException.class)
+	protected ResponseEntity<Object> badRequestException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            org.springframework.web.bind.MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
-        List<String> errorList = new ArrayList<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errorList.add(error.getDefaultMessage());
-        });
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(
+		org.springframework.web.bind.MethodArgumentNotValidException ex,
+		HttpHeaders headers,
+		HttpStatus status,
+		WebRequest request) {
+		List<String> errorList = new ArrayList<>();
+		ex.getBindingResult().getFieldErrors().forEach(error -> {
+		errorList.add(error.getDefaultMessage());
+	});
 
-        ApiError apiError =
-                new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
-        return handleExceptionInternal(
-                ex, apiError, headers, apiError.getStatus(), request);
-    }
+	ApiError apiError =
+		new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
+			return handleExceptionInternal(
+			ex, apiError, headers, apiError.getStatus(), request);
+	}
 
-    @ExceptionHandler(InvalidConnectionTypeException.class)
-    protected ResponseEntity<Object> invalidConnectionTypeException(Exception ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
-        apiError.setMessage(ex.getLocalizedMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(InvalidConnectionTypeException.class)
+	protected ResponseEntity<Object> invalidConnectionTypeException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 
-    @ExceptionHandler(Exception.class)
-    protected ResponseEntity<Object> genericException(Exception ex) {
-        log.error(ex.getLocalizedMessage());
-        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
-        apiError.setMessage(ex.getLocalizedMessage());
-        return buildResponseEntity(apiError);
-    }
+	@ExceptionHandler(Exception.class)
+	protected ResponseEntity<Object> genericException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 }
