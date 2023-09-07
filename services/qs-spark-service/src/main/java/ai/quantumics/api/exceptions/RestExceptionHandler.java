@@ -8,8 +8,7 @@
 
 package ai.quantumics.api.exceptions;
 
-import javax.persistence.EntityNotFoundException;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -21,84 +20,105 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import lombok.extern.slf4j.Slf4j;
+import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 @Slf4j
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-	@Override
-	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		String error = "Malformed JSON request";
-		return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error));
-	}
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                  HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String error = "Malformed JSON request";
+        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error));
+    }
 
-	private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
-		return new ResponseEntity<>(apiError, apiError.getStatus());
-	}
+    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+        return new ResponseEntity<>(apiError, apiError.getStatus());
+    }
 
-	// other exception handlers below
+    // other exception handlers below
 
-	@ExceptionHandler(EntityNotFoundException.class)
-	protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
-		log.error(ex.getLocalizedMessage());
-		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
-		apiError.setMessage(ex.getMessage());
-		return buildResponseEntity(apiError);
-	}
+    @ExceptionHandler(EntityNotFoundException.class)
+    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
 
-	@ExceptionHandler(NullPointerException.class)
-	protected ResponseEntity<Object> handleNullPointer(NullPointerException ex) {
-		log.error(ex.getLocalizedMessage());
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
-		apiError.setMessage(ex.getLocalizedMessage());
-		return buildResponseEntity(apiError);
-	}
+    @ExceptionHandler(NullPointerException.class)
+    protected ResponseEntity<Object> handleNullPointer(NullPointerException ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
 
-	@ExceptionHandler(ProjectNotFoundException.class)
-	protected ResponseEntity<Object> projectNotFoundException(Exception ex) {
-		log.error(ex.getLocalizedMessage());
-		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
-		apiError.setMessage(ex.getLocalizedMessage());
-		return buildResponseEntity(apiError);
-	}
+    @ExceptionHandler(ProjectNotFoundException.class)
+    protected ResponseEntity<Object> projectNotFoundException(Exception ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
 
-	@ExceptionHandler(QuantumsparkUserNotFound.class)
-	protected ResponseEntity<Object> userNotFoundException(Exception ex) {
-		log.error(ex.getLocalizedMessage());
-		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
-		apiError.setMessage(ex.getLocalizedMessage());
-		return buildResponseEntity(apiError);
-	}
+    @ExceptionHandler(QuantumsparkUserNotFound.class)
+    protected ResponseEntity<Object> userNotFoundException(Exception ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
 
-	@ExceptionHandler(BadRequestException.class)
-	protected ResponseEntity<Object> badRequestException(Exception ex) {
-		log.error(ex.getLocalizedMessage());
-		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
-		apiError.setMessage(ex.getLocalizedMessage());
-		return buildResponseEntity(apiError);
-	}
-	
-	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(
-	  org.springframework.web.bind.MethodArgumentNotValidException ex, 
-	  HttpHeaders headers, 
-	  HttpStatus status, 
-	  WebRequest request) {
-	    ApiError apiError = 
-	      new ApiError(HttpStatus.BAD_REQUEST, "Please provide valid input!");
-	    return handleExceptionInternal(
-	      ex, apiError, headers, apiError.getStatus(), request);
-	}
-	
-	
-	@ExceptionHandler(Exception.class)
-	protected ResponseEntity<Object> genericException(Exception ex) {
-		log.error(ex.getLocalizedMessage());
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
-		apiError.setMessage(ex.getLocalizedMessage());
-		return buildResponseEntity(apiError);
-	}
+    @ExceptionHandler(BadRequestException.class)
+    protected ResponseEntity<Object> badRequestException(Exception ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            org.springframework.web.bind.MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatus status,
+            WebRequest request) {
+
+        List<String> errorList = new ArrayList<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errorList.add(error.getDefaultMessage());
+        });
+        ApiError apiError =
+                new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
+        return handleExceptionInternal(
+                ex, apiError, headers, apiError.getStatus(), request);
+    }
+
+    @ExceptionHandler(InvalidConnectionTypeException.class)
+    protected ResponseEntity<Object> invalidConnectionTypeException(Exception ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(DuplicateDataSourceException.class)
+    protected ResponseEntity<Object> duplicateException(Exception ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> genericException(Exception ex) {
+        log.error(ex.getLocalizedMessage());
+        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
+        apiError.setMessage(ex.getLocalizedMessage());
+        return buildResponseEntity(apiError);
+    }
 }

@@ -1,46 +1,79 @@
 package ai.quantumics.api.service.impl;
 
+import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
 import ai.quantumics.api.model.AWSDatasource;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
+import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
+
+    public static final String CONNECTION_TYPE = "IAM";
 
     @Autowired
     private AwsConnectionRepo awsConnectionRepo;
 
     @Override
-    public AWSDatasource saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Projects project) {
+    public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Projects project) throws InvalidConnectionTypeException {
+
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceName(awsDatasourceRequest.getDataSourceName());
+        if (dataSources.isPresent()) {
+            throw new BadRequestException("Data source name already exist.");
+        }
 
         String connectionType = awsDatasourceRequest.getConnectionType();//access Type
 
-        if ("IAM".equals(connectionType)) {
-            AWSDatasource awsDatasource = awsDatasourceMapper(awsDatasourceRequest, project);
+        if (CONNECTION_TYPE.equals(connectionType)) {
+            AWSDatasource awsDatasource = awsConnectionRepo.saveAndFlush(awsDatasourceMapper(awsDatasourceRequest, project));
 
-            return awsConnectionRepo.saveAndFlush(awsDatasource);
+            return createResponse(awsDatasource);
         } else {
             throw new InvalidConnectionTypeException("Invalid Connection Type");
         }
     }
 
+    private AwsDatasourceResponse createResponse(AWSDatasource awsDatasource) {
+        AwsDatasourceResponse response = new AwsDatasourceResponse();
+        response.setDataSourceName(awsDatasource.getDataSourceName());
+        response.setConnectionType(awsDatasource.getConnectionType());
+        response.setIamRole(awsDatasource.getCredentialOrRole());
+        response.setCreatedDate(awsDatasource.getCreatedDate());
+        response.setModifiedDate(awsDatasource.getModifiedDate());
+        return response;
+    }
+
 
     @Override
-    public List<AWSDatasource> getAllConnection() {
+    public List<AwsDatasourceResponse> getAllConnection() {
+        List<AwsDatasourceResponse> response = new ArrayList<>();
+        List<AWSDatasource> awsDatasource = awsConnectionRepo.findAll();
 
-        return awsConnectionRepo.findAll();
+        awsDatasource.forEach(datasource -> {
+            response.add(createResponse(datasource));
+        });
+
+        return response;
     }
 
     @Override
-    public List<AWSDatasource> getConnectionByName(String datasourceName) {
-        return awsConnectionRepo.findByDataSourceName(datasourceName);
+    public AwsDatasourceResponse getConnectionByName(String datasourceName) {
+
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceName(datasourceName);
+        if (dataSources.isPresent()) {
+            return createResponse(dataSources.get());
+        }else{
+            throw new BadRequestException("No record found.");
+        }
     }
 
     private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, Projects project) {
@@ -56,5 +89,4 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
         return awsDatasource;
     }
-
 }

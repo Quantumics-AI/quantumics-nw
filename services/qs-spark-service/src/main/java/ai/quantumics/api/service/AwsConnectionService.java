@@ -1,18 +1,18 @@
 package ai.quantumics.api.service;
 
-
-import ai.quantumics.api.model.AWSDatasource;
+import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.req.AwsDatasourceRequest;
+import ai.quantumics.api.res.AwsDatasourceResponse;
 
 import java.util.List;
 
 public interface AwsConnectionService {
 
-    AWSDatasource saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Projects project);
+    AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Projects project) throws InvalidConnectionTypeException;
 
-    List<AWSDatasource> getAllConnection();
+    List<AwsDatasourceResponse> getAllConnection();
 
-    List<AWSDatasource> getConnectionByName(String datasourceName);
+    AwsDatasourceResponse getConnectionByName(String datasourceName);
 
 }
