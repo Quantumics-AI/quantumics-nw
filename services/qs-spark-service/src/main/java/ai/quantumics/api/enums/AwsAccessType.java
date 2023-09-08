@@ -3,8 +3,8 @@ package ai.quantumics.api.enums;
 public enum AwsAccessType {
 
     IAM("IAM"),
-    ACCESS_KEY("ACCESS_KEY"),
-    ACCESS_SECRET_KEY("ACCESS_SECRET_KEY");
+    RESOURCE_POLICY("RESOURCE_POLICY"),
+    ACCESS_SECRET_KEY("ACCESS_KEY/SECRET_KEY");
 
     private String accessType;
 
