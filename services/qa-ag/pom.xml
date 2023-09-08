@@ -15,7 +15,7 @@
 	<name>qs-gateway</name>
 	<description>Gateway For Backend QS API services</description>
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
 	</properties>
 	<dependencies>
@@ -44,12 +44,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.14.0</version>
+			<version>2.15.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.33</version>
+			<version>2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -68,12 +68,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
-			<version>2.4.3</version>
+			<!--<version>2.4.4</version>-->
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.8.5</version>
+			<version>2.8.9</version>
 		</dependency>
 
 	</dependencies>
@@ -103,8 +103,21 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.4.0.905</version>
+				<version>3.9.1.2184</version>
 			</plugin>
+			<!--*** We need this plugin in the Development mode only *** -->
+			<!--<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>8.4.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
 		</plugins>
 		<finalName>QSGatewayService</finalName>
 		<resources>
