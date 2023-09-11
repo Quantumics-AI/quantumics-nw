@@ -54,19 +54,19 @@
                                 <input class="form-check-input" type="radio" name="type" id="sourceAndTarget"
                                     formControlName="type" value="sourceAndTarget" [(ngModel)]="sourceTargetType"
                                     (change)="selectedType($event.target.value)">
-                                <label class="form-check-label" for="sourceAndTarget">Source & Target</label>
+                                <label class="form-check-label" for="sourceAndTarget">Source Vs Target</label>
                             </div>
 
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="type" formControlName="type"
                                     value="target" id="target" [(ngModel)]="sourceTargetType"
                                     (change)="selectedType($event.target.value)">
-                                <label class="form-check-label" for="target">Target</label>
+                                <label class="form-check-label" for="target">Source / Target</label>
                             </div>
                         </div>
                         <div class="form-div row col-12 pd-mr mt-3">
                             <ng-container *ngIf="sourceTargetType === 'target' else sourceAndTarget">
-                                <div class="col-12">
+                                <div class="col-12 mt-3">
                                     <div class="form-group">
                                         <label for="inputName" class="p2">Select data source*</label>
                                         <select class="form-control input-design" formControlName="targetDataSource">
@@ -100,12 +100,22 @@
                                 </div>
     
                                 <div class="col-12">
-                                    <div class="form-group">
+                                    <!-- <div class="form-group">
                                         <label for="inputName" class="p2">Select folder*</label>
                                         <select class="form-control input-design" formControlName="targetFolder">
                                             <option value="folder1" selected>Folder 1</option>
                                             <option value="folder2" selected>Folder 2</option>
                                         </select>
+                                    </div> -->
+
+                                    <div class="input-group mr">
+                                        <div class="custom-file">
+                                            <input type="text" formControlName="targetFolder" class="form-control input-design br-r-0" 
+                                            id="inputGroupFile04" placeholder="No table chosen">
+                                        </div>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" (click)="browseTable()">Choose table</button>
+                                        </div>
                                     </div>
                                 </div>
                             </ng-container>
@@ -149,12 +159,21 @@
                                         </div>
     
                                         <div class="col-12">
-                                            <div class="form-group">
+                                            <!-- <div class="form-group">
                                                 <label for="inputName" class="p2">Select folder*</label>
                                                 <select class="form-control input-design" formControlName="sourceFolder">
                                                     <option value="folder1" selected>Folder 1</option>
                                                     <option value="folder2" selected>Folder 2</option>
                                                 </select>
+                                            </div> -->
+                                            <div class="input-group mr">
+                                                <div class="custom-file">
+                                                    <input type="text" formControlName="sourceFolder" class="form-control input-design br-r-0" 
+                                                    id="inputGroupFile04" placeholder="No table chosen">
+                                                </div>
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-design pos-u br-l-0 br-r-8" type="button">Choose table</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -198,13 +217,23 @@
                                         </div>
     
                                         <div class="col-12">
-                                            <div class="form-group">
+                                            <!-- <div class="form-group">
                                                 <label for="inputName" class="p2">Select folder*</label>
                                                 <select class="form-control input-design" formControlName="targetFolder">
                                                     <option value="folder1" selected>Folder 1</option>
                                                     <option value="folder2" selected>Folder 2</option>
                                                 </select>
+                                            </div> -->
+                                            <div class="input-group mr">
+                                                <div class="custom-file">
+                                                    <input type="text" formControlName="targetFolder" class="form-control input-design br-r-0" 
+                                                    id="inputGroupFile04" placeholder="No table chosen">
+                                                </div>
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-design pos-u br-l-0 br-r-8" type="button">Choose table</button>
+                                                </div>
                                             </div>
+                                            
                                         </div>
                                     </div>
                                 </div>

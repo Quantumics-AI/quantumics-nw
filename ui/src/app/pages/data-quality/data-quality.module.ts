@@ -15,6 +15,7 @@ import { RuleTypesComponent } from './components/rule-types/rule-types.component
 import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
 import { ViewRunningRulesComponent } from './components/view-running-rules/view-running-rules.component';
 import { ViewResultComponent } from './components/view-result/view-result.component';
+import { BrowseFileComponent } from './components/browse-file/browse-file.component';
 
 @NgModule({
     declarations: [
@@ -27,7 +28,8 @@ import { ViewResultComponent } from './components/view-result/view-result.compon
         RuleTypesComponent,
         EditRuleComponent,
         ViewRunningRulesComponent,
-        ViewResultComponent
+        ViewResultComponent,
+        BrowseFileComponent
     ],
     imports: [
         CommonModule,

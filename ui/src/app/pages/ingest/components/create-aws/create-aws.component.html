@@ -50,7 +50,16 @@
                                             Data source name*
                                         </label>
                                         <input type="text" class="form-control input-design" id="sourceName" #folder
-                                            formControlName="folderName" autocomplete="off" placeholder="Data source Name" >
+                                            formControlName="folderName" autocomplete="off" placeholder="Data source Name" 
+                                            minlength="3" maxlength="50">
+                                        <small id="workspaceNameHelp" class="form-text body-text-muted">Data source name must be
+                                                between 3 and 50 characters long.</small>
+                                        <div *ngIf="fg.get('folderName').invalid && fg.get('folderName').dirty || fg.get('folderName').touched">
+                                            <div class="text-error" *ngIf="fg.get('folderName').hasError('required')">
+                                                <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; Data source name is
+                                                required.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -78,6 +87,12 @@
                                         </label>
                                         <input type="text" class="form-control input-design" id="sourceName" #folder
                                             formControlName="roleName" autocomplete="off" placeholder="Role Name" >
+                                        <div *ngIf="fg.get('roleName').invalid && fg.get('roleName').dirty || fg.get('roleName').touched">
+                                            <div class="text-error" *ngIf="fg.get('roleName').hasError('required')">
+                                                <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; Role name is
+                                                required.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

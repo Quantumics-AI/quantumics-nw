@@ -7,6 +7,7 @@ import { DataQualityEditComponent } from './components/data-quality-edit/data-qu
 import { RuleTypesComponent } from './components/rule-types/rule-types.component';
 import { ViewRunningRulesComponent } from './components/view-running-rules/view-running-rules.component';
 import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
+import { BrowseFileComponent } from './components/browse-file/browse-file.component';
 
 const routes: Routes = [
     {
@@ -28,7 +29,11 @@ const routes: Routes = [
     {
         path:'view-rules',
         component :ViewRunningRulesComponent
-    }
+    },
+    {
+        path: 'create/table',
+        component: BrowseFileComponent
+    },
     //   {
     //     path: '',
     //     component: FileProfileComponent,

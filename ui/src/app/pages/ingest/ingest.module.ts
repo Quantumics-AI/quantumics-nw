@@ -99,7 +99,7 @@ import { EditDataSourceComponent } from './components/edit-data-source/edit-data
     ListAwsComponent,
     AwsConfirmationComponent,
     SelectSourceTargetComponent,
-    EditDataSourceComponent,
+    EditDataSourceComponent
   ],
   imports: [
     CommonModule,

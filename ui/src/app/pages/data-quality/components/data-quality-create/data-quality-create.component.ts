@@ -7,6 +7,7 @@ import { SnackbarService } from 'src/app/core/services/snackbar.service';
 import { Certificate } from 'src/app/models/certificate';
 import { Quantumfacade } from 'src/app/state/quantum.facade';
 import { Location } from '@angular/common';
+import { BrowseFileComponent } from '../browse-file/browse-file.component';
 
 @Component({
   selector: 'app-data-quality-create',
@@ -311,6 +312,11 @@ export class DataQualityCreateComponent implements OnInit {
       this.showDVMulti = true;
       this.showDupMulCol = true;
     }
+  }
+
+  // browse table 
+  public browseTable(): void {
+    this.router.navigate([`projects/${this.projectId}/data-quality/create/table`]);
   }
 
 }

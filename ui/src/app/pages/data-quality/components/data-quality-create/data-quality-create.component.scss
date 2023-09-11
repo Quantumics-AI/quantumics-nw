@@ -171,3 +171,27 @@ input[type=checkbox]{
 input[type=checkbox]:checked{
     accent-color: #00977C;
 }
+
+//browse file
+.mr {
+    margin: 0 0 1rem 0;
+}
+
+.pos-u {
+    position: unset !important;
+}
+
+.br-r-0 {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.br-l-0 {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.br-r-8 {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}

@@ -1,0 +1,67 @@
+<div class="page-header1 pd-l-20">
+    <ol class="breadcrumb breadcrumb-top">
+        <li class="breadcrumb-item">Rule</li>
+        <li class="breadcrumb-item active" aria-current="page">Tables</li>
+    </ol>
+</div>
+<div class="page-content pd-20">
+    <div class="card card-d">
+        <div class="card-header ch">
+            <div class="di mr-t-6">
+                <p class="card-main-text">Tables</p>
+                <p class="p1 mr-b-0">Dataset imported through db connector here. To connect new source, go to import dataset.</p>
+            </div>
+        </div>
+        <div class="card-body pd-0">
+            <div class="table-responsive br-r">
+                <table class="table m-0 table-fixed table-striped">
+                    <thead class="thead-light">
+                        <tr class="fixed-th">
+                            <th class="pd-l-24">Table name
+                                <!-- <span> <img (click)="sortPipeLine();" class="cp" [src]="isDescending ?
+                                '/assets/images/up-sort.svg'
+                                : '/assets/images/down-sort.svg'"></span> -->
+                            </th>
+                            <th class="pd-l-24">Date</th>
+                            <th class="pd-l-24">Type</th>
+                            <th class="pd-l-24">Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container *ngFor="let item of tableData">
+                            <tr class="td-text" [class.selected]="item.expanded">
+                                <td class="text-left fn pipe-n" (click)="getTableFile(item)">
+                                    <a>
+                                        <img class="pd-r-12" *ngIf="item.expanded"
+                                            src="assets/img/pipline/d-arrow.svg">
+                                        <img class="pd-r-12" *ngIf="!item.expanded"
+                                            src="assets/img/pipline/r-arrow.svg">
+                                        <span class="pd-r-12"><img src="assets/img/project-stats/folder-i.svg"></span>
+                                        <span title="{{item.name}}">{{item.name}}</span>
+                                    </a>
+                                </td>
+                                <td>{{item.createdDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                <td>{{item.type}}</td>
+                                <td></td>
+                            </tr>
+                            <ng-container *ngIf="item.expanded">
+                                <tr *ngFor="let d of childData" class="td-text">
+                                    <td>
+                                        <span class="pd-r-12">
+                                            <img *ngIf="d.type == 'folder'" src="assets/img/project-stats/folder-i.svg">
+                                            <img *ngIf="d.type == 'file'" src="assets/img/pipline/file.svg">
+                                        </span>
+                                        {{d.name}}
+                                    </td>
+                                    <td>{{d.createdDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                    <td>{{d.type}}</td>
+                                    <td></td>
+                                </tr>
+                            </ng-container>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
