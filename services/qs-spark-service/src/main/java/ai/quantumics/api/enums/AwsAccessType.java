@@ -1,5 +1,10 @@
 package ai.quantumics.api.enums;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum AwsAccessType {
 
     IAM("IAM"),
@@ -16,4 +21,8 @@ public enum AwsAccessType {
         return accessType;
     }
 
+    public static Map<AwsAccessType,String> getAccessTypeAsMap(){
+        return Arrays.stream(AwsAccessType.values())
+                .collect(Collectors.toMap( Function.identity(),AwsAccessType::getAccessType));
+    }
 }

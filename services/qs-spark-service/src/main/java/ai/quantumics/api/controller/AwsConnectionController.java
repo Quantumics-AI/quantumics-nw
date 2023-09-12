@@ -1,6 +1,8 @@
 package ai.quantumics.api.controller;
 
+import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.BadRequestException;
+import ai.quantumics.api.exceptions.ConnectionNotFoundException;
 import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
@@ -15,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/aws")
@@ -75,5 +79,45 @@ public class AwsConnectionController {
 
         return ResponseEntity.status(HttpStatus.OK).body(allConnection);
 
+    }
+
+    @DeleteMapping("/deleteConnections/{userId}/{projectId}/{id}")
+    public ResponseEntity<Object> deleteConnection(@PathVariable(value = "userId") final int userId,
+                                                                        @PathVariable(value = "projectId") final int projectId,
+                                                                        @PathVariable(value = "id") final int id) throws ConnectionNotFoundException{
+
+        dbUtil.changeSchema("public");
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        awsConnectionService.deleteConnection(id);
+        return returnResInstance(HttpStatus.OK, "Connection deleted successfully.");
+    }
+
+    @GetMapping("/getAwsAccessTypes")
+    public ResponseEntity<Map<AwsAccessType,String>> getAwsAccessTypes() {
+        return ResponseEntity.status(HttpStatus.OK).body(AwsAccessType.getAccessTypeAsMap());
+    }
+
+    @PutMapping("/updateConnection/{id}")
+    public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest,
+                                                                  @PathVariable(value = "id") final int id)
+            throws ConnectionNotFoundException {
+
+        dbUtil.changeSchema("public");
+        QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
+        Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
+        controllerHelper.getProjects(project.getProjectId(), user.getUserId());
+        dbUtil.changeSchema(project.getDbSchemaName());
+        AwsDatasourceResponse response = awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, project);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
+        HashMap<String, Object> genericResponse = new HashMap<>();
+        genericResponse.put("code", code.value());
+        genericResponse.put("message", message);
+        return ResponseEntity.status(code).body(genericResponse);
     }
 }

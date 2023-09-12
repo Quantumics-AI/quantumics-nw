@@ -1,6 +1,7 @@
 package ai.quantumics.api.service.impl;
 
 import ai.quantumics.api.exceptions.BadRequestException;
+import ai.quantumics.api.exceptions.ConnectionNotFoundException;
 import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
 import ai.quantumics.api.model.AWSDatasource;
 import ai.quantumics.api.model.Projects;
@@ -8,6 +9,7 @@ import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +44,19 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }
     }
 
+    @Override
+    public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, Projects project) throws ConnectionNotFoundException {
+
+        AWSDatasource dataSource = awsConnectionRepo.findById(id).orElseThrow(() -> new ConnectionNotFoundException("Connection not found"));
+        dataSource.setDataSourceName(awsDatasourceRequest.getDataSourceName());
+        dataSource.setModifiedBy(project.getModifiedBy());
+        dataSource.setModifiedDate(DateTime.now().toDate());
+        return createResponse(awsConnectionRepo.save(dataSource));
+    }
+
     private AwsDatasourceResponse createResponse(AWSDatasource awsDatasource) {
         AwsDatasourceResponse response = new AwsDatasourceResponse();
+        response.setId(awsDatasource.getId());
         response.setDataSourceName(awsDatasource.getDataSourceName());
         response.setConnectionType(awsDatasource.getConnectionType());
         response.setIamRole(awsDatasource.getCredentialOrRole());
@@ -74,6 +87,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }else{
             throw new BadRequestException("No record found.");
         }
+    }
+
+    @Override
+    public void deleteConnection(Integer id) throws ConnectionNotFoundException {
+        AWSDatasource connection = awsConnectionRepo.findById(id).orElseThrow(() -> new ConnectionNotFoundException("Connection not found"));
+        awsConnectionRepo.delete(connection);
     }
 
     private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, Projects project) {
