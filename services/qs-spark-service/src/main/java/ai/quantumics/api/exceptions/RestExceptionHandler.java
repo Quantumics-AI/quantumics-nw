@@ -23,6 +23,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 @Slf4j
@@ -87,13 +90,34 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	  HttpHeaders headers, 
 	  HttpStatus status, 
 	  WebRequest request) {
+		List<String> errorList = new ArrayList<>();
+		ex.getBindingResult().getFieldErrors().forEach(error -> {
+		errorList.add(error.getDefaultMessage());
+	});
+
 	    ApiError apiError = 
-	      new ApiError(HttpStatus.BAD_REQUEST, "Please provide valid input!");
+	      new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
 	    return handleExceptionInternal(
 	      ex, apiError, headers, apiError.getStatus(), request);
 	}
 	
 	
+	@ExceptionHandler(InvalidConnectionTypeException.class)
+	protected ResponseEntity<Object> invalidConnectionTypeException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
+	@ExceptionHandler(ConnectionNotFoundException.class)
+	protected ResponseEntity<Object> connectionNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<Object> genericException(Exception ex) {
 		log.error(ex.getLocalizedMessage());

@@ -924,6 +924,21 @@ BEGIN
             CONSTRAINT qsp_home_kpi_pkey PRIMARY KEY (kpi_id)
             )';
 
+        EXECUTE '
+	    CREATE TABLE '||schemaName||'.qsp_aws_datasource (
+	    id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
+	    data_source_name character varying(255) NOT NULL,
+	    connection_type character varying(255) NOT NULL,
+	    credential_role character varying(255) NOT NULL,
+	    project_id int4 NOT NULL,
+            user_id int4 NOT NULL,
+            active bool NULL DEFAULT true,
+            created_by varchar(255) NOT NULL,
+	    created_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    modified_by varchar(255) NULL,
+	    modified_date timestamp without time zone NULL
+	)';
+
 	--- Table Creation completed..
 
 	--- Trigger Creation started..
