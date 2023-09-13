@@ -76,7 +76,7 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
 
-        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByNameAndActive(datasourceName,true);
+        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByNameAndActive(datasourceName.trim(),true);
 
         return ResponseEntity.status(HttpStatus.OK).body(allConnection);
 
@@ -103,7 +103,7 @@ public class AwsConnectionController {
     }
 
     @PutMapping("/updateConnection/{id}")
-    public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest,
+    public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
                                                                   @PathVariable(value = "id") final int id)
             throws ConnectionNotFoundException {
 
