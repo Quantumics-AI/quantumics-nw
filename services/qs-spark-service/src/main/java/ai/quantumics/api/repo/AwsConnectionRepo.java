@@ -15,6 +15,6 @@ public interface AwsConnectionRepo extends JpaRepository<AWSDatasource, Integer>
 
 	Optional<AWSDatasource> findByIdAndActive(Integer id,boolean active) throws ConnectionNotFoundException;
 
-	List<AWSDatasource> findByUserIdAndProjectIdAndActiveOrderByCreatedDateDesc(int userId, int projectId, boolean active);
+	List<AWSDatasource> findByActiveOrderByCreatedDateDesc(boolean active);
 
 }

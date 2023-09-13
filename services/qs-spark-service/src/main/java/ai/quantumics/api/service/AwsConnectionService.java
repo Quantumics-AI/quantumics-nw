@@ -13,9 +13,9 @@ public interface AwsConnectionService {
 
     AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest,Integer id, String userName) throws ConnectionNotFoundException;
 
-    List<AwsDatasourceResponse> getConnections(int userId, int projectId, boolean active);
+    List<AwsDatasourceResponse> getActiveConnections(boolean active);
 
-    AwsDatasourceResponse getConnectionByName(String datasourceName, boolean active);
+    AwsDatasourceResponse getConnectionByNameAndActive(String datasourceName, boolean active);
 
     void deleteConnection(Integer id,boolean active,String userName) throws ConnectionNotFoundException;
 

@@ -61,7 +61,7 @@ public class AwsConnectionController {
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnections(userId,projectId,true));
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections(true));
     }
 
     @GetMapping("/getConnections/{userId}/{projectId}/{datasourceName}")
@@ -76,7 +76,7 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
 
-        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByName(datasourceName,true);
+        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByNameAndActive(datasourceName,true);
 
         return ResponseEntity.status(HttpStatus.OK).body(allConnection);
 

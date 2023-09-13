@@ -68,9 +68,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public List<AwsDatasourceResponse> getConnections(int userId, int projectId, boolean active) {
+    public List<AwsDatasourceResponse> getActiveConnections(boolean active) {
         List<AwsDatasourceResponse> response = new ArrayList<>();
-        List<AWSDatasource> awsDatasource = awsConnectionRepo.findByUserIdAndProjectIdAndActiveOrderByCreatedDateDesc(userId,projectId,active);
+        List<AWSDatasource> awsDatasource = awsConnectionRepo.findByActiveOrderByCreatedDateDesc(active);
         awsDatasource.forEach(datasource -> {
             response.add(createResponse(datasource));
         });
@@ -78,7 +78,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return response;
     }
     @Override
-    public AwsDatasourceResponse getConnectionByName(String datasourceName, boolean active) {
+    public AwsDatasourceResponse getConnectionByNameAndActive(String datasourceName, boolean active) {
 
         Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCaseAndActive(datasourceName,active);
         if (dataSources.isPresent()) {
