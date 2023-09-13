@@ -28,13 +28,7 @@ public class AWSDatasource {
 	private int projectId;
 	private int userId;
 	private boolean active;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	@CreationTimestamp
 	private Date createdDate;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	@UpdateTimestamp
 	private Date modifiedDate;
 	private String createdBy;
 	private String modifiedBy;

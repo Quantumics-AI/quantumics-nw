@@ -1,7 +1,6 @@
 package ai.quantumics.api.controller;
 
 import ai.quantumics.api.enums.AwsAccessType;
-import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.ConnectionNotFoundException;
 import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
 import ai.quantumics.api.helper.ControllerHelper;
@@ -27,7 +26,6 @@ public class AwsConnectionController {
     private final AwsConnectionService awsConnectionService;
     private final DbSessionUtil dbUtil;
     private final ValidatorUtils validatorUtils;
-
     private final ControllerHelper controllerHelper;
 
     public AwsConnectionController(AwsConnectionService awsConnectionService, DbSessionUtil dbUtil,
@@ -40,14 +38,17 @@ public class AwsConnectionController {
 
     @PostMapping("/saveConnection")
     public ResponseEntity<AwsDatasourceResponse> saveConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
-            throws Exception {
+            throws InvalidConnectionTypeException {
 
             dbUtil.changeSchema("public");
             QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
             Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
             controllerHelper.getProjects(project.getProjectId(), user.getUserId());
             dbUtil.changeSchema(project.getDbSchemaName());
-            AwsDatasourceResponse response = awsConnectionService.saveConnectionInfo(awsDatasourceRequest, project);
+            final String userName = user.getQsUserProfile().getUserFirstName() + " "
+                + user.getQsUserProfile().getUserLastName();
+
+            AwsDatasourceResponse response = awsConnectionService.saveConnectionInfo(awsDatasourceRequest, userName);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -60,7 +61,7 @@ public class AwsConnectionController {
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getAllConnection());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnections(userId,projectId,true));
     }
 
     @GetMapping("/getConnections/{userId}/{projectId}/{datasourceName}")
@@ -75,7 +76,7 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
 
-        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByName(datasourceName);
+        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByName(datasourceName,true);
 
         return ResponseEntity.status(HttpStatus.OK).body(allConnection);
 
@@ -90,7 +91,9 @@ public class AwsConnectionController {
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        awsConnectionService.deleteConnection(id);
+        final String userName = user.getQsUserProfile().getUserFirstName() + " "
+                + user.getQsUserProfile().getUserLastName();
+        awsConnectionService.deleteConnection(id, true, userName);
         return returnResInstance(HttpStatus.OK, "Connection deleted successfully.");
     }
 
@@ -109,7 +112,9 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
         controllerHelper.getProjects(project.getProjectId(), user.getUserId());
         dbUtil.changeSchema(project.getDbSchemaName());
-        AwsDatasourceResponse response = awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, project);
+        final String userName = user.getQsUserProfile().getUserFirstName() + " "
+                + user.getQsUserProfile().getUserLastName();
+        AwsDatasourceResponse response = awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
