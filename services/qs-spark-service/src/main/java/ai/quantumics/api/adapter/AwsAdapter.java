@@ -116,7 +116,7 @@ public class AwsAdapter {
 			CleansingRuleParamService cleanseRuleParamServiceCi,
 			ProjectCumulativeSizeService projectSizeServiceCi,
 			AwsCustomConfiguration awsCustomConfigurationCi
-			) {
+	) {
 		amazonS3Client = amazonS3ClientCi;
 		fileHelper = fileHelperCi;
 		athenaClient = athenaClientCi;
@@ -229,7 +229,7 @@ public class AwsAdapter {
 		S3Object finalEventObject = fetchObject(bucketName, path);
 		if(finalEventObject != null) {
 			try (final InputStreamReader streamReader = new InputStreamReader(finalEventObject.getObjectContent(), StandardCharsets.UTF_8);
-					final BufferedReader reader = new BufferedReader(streamReader)) {
+				 final BufferedReader reader = new BufferedReader(streamReader)) {
 				lines = reader.lines().collect(Collectors.toList());
 				if(lines != null && !lines.isEmpty()) {
 					log.info("Header line is: {}", lines.get(0));
@@ -253,7 +253,7 @@ public class AwsAdapter {
 
 	public ArrayNode getFileContentHelper(
 			final QsFileContent detailsObj, boolean skipMetadataUpdate, String type)
-					throws InterruptedException {
+			throws InterruptedException {
 		final String fileName = detailsObj.getFileName();
 		final String tableName = detailsObj.getTableName();
 		final int folderId = detailsObj.getFolderId();
@@ -354,7 +354,7 @@ public class AwsAdapter {
 			metaDataArrayNode.add(globalObjectMapper.createObjectNode().
 					put("column_name", colMetadata.getColumnName()).
 					put("data_type", colMetadata.getDataType())
-					);
+			);
 		});
 
 		prepareDataV2(dataRowsList, globalObjectMapper, dataArrayNode, columnDetails);
@@ -567,6 +567,7 @@ public class AwsAdapter {
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
 		}
 
+
 		return runExternalCommand(commands);
 	}
 
@@ -607,6 +608,7 @@ public class AwsAdapter {
 			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
 		}
+
 
 		return runExternalCommand(commands);
 	}
@@ -2610,6 +2612,7 @@ public class AwsAdapter {
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
 		}
 
+
 		return runExternalCommand(commands);
 	}
 
@@ -2649,6 +2652,7 @@ public class AwsAdapter {
 			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
 		}
+
 
 		return runExternalCommand(commands);
 	}

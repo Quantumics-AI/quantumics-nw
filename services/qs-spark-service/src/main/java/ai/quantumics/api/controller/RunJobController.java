@@ -788,9 +788,7 @@ public class RunJobController {
   }
 
   private void readLinesFromTemplate(StringBuilder fileContents) throws Exception {
-    URL url = getClass().getClassLoader().getResource(QsConstants.QS_LIVY_TEMPLATE_NAME);
-    File contentSource = ResourceUtils.getFile(url.toURI());
-    //File contentSource = ResourceUtils.getFile("./"+QS_LIVY_TEMPLATE_NAME);
+    File contentSource = ResourceUtils.getFile("./"+QS_LIVY_TEMPLATE_NAME);
     log.info("File in classpath Found {} : ", contentSource.exists());
     fileContents.append(new String(Files.readAllBytes(contentSource.toPath())));
   }
