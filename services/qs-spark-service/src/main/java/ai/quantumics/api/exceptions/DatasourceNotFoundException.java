@@ -8,20 +8,20 @@
 
 package ai.quantumics.api.exceptions;
 
-public class InvalidConnectionTypeException extends RuntimeException {
+public class DatasourceNotFoundException extends RuntimeException {
 
 	/** */
 	private static final long serialVersionUID = 1L;
 
-	public InvalidConnectionTypeException(String message, Throwable cause) {
+	public DatasourceNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public InvalidConnectionTypeException(String message) {
+	public DatasourceNotFoundException(String message) {
 		super(message);
 	}
 
-	public InvalidConnectionTypeException() {
-		super("Invalid Connection Type");
+	public DatasourceNotFoundException() {
+		super("Connection not found");
 	}
 }

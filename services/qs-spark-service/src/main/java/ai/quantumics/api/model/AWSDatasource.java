@@ -19,11 +19,11 @@ public class AWSDatasource {
 	@Column(name = "data_source_name")
 	private String dataSourceName;
 
-	@Column(name = "connection_type")
-	private String connectionType;
+	@Column(name = "access_type")
+	private String accessType;
 
-	@Column(name = "credential_role", columnDefinition = "TEXT")
-	private String credentialOrRole;
+	@Column(name = "connection_data", columnDefinition = "TEXT")
+	private String connectionData;
 
 	private int projectId;
 	private int userId;

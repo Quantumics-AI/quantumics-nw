@@ -13,9 +13,10 @@ public class AwsDatasourceRequest {
     @NotNull(message="Data Source Name is mandatory")
     @Size(min = 3, max = 50, message = "Data Source Name must be between 3 and 50 Characters long")
     private String dataSourceName;
-    @NotNull(message="Connection type is mandatory")
-    private String connectionType;
+    @NotNull(message="Access Type is mandatory")
+    private String accessType;
     @NotNull(message="Data Source Name is mandatory")
     @Size(max = 100, message = "IAM name can have alphabets, number and special characters only and maximum 100 Characters long")
-    private String iamRole;
+    private String connectionData;
+
 }

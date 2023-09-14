@@ -1,7 +1,7 @@
 package ai.quantumics.api.service;
 
-import ai.quantumics.api.exceptions.ConnectionNotFoundException;
-import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
+import ai.quantumics.api.exceptions.DatasourceNotFoundException;
+import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 
@@ -9,14 +9,14 @@ import java.util.List;
 
 public interface AwsConnectionService {
 
-    AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidConnectionTypeException;
+    AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException;
 
-    AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest,Integer id, String userName) throws ConnectionNotFoundException;
+    AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest,Integer id, String userName) throws DatasourceNotFoundException;
 
-    List<AwsDatasourceResponse> getActiveConnections(boolean active);
+    List<AwsDatasourceResponse> getActiveConnections();
 
-    AwsDatasourceResponse getConnectionByNameAndActive(String datasourceName, boolean active);
+    AwsDatasourceResponse getConnectionByName(String datasourceName);
 
-    void deleteConnection(Integer id,boolean active,String userName) throws ConnectionNotFoundException;
+    void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException;
 
 }

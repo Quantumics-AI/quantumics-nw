@@ -1,8 +1,8 @@
 package ai.quantumics.api.controller;
 
 import ai.quantumics.api.enums.AwsAccessType;
-import ai.quantumics.api.exceptions.ConnectionNotFoundException;
-import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
+import ai.quantumics.api.exceptions.DatasourceNotFoundException;
+import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsUserV2;
@@ -38,7 +38,7 @@ public class AwsConnectionController {
 
     @PostMapping("/saveConnection")
     public ResponseEntity<AwsDatasourceResponse> saveConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
-            throws InvalidConnectionTypeException {
+            throws InvalidAccessTypeException {
 
             dbUtil.changeSchema("public");
             QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
@@ -61,7 +61,7 @@ public class AwsConnectionController {
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections(true));
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections());
     }
 
     @GetMapping("/getConnections/{userId}/{projectId}/{datasourceName}")
@@ -76,7 +76,7 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
 
-        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByNameAndActive(datasourceName.trim(),true);
+        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByName(datasourceName.trim());
 
         return ResponseEntity.status(HttpStatus.OK).body(allConnection);
 
@@ -85,7 +85,7 @@ public class AwsConnectionController {
     @DeleteMapping("/deleteConnections/{userId}/{projectId}/{id}")
     public ResponseEntity<Object> deleteConnection(@PathVariable(value = "userId") final int userId,
                                                                         @PathVariable(value = "projectId") final int projectId,
-                                                                        @PathVariable(value = "id") final int id) throws ConnectionNotFoundException{
+                                                                        @PathVariable(value = "id") final int id) throws DatasourceNotFoundException {
 
         dbUtil.changeSchema("public");
         QsUserV2 user = validatorUtils.checkUser(userId);
@@ -93,7 +93,7 @@ public class AwsConnectionController {
         dbUtil.changeSchema(project.getDbSchemaName());
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
-        awsConnectionService.deleteConnection(id, true, userName);
+        awsConnectionService.deleteConnection(id, userName);
         return returnResInstance(HttpStatus.OK, "Connection deleted successfully.");
     }
 
@@ -105,7 +105,7 @@ public class AwsConnectionController {
     @PutMapping("/updateConnection/{id}")
     public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
                                                                   @PathVariable(value = "id") final int id)
-            throws ConnectionNotFoundException {
+            throws DatasourceNotFoundException {
 
         dbUtil.changeSchema("public");
         QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
