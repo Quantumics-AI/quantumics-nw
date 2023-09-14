@@ -8,6 +8,7 @@
 
 package ai.quantumics.api.adapter;
 
+import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.exceptions.QsRecordNotFoundException;
 import ai.quantumics.api.model.*;
@@ -20,6 +21,7 @@ import ai.quantumics.api.vo.S3FileUploadResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
@@ -55,8 +57,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.io.File;
-import java.io.FileInputStream;
 
 import static ai.quantumics.api.constants.QsConstants.*;
 
@@ -78,6 +78,7 @@ public class AwsAdapter {
 	private final ProjectService projectService;
 	private final CleansingRuleParamService cleanseRuleParamService;
 	private final ProjectCumulativeSizeService projectSizeService;
+	private final AwsCustomConfiguration awsCustomConfiguration;
 
 	@Autowired private QsUtil qsUtil;
 
@@ -90,11 +91,14 @@ public class AwsAdapter {
 	@Value("${qs.athena.query.limit}")
 	private int qsQueryLimit;
 
-	@Value("${s3.credentials.accessKey}")
+	@Value("${aws.credentials.accessKey}")
 	private String s3AccessKey;
 
-	@Value("${s3.credentials.secretKey}")
+	@Value("${aws.credentials.secretKey}")
 	private String s3SecretKey;
+
+	@Value("${qs.aws.access.method}")
+	private String accessMethod;
 
 
 	public AwsAdapter(
@@ -108,7 +112,8 @@ public class AwsAdapter {
 			FileService fileServiceCi,
 			ProjectService projectServiceCi,
 			CleansingRuleParamService cleanseRuleParamServiceCi,
-			ProjectCumulativeSizeService projectSizeServiceCi
+			ProjectCumulativeSizeService projectSizeServiceCi,
+			AwsCustomConfiguration awsCustomConfigurationCi
 			) {
 		amazonS3Client = amazonS3ClientCi;
 		fileHelper = fileHelperCi;
@@ -121,6 +126,7 @@ public class AwsAdapter {
 		projectService = projectServiceCi;
 		cleanseRuleParamService = cleanseRuleParamServiceCi;
 		projectSizeService = projectSizeServiceCi;
+		awsCustomConfiguration = awsCustomConfigurationCi;
 	}
 
 	private String athenaPrepareQuery(
@@ -509,7 +515,6 @@ public class AwsAdapter {
 	public String getRawFileContentAnalyticsV2(final String bucketNameLocal, final QsFileContent detailsObj) throws Exception {
 		// Get the Python Script used for PII Detection from Classpath as a Resource before proceeding
 		// further..
-/*
 		URL url = null;
 
 		if (QsConstants.PII_DETECTION.equals(detailsObj.getAnalyticsType())) {
@@ -526,13 +531,12 @@ public class AwsAdapter {
 
 			return null;
 		}
-*/
-		String detectionPyFile = null;
+		/*String detectionPyFile = null;
 		if (QsConstants.PII_DETECTION.equals(detailsObj.getAnalyticsType())) {
 			detectionPyFile = "./"+QsConstants.PII_PYTHON_FILE_REL_LOC;
 		} else if (QsConstants.OUTLIERS_DETECTION.equals(detailsObj.getAnalyticsType())) {
 			detectionPyFile = "./"+QsConstants.OUTLIERS_PYTHON_FILE_REL_LOC;
-		}
+		}*/
 
 		
 
@@ -547,29 +551,41 @@ public class AwsAdapter {
 			commands.add("python3");
 		}
 
-		commands.add(detectionPyFile);
+		commands.add(detectionPyFile.getAbsolutePath());
 		commands.add(bucketNameLocal);
 		commands.add(detailsObj.getFileObjectKey());
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals("Keys")) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals("IAM")) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
 
 		return runExternalCommand(commands);
 	}
 
 	public String getDeltaBtwnFiles(final String bucketNameLocal, final String file1ObjKey, final String file2ObjKey) throws Exception{
-		/*
 		URL url = getClass().getClassLoader().getResource(QsConstants.DELTA_PYTHON_FILE_REL_LOC);
-
+		log.info("get PII column info url:{}",url);
 		File detectionPyFile = null;
 		if(url != null) {
-			detectionPyFile = new File(url.toURI());
+			try {
+				detectionPyFile = new File(url.toURI());
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.error("Exception while converting URI..{}",e);
+			}
+
 		} else {
 			log.info("Couldn't locate the Python script.");
 
 			return null;
 		}
-*/
-		String  detectionPyFile = "./"+QsConstants.DELTA_PYTHON_FILE_REL_LOC;
+
+		log.info("get PII column info detectionPyFile.getAbsolutePath :{}",detectionPyFile.getAbsolutePath());
+		//String  detectionPyFile = "./"+QsConstants.DELTA_PYTHON_FILE_REL_LOC;
 		List<String> commands = new ArrayList<>();
 
 		if(isWindows()) {
@@ -580,13 +596,19 @@ public class AwsAdapter {
 			commands.add("python3");
 		}
 
-		commands.add(detectionPyFile);
+		commands.add(detectionPyFile.getAbsolutePath());
 		commands.add(bucketNameLocal);
 		commands.add(file1ObjKey);
 		commands.add(bucketNameLocal);
 		commands.add(file2ObjKey);
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals("Keys")) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals("IAM")) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
 
 		return runExternalCommand(commands);
 	}
@@ -595,7 +617,7 @@ public class AwsAdapter {
 		List<String> commands = new ArrayList<>();
 		log.info("get PII column info :{}",inputFileWithPath);
 		try {
-			/*URL url = getClass().getClassLoader().getResource(QsConstants.PII_COL_DETECTION_PYTHON_FILE_REL_LOC);
+			URL url = getClass().getClassLoader().getResource(QsConstants.PII_COL_DETECTION_PYTHON_FILE_REL_LOC);
 			log.info("get PII column info url:{}",url);
 			File detectionPyFile = null;
 			if(url != null) {
@@ -612,8 +634,8 @@ public class AwsAdapter {
 				return null;
 			}
 
-			log.info("get PII column info detectionPyFile.getAbsolutePath :{}",detectionPyFile.getAbsolutePath());*/
-			String detectionPyFile = "./"+QsConstants.PII_COL_DETECTION_PYTHON_FILE_REL_LOC;
+			log.info("get PII column info detectionPyFile.getAbsolutePath :{}",detectionPyFile.getAbsolutePath());
+			//String detectionPyFile = "./"+QsConstants.PII_COL_DETECTION_PYTHON_FILE_REL_LOC;
 			System.out.println("Working Directory = " + System.getProperty("user.dir"));
 			log.info("get PII column info detectionPyFile.getAbsolutePath :{}",detectionPyFile);
 			
@@ -631,7 +653,7 @@ public class AwsAdapter {
 				commands.add("python3");
 			}
 
-			commands.add(detectionPyFile);
+			commands.add(detectionPyFile.getAbsolutePath());
 			commands.add(inputFileWithPath);
 	
 		} catch (Exception e) {
@@ -2553,7 +2575,6 @@ public class AwsAdapter {
 	}
 
 	public String getFileColumnValueFreq(final String  bucketNameLocal, final String fileObjKey, final String columnName) throws Exception{
-		/*
 		URL url = getClass().getClassLoader().getResource(QsConstants.COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC);
 
 		File detectionPyFile = null;
@@ -2564,8 +2585,7 @@ public class AwsAdapter {
 
 			return null;
 		}
-		*/
-		String detectionPyFile = "./"+QsConstants.COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC;
+		//String detectionPyFile = "./"+QsConstants.COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC;
 
 		List<String> commands = new ArrayList<>();
 
@@ -2577,18 +2597,23 @@ public class AwsAdapter {
 			commands.add("python3");
 		}
 
-		commands.add(detectionPyFile);
+		commands.add(detectionPyFile.getAbsolutePath());
 		commands.add(bucketNameLocal);
 		commands.add(fileObjKey);
 		commands.add(columnName);
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals("Keys")) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals("IAM")) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
 
 		return runExternalCommand(commands);
 	}
 
 	public String getFileStatistics(final String bucketNameLocal, final String fileObjKey) throws Exception{
-		/*
 		URL url = getClass().getClassLoader().getResource(QsConstants.FILE_STATS_PYTHON_FILE_REL_LOC);
 
 		File detectionPyFile = null;
@@ -2599,9 +2624,8 @@ public class AwsAdapter {
 
 			return null;
 		}
-		*/
 
-		String detectionPyFile = "./"+QsConstants.FILE_STATS_PYTHON_FILE_REL_LOC;
+		//String detectionPyFile = "./"+QsConstants.FILE_STATS_PYTHON_FILE_REL_LOC;
 		List<String> commands = new ArrayList<>();
 
 		if(isWindows()) {
@@ -2612,11 +2636,17 @@ public class AwsAdapter {
 			commands.add("python3");
 		}
 
-		commands.add(detectionPyFile);
+		commands.add(detectionPyFile.getAbsolutePath());
 		commands.add(bucketNameLocal);
 		commands.add(fileObjKey);
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals("Keys")) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals("IAM")) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
 
 		return runExternalCommand(commands);
 	}

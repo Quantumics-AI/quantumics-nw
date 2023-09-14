@@ -9,15 +9,16 @@
 package ai.quantumics.api;
 
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.*;
 import com.amazonaws.services.athena.AmazonAthena;
 import com.amazonaws.services.athena.AmazonAthenaClient;
+import com.amazonaws.services.athena.AmazonAthenaClientBuilder;
 import com.amazonaws.services.glue.AWSGlue;
 import com.amazonaws.services.glue.AWSGlueClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,17 +28,11 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 @Configuration
 public class AwsCustomConfiguration {
 
-  @Value("${s3.credentials.accessKey}")
-  private String s3AccessKey;
+  @Value("${aws.credentials.accessKey}")
+  private String accessKey;
 
-  @Value("${s3.credentials.secretKey}")
-  private String s3SecretKey;
-
-  @Value("${athena.credentials.accessKey}")
-  private String athenaAccessKey;
-
-  @Value("${athena.credentials.secretKey}")
-  private String athenaSecretKey;
+  @Value("${aws.credentials.secretKey}")
+  private String secretKey;
 
   @Value("${qs.cloud.region}")
   private String cloudRegion;
@@ -45,48 +40,145 @@ public class AwsCustomConfiguration {
   @Value("${qs.file.max-size}")
   private long maxFileSize;
 
-  @Value("${glue.credentials.accessKey}")
-  private String glueAccessKey;
+  @Value("${qs.aws.access.method}")
+  private String accessMethod;
 
-  @Value("${glue.credentials.secretKey}")
-  private String glueSecretKey;
-
+  @Value("${aws.access.role}")
+  private String roleArn;
 
   @Bean
   public AmazonAthena awsAthenaClient() {
-    final BasicAWSCredentials awsAthenaCredentials =
-        new BasicAWSCredentials(athenaAccessKey, athenaSecretKey);
+    if(accessMethod.equals("Keys")) {
+      return createAmazonAthena(accessKey, secretKey);
+    } else if(accessMethod.equals("IAM")) {
+      return createAmazonRoleAthena();
+    } else if(accessMethod.equals("Profile")) {
+      return createAmazonProfileAthena();
+    } else {
+      return null;
+    }
+  }
 
-      return AmazonAthenaClient.builder()
-      .withRegion(cloudRegion)
-      .withCredentials(new AWSStaticCredentialsProvider(awsAthenaCredentials))
-      .build();
+  private AmazonAthena createAmazonAthena(String accessKey, String secretKey) {
+    final BasicAWSCredentials awsAthenaCredentials =
+            new BasicAWSCredentials(accessKey, secretKey);
+
+    return AmazonAthenaClient.builder()
+            .withRegion(cloudRegion)
+            .withCredentials(new AWSStaticCredentialsProvider(awsAthenaCredentials))
+            .build();
+  }
+
+  public AmazonAthena createAmazonRoleAthena() {
+
+    AWSCredentialsProvider credentialsProvider = getAwsCredentialsProvider();
+
+    return AmazonAthenaClient.builder()
+            .withRegion(cloudRegion)
+            .withCredentials(credentialsProvider)
+            .build();
+  }
+
+  public AmazonAthena createAmazonProfileAthena() {
+    return AmazonAthenaClientBuilder.defaultClient();
   }
 
   @Bean
   public AmazonS3 awsS3Client() {
-    final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
+    if(accessMethod.equals("Keys")) {
+      return createAmazonS3(accessKey, secretKey);
+    } else if(accessMethod.equals("IAM")) {
+      return createAmazonRoleS3();
+    } else if(accessMethod.equals("Profile")) {
+      return createAmazonProfileS3();
+    } else {
+      return null;
+    }
+  }
+
+  private AmazonS3 createAmazonS3(String accessKey, String secretKey) {
+    final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(accessKey, secretKey);
+
     ClientConfiguration config = new ClientConfiguration();
     config.setMaxConnections(2000);
     return AmazonS3ClientBuilder.standard()
-        .withRegion(cloudRegion)
-        .withClientConfiguration(config)
-        .withCredentials(new AWSStaticCredentialsProvider(awsS3Credentials))
-        .build();
+            .withRegion(cloudRegion)
+            .withClientConfiguration(config)
+            .withCredentials(new AWSStaticCredentialsProvider(awsS3Credentials))
+            .build();
+  }
+
+  public AmazonS3 createAmazonRoleS3() {
+
+    AWSCredentialsProvider credentialsProvider = getAwsCredentialsProvider();
+
+    // Create an Amazon S3 client using the assumed role's credentials.
+    AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+            .withCredentials(credentialsProvider)
+            .withRegion(cloudRegion) // Set your desired region
+            .build();
+    return s3Client;
+  }
+
+  public AWSCredentialsProvider getAwsCredentialsProvider() {
+    int sessionDurationSeconds = 3600; // 1 hour
+
+    // Set the desired duration for the assumed role session (in seconds).
+    AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
+            .withRegion(cloudRegion) // Set your desired region
+            .build();
+    // Create a session credentials provider that assumes the role with the specified duration.
+    AWSCredentialsProvider credentialsProvider = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "my-session")
+            .withStsClient(stsClient)
+            .withRoleSessionDurationSeconds(sessionDurationSeconds)
+            .build();
+    return credentialsProvider;
+  }
+
+  public AmazonS3 createAmazonProfileS3() {
+    // Create an S3 client using the default AWS credentials provider chain.
+    // The credentials provider chain will automatically use the IAM role attached to the EC2 instance.
+    return AmazonS3ClientBuilder.defaultClient();
+  }
+
+  @Bean
+  public AWSGlue glueClient() {
+    if(accessMethod.equals("Keys")) {
+      return createAWSGlue(accessKey, secretKey);
+    } else if(accessMethod.equals("IAM")) {
+      return createAmazonRoleGlue();
+    } else if(accessMethod.equals("Profile")) {
+      return createAmazonProfileGlue();
+    } else {
+      return null;
+    }
+  }
+
+  private AWSGlue createAWSGlue(String accessKey, String secretKey) {
+    final AWSCredentials awsGlueCredentials = new BasicAWSCredentials(accessKey, secretKey);
+    return AWSGlueClientBuilder.standard()
+            .withRegion(cloudRegion)
+            .withCredentials(new AWSStaticCredentialsProvider(awsGlueCredentials))
+            .build();
+  }
+
+  public AWSGlue createAmazonRoleGlue() {
+
+    AWSCredentialsProvider credentialsProvider = getAwsCredentialsProvider();
+
+    return AWSGlueClientBuilder.standard()
+            .withRegion(cloudRegion)
+            .withCredentials(credentialsProvider)
+            .build();
+  }
+
+  public AWSGlue createAmazonProfileGlue() {
+    return AWSGlueClientBuilder.defaultClient();
   }
 
   @Bean
   RestTemplate getRestTemplate() {
     return new RestTemplate();
-  }
-
-  @Bean
-  public AWSGlue glueClient() {
-    final AWSCredentials awsGlueCredentials = new BasicAWSCredentials(glueAccessKey, glueSecretKey);
-    return AWSGlueClientBuilder.standard()
-            .withRegion(cloudRegion)
-            .withCredentials(new AWSStaticCredentialsProvider(awsGlueCredentials))
-            .build();
   }
 
   @Bean(name = "multipartResolver")
