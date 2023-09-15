@@ -1,15 +1,16 @@
 package ai.quantumics.api.service.impl;
 
+import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.BadRequestException;
-import ai.quantumics.api.exceptions.ConnectionNotFoundException;
-import ai.quantumics.api.exceptions.InvalidConnectionTypeException;
+import ai.quantumics.api.exceptions.DatasourceNotFoundException;
+import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.model.AWSDatasource;
-import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import org.joda.time.DateTime;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static ai.quantumics.api.enums.AwsAccessType.IAM;
+import static ai.quantumics.api.constants.DatasourceConstants.*;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -26,86 +27,94 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AwsConnectionRepo awsConnectionRepo;
 
     @Override
-    public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Projects project) throws InvalidConnectionTypeException {
+    public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceName(awsDatasourceRequest.getDataSourceName());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCase(awsDatasourceRequest.getDataSourceName().trim());
         if (dataSources.isPresent()) {
-            throw new BadRequestException("Data source name already exist.");
+            throw new BadRequestException(DATA_SOURCE_EXIST);
         }
 
-        String connectionType = awsDatasourceRequest.getConnectionType();//access Type
+        if (AwsAccessType.getAccessTypeAsMap().containsValue(awsDatasourceRequest.getAccessType())) {
 
-        if (IAM.getAccessType().equals(connectionType)) {
-            AWSDatasource awsDatasource = awsConnectionRepo.saveAndFlush(awsDatasourceMapper(awsDatasourceRequest, project));
+            AWSDatasource awsDatasource = awsConnectionRepo.saveAndFlush(awsDatasourceMapper(awsDatasourceRequest, userName));
 
             return createResponse(awsDatasource);
         } else {
-            throw new InvalidConnectionTypeException("Invalid Connection Type");
+            throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
         }
     }
 
     @Override
-    public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, Projects project) throws ConnectionNotFoundException {
+    public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
 
-        AWSDatasource dataSource = awsConnectionRepo.findById(id).orElseThrow(() -> new ConnectionNotFoundException("Connection not found"));
+        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCase(awsDatasourceRequest.getDataSourceName().trim());
+        if (dataSources.isPresent()) {
+            throw new BadRequestException(DATA_SOURCE_EXIST);
+        }
+
         dataSource.setDataSourceName(awsDatasourceRequest.getDataSourceName());
-        dataSource.setModifiedBy(project.getModifiedBy());
+        dataSource.setModifiedBy(userName);
         dataSource.setModifiedDate(DateTime.now().toDate());
-        return createResponse(awsConnectionRepo.save(dataSource));
+        return createResponse(awsConnectionRepo.saveAndFlush(dataSource));
     }
 
     private AwsDatasourceResponse createResponse(AWSDatasource awsDatasource) {
-        AwsDatasourceResponse response = new AwsDatasourceResponse();
-        response.setId(awsDatasource.getId());
-        response.setDataSourceName(awsDatasource.getDataSourceName());
-        response.setConnectionType(awsDatasource.getConnectionType());
-        response.setIamRole(awsDatasource.getCredentialOrRole());
-        response.setCreatedDate(awsDatasource.getCreatedDate());
-        response.setModifiedDate(awsDatasource.getModifiedDate());
-        return response;
+        ModelMapper mapper = new ModelMapper();
+        return mapper.map(awsDatasource,AwsDatasourceResponse.class);
     }
 
-
     @Override
-    public List<AwsDatasourceResponse> getAllConnection() {
+    public List<AwsDatasourceResponse> getActiveConnections() {
         List<AwsDatasourceResponse> response = new ArrayList<>();
-        List<AWSDatasource> awsDatasource = awsConnectionRepo.findAll();
-
-        awsDatasource.forEach(datasource -> {
+        Optional<List<AWSDatasource>> awsDatasource = awsConnectionRepo.findByActiveOrderByCreatedDateDesc(true);
+        awsDatasource.get().forEach(datasource -> {
             response.add(createResponse(datasource));
         });
 
         return response;
     }
-
     @Override
     public AwsDatasourceResponse getConnectionByName(String datasourceName) {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceName(datasourceName);
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCaseAndActive(datasourceName,true);
         if (dataSources.isPresent()) {
             return createResponse(dataSources.get());
         }else{
-            throw new BadRequestException("No record found.");
+            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
         }
     }
 
     @Override
-    public void deleteConnection(Integer id) throws ConnectionNotFoundException {
-        AWSDatasource connection = awsConnectionRepo.findById(id).orElseThrow(() -> new ConnectionNotFoundException("Connection not found"));
-        awsConnectionRepo.delete(connection);
+    public AwsDatasourceResponse getConnectionById(Integer id) {
+
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByIdAndActive(id,true);
+        if (dataSources.isPresent()) {
+            return createResponse(dataSources.get());
+        }else{
+            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
+        }
     }
 
-    private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, Projects project) {
+    @Override
+    public void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException {
+        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
+        dataSource.setActive(false);
+        dataSource.setModifiedBy(userName);
+        awsConnectionRepo.saveAndFlush(dataSource);
+    }
+
+    private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, String userName) {
+
         AWSDatasource awsDatasource = new AWSDatasource();
-        String iamRole = "{" + "IAMRole " + ": " + awsDatasourceRequest.getIamRole() + "}";
         awsDatasource.setProjectId(awsDatasourceRequest.getProjectId());
         awsDatasource.setUserId(awsDatasourceRequest.getUserId());
-        awsDatasource.setDataSourceName(awsDatasourceRequest.getDataSourceName());
-        awsDatasource.setConnectionType(awsDatasourceRequest.getConnectionType());
-        awsDatasource.setCredentialOrRole(iamRole);
-        awsDatasource.setCreatedBy(project.getCreatedBy());
-        awsDatasource.setModifiedBy(project.getModifiedBy());
-
+        awsDatasource.setDataSourceName(awsDatasourceRequest.getDataSourceName().trim());
+        awsDatasource.setAccessType(awsDatasourceRequest.getAccessType());
+        awsDatasource.setConnectionData(awsDatasourceRequest.getConnectionData());
+        awsDatasource.setCreatedBy(userName);
+        awsDatasource.setCreatedDate(DateTime.now().toDate());
+        awsDatasource.setActive(true);
         return awsDatasource;
     }
 }

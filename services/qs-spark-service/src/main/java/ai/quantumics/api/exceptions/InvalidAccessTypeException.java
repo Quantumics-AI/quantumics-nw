@@ -8,20 +8,20 @@
 
 package ai.quantumics.api.exceptions;
 
-public class ConnectionNotFoundException extends RuntimeException {
+public class InvalidAccessTypeException extends RuntimeException {
 
 	/** */
 	private static final long serialVersionUID = 1L;
 
-	public ConnectionNotFoundException(String message, Throwable cause) {
+	public InvalidAccessTypeException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public ConnectionNotFoundException(String message) {
+	public InvalidAccessTypeException(String message) {
 		super(message);
 	}
 
-	public ConnectionNotFoundException() {
-		super("Connection not found");
+	public InvalidAccessTypeException() {
+		super("Invalid Access Type");
 	}
 }

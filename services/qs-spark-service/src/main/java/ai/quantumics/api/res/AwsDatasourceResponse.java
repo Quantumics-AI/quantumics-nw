@@ -9,8 +9,8 @@ public class AwsDatasourceResponse {
 
     private Integer id;
     private String dataSourceName;
-    private String connectionType;
-    private String iamRole;
+    private String accessType;
+    private String connectionData;
     private Date createdDate;
     private Date modifiedDate;
 }

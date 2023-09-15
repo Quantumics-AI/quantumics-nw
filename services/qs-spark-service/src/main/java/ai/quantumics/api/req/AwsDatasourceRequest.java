@@ -3,18 +3,20 @@ package ai.quantumics.api.req;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 public class AwsDatasourceRequest {
 
-    @NotNull(message="Project id can't be null")
     private Integer projectId;
-    @NotNull(message="User id can't be null")
     private Integer userId;
-    @NotNull(message="Data source name can't be null")
+    @NotNull(message="Data Source Name is mandatory")
+    @Size(min = 3, max = 50, message = "Data Source Name must be between 3 and 50 Characters long")
     private String dataSourceName;
-    @NotNull(message="Connection type can't be null")
-    private String connectionType;
-    @NotNull(message="Iam role can't be null")
-    private String iamRole;
+    @NotNull(message="Access Type is mandatory")
+    private String accessType;
+    @NotNull(message="Data Source Name is mandatory")
+    @Size(max = 100, message = "IAM name can have alphabets, number and special characters only and maximum 100 Characters long")
+    private String connectionData;
+
 }
