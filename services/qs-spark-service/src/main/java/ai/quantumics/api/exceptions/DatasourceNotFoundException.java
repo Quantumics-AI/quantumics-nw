@@ -22,6 +22,6 @@ public class DatasourceNotFoundException extends RuntimeException {
 	}
 
 	public DatasourceNotFoundException() {
-		super("Connection not found");
+		super("Data source does not exist.");
 	}
 }

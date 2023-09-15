@@ -22,6 +22,6 @@ public class InvalidAccessTypeException extends RuntimeException {
 	}
 
 	public InvalidAccessTypeException() {
-		super("Invalid Connection Type");
+		super("Invalid Access Type");
 	}
 }
