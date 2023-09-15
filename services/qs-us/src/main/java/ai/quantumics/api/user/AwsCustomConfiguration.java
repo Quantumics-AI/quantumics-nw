@@ -8,6 +8,7 @@
 
 package ai.quantumics.api.user;
 
+import ai.quantumics.api.user.constants.AwsAccessMethod;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -60,11 +61,11 @@ public class AwsCustomConfiguration {
 	@Bean
 	@Primary
 	public AmazonS3 awsS3Client() {
-		if(accessMethod.equals("Keys")) {
+		if(accessMethod.equals(AwsAccessMethod.KEYS)) {
 			return createAmazonS3(accessKey, secretKey);
-		} else if(accessMethod.equals("IAM")) {
+		} else if(accessMethod.equals(AwsAccessMethod.IAM)) {
 			return createAmazonRoleS3();
-		} else if(accessMethod.equals("Profile")){
+		} else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
 			return createAmazonProfileS3();
 		} else {
 			return null;

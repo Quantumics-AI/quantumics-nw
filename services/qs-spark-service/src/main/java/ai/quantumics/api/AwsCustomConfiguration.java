@@ -8,6 +8,7 @@
 
 package ai.quantumics.api;
 
+import ai.quantumics.api.constants.AwsAccessMethod;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.*;
 import com.amazonaws.services.athena.AmazonAthena;
@@ -48,11 +49,11 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AmazonAthena awsAthenaClient() {
-    if(accessMethod.equals("Keys")) {
+    if(accessMethod.equals(AwsAccessMethod.KEYS)) {
       return createAmazonAthena(accessKey, secretKey);
-    } else if(accessMethod.equals("IAM")) {
+    } else if(accessMethod.equals(AwsAccessMethod.IAM)) {
       return createAmazonRoleAthena();
-    } else if(accessMethod.equals("Profile")) {
+    } else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
       return createAmazonProfileAthena();
     } else {
       return null;
@@ -85,11 +86,11 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AmazonS3 awsS3Client() {
-    if(accessMethod.equals("Keys")) {
+    if(accessMethod.equals(AwsAccessMethod.KEYS)) {
       return createAmazonS3(accessKey, secretKey);
-    } else if(accessMethod.equals("IAM")) {
+    } else if(accessMethod.equals(AwsAccessMethod.IAM)) {
       return createAmazonRoleS3();
-    } else if(accessMethod.equals("Profile")) {
+    } else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
       return createAmazonProfileS3();
     } else {
       return null;
@@ -143,11 +144,11 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AWSGlue glueClient() {
-    if(accessMethod.equals("Keys")) {
+    if(accessMethod.equals(AwsAccessMethod.KEYS)) {
       return createAWSGlue(accessKey, secretKey);
-    } else if(accessMethod.equals("IAM")) {
+    } else if(accessMethod.equals(AwsAccessMethod.IAM)) {
       return createAmazonRoleGlue();
-    } else if(accessMethod.equals("Profile")) {
+    } else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
       return createAmazonProfileGlue();
     } else {
       return null;
