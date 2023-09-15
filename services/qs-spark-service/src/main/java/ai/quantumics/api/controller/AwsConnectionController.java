@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_DELETED;
+
 @RestController
 @RequestMapping("/api/v1/aws")
 public class AwsConnectionController {
@@ -33,7 +35,7 @@ public class AwsConnectionController {
         this.validatorUtils = validatorUtils;
     }
 
-    @PostMapping("/saveConnection")
+    @PostMapping("/save")
     public ResponseEntity<AwsDatasourceResponse> saveConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
             throws InvalidAccessTypeException {
 
@@ -43,10 +45,7 @@ public class AwsConnectionController {
             dbUtil.changeSchema(project.getDbSchemaName());
             final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
-
-            AwsDatasourceResponse response = awsConnectionService.saveConnectionInfo(awsDatasourceRequest, userName);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(awsConnectionService.saveConnectionInfo(awsDatasourceRequest, userName));
     }
 
     @GetMapping("/getConnections/{userId}/{projectId}")
@@ -60,7 +59,7 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections());
     }
 
-    @GetMapping("/getConnections/{userId}/{projectId}/{datasourceName}")
+    @GetMapping("/getConnectionByName/{userId}/{projectId}/{datasourceName}")
     public ResponseEntity<AwsDatasourceResponse> getConnectionByName(
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId,
@@ -71,14 +70,11 @@ public class AwsConnectionController {
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-
-        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionByName(datasourceName.trim());
-
-        return ResponseEntity.status(HttpStatus.OK).body(allConnection);
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnectionByName(datasourceName.trim()));
 
     }
 
-    @GetMapping("/getConnection/{userId}/{projectId}/{id}")
+    @GetMapping("/getConnectionById/{userId}/{projectId}/{id}")
     public ResponseEntity<AwsDatasourceResponse> getConnectionById(
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId,
@@ -89,14 +85,11 @@ public class AwsConnectionController {
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-
-        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionById(id);
-
-        return ResponseEntity.status(HttpStatus.OK).body(allConnection);
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnectionById(id));
 
     }
 
-    @DeleteMapping("/deleteConnection/{userId}/{projectId}/{id}")
+    @DeleteMapping("/delete/{userId}/{projectId}/{id}")
     public ResponseEntity<Object> deleteConnection(@PathVariable(value = "userId") final int userId,
                                                                         @PathVariable(value = "projectId") final int projectId,
                                                                         @PathVariable(value = "id") final int id) throws DatasourceNotFoundException {
@@ -108,7 +101,7 @@ public class AwsConnectionController {
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
         awsConnectionService.deleteConnection(id, userName);
-        return returnResInstance(HttpStatus.OK, "Data source deleted successfully.");
+        return returnResInstance(HttpStatus.OK, DATA_SOURCE_DELETED);
     }
 
     @GetMapping("/getAwsAccessTypes")
@@ -116,7 +109,7 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(AwsAccessType.getAccessTypeAsMap());
     }
 
-    @PutMapping("/updateConnection/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
                                                                   @PathVariable(value = "id") final int id)
             throws DatasourceNotFoundException {
@@ -127,9 +120,7 @@ public class AwsConnectionController {
         dbUtil.changeSchema(project.getDbSchemaName());
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
-        AwsDatasourceResponse response = awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {

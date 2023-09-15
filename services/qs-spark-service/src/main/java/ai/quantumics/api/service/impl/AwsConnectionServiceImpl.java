@@ -9,6 +9,7 @@ import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
+import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static ai.quantumics.api.constants.DatasourceConstants.*;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -28,7 +31,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
         Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCase(awsDatasourceRequest.getDataSourceName().trim());
         if (dataSources.isPresent()) {
-            throw new BadRequestException("Entered Data Source Name is already used.Please enter a different name");
+            throw new BadRequestException(DATA_SOURCE_EXIST);
         }
 
         if (AwsAccessType.getAccessTypeAsMap().containsValue(awsDatasourceRequest.getAccessType())) {
@@ -37,21 +40,22 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
             return createResponse(awsDatasource);
         } else {
-            throw new InvalidAccessTypeException("Invalid Access Type");
+            throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
         }
     }
 
     @Override
     public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
 
-        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException("Data source does not exist."));
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCaseAndActive(awsDatasourceRequest.getDataSourceName().trim(),true);
+        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCase(awsDatasourceRequest.getDataSourceName().trim());
         if (dataSources.isPresent()) {
-            throw new BadRequestException("Data source already exist.");
+            throw new BadRequestException(DATA_SOURCE_EXIST);
         }
 
         dataSource.setDataSourceName(awsDatasourceRequest.getDataSourceName());
         dataSource.setModifiedBy(userName);
+        dataSource.setModifiedDate(DateTime.now().toDate());
         return createResponse(awsConnectionRepo.saveAndFlush(dataSource));
     }
 
@@ -77,7 +81,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         if (dataSources.isPresent()) {
             return createResponse(dataSources.get());
         }else{
-            throw new BadRequestException("No record found.");
+            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
         }
     }
 
@@ -88,13 +92,13 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         if (dataSources.isPresent()) {
             return createResponse(dataSources.get());
         }else{
-            throw new BadRequestException("No record found.");
+            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
         }
     }
 
     @Override
     public void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException {
-        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException("Data source does not exist."));
+        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
         dataSource.setActive(false);
         dataSource.setModifiedBy(userName);
         awsConnectionRepo.saveAndFlush(dataSource);
@@ -109,6 +113,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsDatasource.setAccessType(awsDatasourceRequest.getAccessType());
         awsDatasource.setConnectionData(awsDatasourceRequest.getConnectionData());
         awsDatasource.setCreatedBy(userName);
+        awsDatasource.setCreatedDate(DateTime.now().toDate());
         awsDatasource.setActive(true);
         return awsDatasource;
     }
