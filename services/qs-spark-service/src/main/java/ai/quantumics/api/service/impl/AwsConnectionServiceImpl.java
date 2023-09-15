@@ -44,10 +44,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
 
-        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException("Data source does not exists."));
+        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException("Data source does not exist."));
         Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCaseAndActive(awsDatasourceRequest.getDataSourceName().trim(),true);
         if (dataSources.isPresent()) {
-            throw new BadRequestException("Data source already exists.");
+            throw new BadRequestException("Data source already exist.");
         }
 
         dataSource.setDataSourceName(awsDatasourceRequest.getDataSourceName());
@@ -82,8 +82,19 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
+    public AwsDatasourceResponse getConnectionById(Integer id) {
+
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByIdAndActive(id,true);
+        if (dataSources.isPresent()) {
+            return createResponse(dataSources.get());
+        }else{
+            throw new BadRequestException("No record found.");
+        }
+    }
+
+    @Override
     public void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException {
-        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException("Data source does not exists."));
+        AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException("Data source does not exist."));
         dataSource.setActive(false);
         dataSource.setModifiedBy(userName);
         awsConnectionRepo.saveAndFlush(dataSource);

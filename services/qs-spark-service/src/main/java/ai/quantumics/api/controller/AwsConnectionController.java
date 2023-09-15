@@ -3,7 +3,6 @@ package ai.quantumics.api.controller;
 import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
-import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.req.AwsDatasourceRequest;
@@ -26,14 +25,12 @@ public class AwsConnectionController {
     private final AwsConnectionService awsConnectionService;
     private final DbSessionUtil dbUtil;
     private final ValidatorUtils validatorUtils;
-    private final ControllerHelper controllerHelper;
 
     public AwsConnectionController(AwsConnectionService awsConnectionService, DbSessionUtil dbUtil,
-                                   ValidatorUtils validatorUtils, ControllerHelper controllerHelper) {
+                                   ValidatorUtils validatorUtils) {
         this.awsConnectionService = awsConnectionService;
         this.dbUtil = dbUtil;
         this.validatorUtils = validatorUtils;
-        this.controllerHelper = controllerHelper;
     }
 
     @PostMapping("/saveConnection")
@@ -43,7 +40,6 @@ public class AwsConnectionController {
             dbUtil.changeSchema("public");
             QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
             Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
-            controllerHelper.getProjects(project.getProjectId(), user.getUserId());
             dbUtil.changeSchema(project.getDbSchemaName());
             final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
@@ -82,7 +78,25 @@ public class AwsConnectionController {
 
     }
 
-    @DeleteMapping("/deleteConnections/{userId}/{projectId}/{id}")
+    @GetMapping("/getConnection/{userId}/{projectId}/{id}")
+    public ResponseEntity<AwsDatasourceResponse> getConnectionById(
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "id") final int id)
+            throws Exception {
+
+        dbUtil.changeSchema("public");
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+
+        AwsDatasourceResponse allConnection = awsConnectionService.getConnectionById(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(allConnection);
+
+    }
+
+    @DeleteMapping("/deleteConnection/{userId}/{projectId}/{id}")
     public ResponseEntity<Object> deleteConnection(@PathVariable(value = "userId") final int userId,
                                                                         @PathVariable(value = "projectId") final int projectId,
                                                                         @PathVariable(value = "id") final int id) throws DatasourceNotFoundException {
@@ -94,7 +108,7 @@ public class AwsConnectionController {
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
         awsConnectionService.deleteConnection(id, userName);
-        return returnResInstance(HttpStatus.OK, "Connection deleted successfully.");
+        return returnResInstance(HttpStatus.OK, "Data source deleted successfully.");
     }
 
     @GetMapping("/getAwsAccessTypes")
@@ -110,7 +124,6 @@ public class AwsConnectionController {
         dbUtil.changeSchema("public");
         QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
         Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
-        controllerHelper.getProjects(project.getProjectId(), user.getUserId());
         dbUtil.changeSchema(project.getDbSchemaName());
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();

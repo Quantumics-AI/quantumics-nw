@@ -928,8 +928,8 @@ BEGIN
 	    CREATE TABLE '||schemaName||'.qsp_aws_datasource (
 	    id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
 	    data_source_name character varying(255) NOT NULL UNIQUE,
-	    connection_type character varying(255) NOT NULL,
-	    credential_role character varying(255) NOT NULL,
+	    access_type character varying(50) NOT NULL,
+        connection_data character varying(100) NOT NULL,
 	    project_id int4 NOT NULL,
             user_id int4 NOT NULL,
             active bool NULL DEFAULT true,

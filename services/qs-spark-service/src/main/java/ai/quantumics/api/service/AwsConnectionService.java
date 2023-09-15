@@ -17,6 +17,8 @@ public interface AwsConnectionService {
 
     AwsDatasourceResponse getConnectionByName(String datasourceName);
 
+    AwsDatasourceResponse getConnectionById(Integer id);
+
     void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException;
 
 }
