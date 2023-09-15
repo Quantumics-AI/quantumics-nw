@@ -1,4 +1,4 @@
-package ai.quantumics.api.enums;
+package ai.quantumics.api.user.enums;
 
 import java.util.Arrays;
 import java.util.Map;

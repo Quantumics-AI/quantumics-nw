@@ -8,7 +8,7 @@
 
 package ai.quantumics.api.user;
 
-import ai.quantumics.api.user.constants.AwsAccessMethod;
+import ai.quantumics.api.user.enums.AwsAccessType;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -27,12 +27,6 @@ import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sts.StsClient;
-import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
-import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
-import software.amazon.awssdk.services.sts.model.Credentials;
 
 @Configuration
 public class AwsCustomConfiguration {
@@ -61,11 +55,11 @@ public class AwsCustomConfiguration {
 	@Bean
 	@Primary
 	public AmazonS3 awsS3Client() {
-		if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
 			return createAmazonS3(accessKey, secretKey);
-		} else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
 			return createAmazonRoleS3();
-		} else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
+		} else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
 			return createAmazonProfileS3();
 		} else {
 			return null;

@@ -8,7 +8,7 @@
 
 package ai.quantumics.api;
 
-import ai.quantumics.api.constants.AwsAccessMethod;
+import ai.quantumics.api.enums.AwsAccessType;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.*;
 import com.amazonaws.services.athena.AmazonAthena;
@@ -49,11 +49,11 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AmazonAthena awsAthenaClient() {
-    if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+    if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
       return createAmazonAthena(accessKey, secretKey);
-    } else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+    } else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
       return createAmazonRoleAthena();
-    } else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
+    } else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
       return createAmazonProfileAthena();
     } else {
       return null;
@@ -86,11 +86,11 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AmazonS3 awsS3Client() {
-    if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+    if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
       return createAmazonS3(accessKey, secretKey);
-    } else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+    } else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
       return createAmazonRoleS3();
-    } else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
+    } else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
       return createAmazonProfileS3();
     } else {
       return null;
@@ -144,11 +144,11 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AWSGlue glueClient() {
-    if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+    if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
       return createAWSGlue(accessKey, secretKey);
-    } else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+    } else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
       return createAmazonRoleGlue();
-    } else if(accessMethod.equals(AwsAccessMethod.PROFILE)) {
+    } else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
       return createAmazonProfileGlue();
     } else {
       return null;

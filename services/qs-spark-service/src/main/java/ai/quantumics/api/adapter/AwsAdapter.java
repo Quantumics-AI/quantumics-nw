@@ -9,8 +9,8 @@
 package ai.quantumics.api.adapter;
 
 import ai.quantumics.api.AwsCustomConfiguration;
-import ai.quantumics.api.constants.AwsAccessMethod;
 import ai.quantumics.api.constants.QsConstants;
+import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.QsRecordNotFoundException;
 import ai.quantumics.api.model.*;
 import ai.quantumics.api.req.ColumnMetaData;
@@ -58,8 +58,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.io.File;
-import java.io.FileInputStream;
 
 import static ai.quantumics.api.constants.QsConstants.*;
 
@@ -559,10 +557,10 @@ public class AwsAdapter {
 		commands.add(detectionPyFile);
 		commands.add(bucketNameLocal);
 		commands.add(detailsObj.getFileObjectKey());
-		if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
 			commands.add(s3AccessKey);
 			commands.add(s3SecretKey);
-		} else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
 			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
 			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
@@ -601,10 +599,10 @@ public class AwsAdapter {
 		commands.add(file1ObjKey);
 		commands.add(bucketNameLocal);
 		commands.add(file2ObjKey);
-		if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
 			commands.add(s3AccessKey);
 			commands.add(s3SecretKey);
-		} else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
 			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
 			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
@@ -2604,10 +2602,10 @@ public class AwsAdapter {
 		commands.add(bucketNameLocal);
 		commands.add(fileObjKey);
 		commands.add(columnName);
-		if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
 			commands.add(s3AccessKey);
 			commands.add(s3SecretKey);
-		} else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
 			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
 			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
@@ -2645,10 +2643,10 @@ public class AwsAdapter {
 		commands.add(detectionPyFile);
 		commands.add(bucketNameLocal);
 		commands.add(fileObjKey);
-		if(accessMethod.equals(AwsAccessMethod.KEYS)) {
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
 			commands.add(s3AccessKey);
 			commands.add(s3SecretKey);
-		} else if(accessMethod.equals(AwsAccessMethod.IAM)) {
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
 			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
 			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
 			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
