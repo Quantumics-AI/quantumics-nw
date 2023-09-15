@@ -10,6 +10,7 @@ package ai.quantumics.api.exceptions;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -102,16 +103,16 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 	
 	
-	@ExceptionHandler(InvalidConnectionTypeException.class)
-	protected ResponseEntity<Object> invalidConnectionTypeException(Exception ex) {
+	@ExceptionHandler(InvalidAccessTypeException.class)
+	protected ResponseEntity<Object> invalidAccessTypeException(Exception ex) {
 		log.error(ex.getLocalizedMessage());
 		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
 		apiError.setMessage(ex.getLocalizedMessage());
 		return buildResponseEntity(apiError);
 	}
 
-	@ExceptionHandler(ConnectionNotFoundException.class)
-	protected ResponseEntity<Object> connectionNotFoundException(Exception ex) {
+	@ExceptionHandler(DatasourceNotFoundException.class)
+	protected ResponseEntity<Object> datasourceNotFoundException(Exception ex) {
 		log.error(ex.getLocalizedMessage());
 		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
 		apiError.setMessage(ex.getLocalizedMessage());
