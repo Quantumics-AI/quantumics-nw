@@ -8,13 +8,16 @@
 
 package ai.quantumics.api.user;
 
+import ai.quantumics.api.user.enums.AwsAccessType;
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.athena.AmazonAthena;
-import com.amazonaws.services.athena.AmazonAthenaClient;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,17 +31,11 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 @Configuration
 public class AwsCustomConfiguration {
 
-	@Value("${s3.credentials.accessKey}")
-	private String s3AccessKey;
+	@Value("${aws.credentials.accessKey}")
+	private String accessKey;
 
-	@Value("${s3.credentials.secretKey}")
-	private String s3SecretKey;
-
-	@Value("${athena.credentials.accessKey}")
-	private String athenaAccessKey;
-
-	@Value("${athena.credentials.secretKey}")
-	private String athenaSecretKey;
+	@Value("${aws.credentials.secretKey}")
+	private String secretKey;
 
 	@Value("${qs.cloud.region}")
 	private String cloudRegion;
@@ -47,24 +44,65 @@ public class AwsCustomConfiguration {
 	@Value("${qs.file.max-size}")
 	private long maxFileSize;
 
+	@Value("${qs.aws.access.method}")
+	private String accessMethod;
+
+	@Value("${aws.access.role}")
+	private String roleArn;
+
 	private static final String SESSION_NAME = "qsaiConsumer";
-
-	@Bean
-	public AmazonAthena awsAthenaClient() {
-		final BasicAWSCredentials awsAthenaCredentials = new BasicAWSCredentials(athenaAccessKey, athenaSecretKey);
-
-		return AmazonAthenaClient.builder().withRegion(cloudRegion)
-				.withCredentials(new AWSStaticCredentialsProvider(awsAthenaCredentials)).build();
-	}
 
 	@Bean
 	@Primary
 	public AmazonS3 awsS3Client() {
-		final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
+			return createAmazonS3(accessKey, secretKey);
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
+			return createAmazonRoleS3();
+		} else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
+			return createAmazonProfileS3();
+		} else {
+			return null;
+		}
+	}
+
+	private AmazonS3 createAmazonS3(String accessKey, String secretKey) {
+		final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(accessKey, secretKey);
 		ClientConfiguration config = new ClientConfiguration();
 		config.setMaxConnections(2000);
-		return AmazonS3ClientBuilder.standard().withRegion(cloudRegion).withClientConfiguration(config)
-				.withCredentials(new AWSStaticCredentialsProvider(awsS3Credentials)).build();
+		return AmazonS3ClientBuilder.standard()
+				.withRegion(cloudRegion)
+				.withClientConfiguration(config)
+				.withCredentials(new AWSStaticCredentialsProvider(awsS3Credentials))
+				.build();
+	}
+
+	public AmazonS3 createAmazonRoleS3() {
+
+		int sessionDurationSeconds = 3600; // 1 hour
+
+		// Set the desired duration for the assumed role session (in seconds).
+		AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
+				.withRegion(cloudRegion) // Set your desired region
+				.build();
+		// Create a session credentials provider that assumes the role with the specified duration.
+		AWSCredentialsProvider credentialsProvider = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "my-session")
+				.withStsClient(stsClient)
+				.withRoleSessionDurationSeconds(sessionDurationSeconds)
+				.build();
+
+		// Create an Amazon S3 client using the assumed role's credentials.
+		AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+				.withCredentials(credentialsProvider)
+				.withRegion(cloudRegion) // Set your desired region
+				.build();
+		return s3Client;
+	}
+
+	public AmazonS3 createAmazonProfileS3() {
+		// Create an S3 client using the default AWS credentials provider chain.
+		// The credentials provider chain will automatically use the IAM role attached to the EC2 instance.
+		return AmazonS3ClientBuilder.defaultClient();
 	}
 
 	@Bean
