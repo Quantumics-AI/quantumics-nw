@@ -26,7 +26,6 @@ public class DatasourceConstants {
   public static final String CONNECTION_SUCCESSFUL = "Connection Established successfully!";
   public static final String CONNECTION_FAILED = "Connection failed";
   public static final String CLOUD_REGION = "us-east-1";
-  public static final String ROLE_ARN = "arn:aws:iam::806006084995:role/QS_SERVICE_ROLE";
   public static final String ROLE_ARN_SESSION_NAME = "role-arn-session";
 
   private DatasourceConstants() {}
