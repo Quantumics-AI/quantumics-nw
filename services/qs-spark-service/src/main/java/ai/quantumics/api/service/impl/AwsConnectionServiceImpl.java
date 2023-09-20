@@ -1,5 +1,7 @@
 package ai.quantumics.api.service.impl;
 
+import ai.quantumics.api.adapter.AwsConnectionFactory;
+import ai.quantumics.api.adapter.AwsS3Connection;
 import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.DatasourceNotFoundException;
@@ -9,6 +11,8 @@ import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.Bucket;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,5 +120,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsDatasource.setCreatedDate(DateTime.now().toDate());
         awsDatasource.setActive(true);
         return awsDatasource;
+    }
+
+    @Override
+    public List<Bucket> testConnection(AwsDatasourceRequest awsDatasourceRequest) throws InvalidAccessTypeException {
+
+        AwsConnectionFactory connectionFactory = new AwsConnectionFactory();
+        String accessType = awsDatasourceRequest.getAccessType().trim();
+
+        if (AwsAccessType.getAccessTypeAsMap().containsValue(accessType)) {
+            AwsS3Connection awsS3Connector = connectionFactory.getAwsConnector(accessType);
+            AmazonS3 s3Connection = awsS3Connector.getS3Connection(awsDatasourceRequest.getConnectionData().trim(), CLOUD_REGION);
+            return s3Connection.listBuckets();
+        } else {
+            throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
+        }
     }
 }

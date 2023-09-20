@@ -10,8 +10,10 @@ import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
+import com.amazonaws.services.s3.model.Bucket;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_DELETED;
+import static ai.quantumics.api.constants.DatasourceConstants.*;
 
 @RestController
 @RequestMapping("/api/v1/aws")
@@ -121,6 +123,23 @@ public class AwsConnectionController {
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
         return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
+    }
+
+    @PostMapping("/testConnection")
+    public ResponseEntity<Object> testConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
+            throws InvalidAccessTypeException {
+
+        dbUtil.changeSchema("public");
+        QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
+        Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
+        dbUtil.changeSchema(project.getDbSchemaName());
+        List<Bucket> buckets = awsConnectionService.testConnection(awsDatasourceRequest);
+
+        if(CollectionUtils.isEmpty(buckets) || buckets.size() >= 0){
+            return returnResInstance(HttpStatus.OK, CONNECTION_SUCCESSFUL);
+        }else{
+            return returnResInstance(HttpStatus.BAD_REQUEST, CONNECTION_FAILED);
+        }
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
