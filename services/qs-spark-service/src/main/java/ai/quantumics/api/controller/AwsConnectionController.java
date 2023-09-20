@@ -21,8 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ai.quantumics.api.constants.DatasourceConstants.*;
-
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_DELETED;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 @RestController
 @RequestMapping("/api/v1/aws")
 public class AwsConnectionController {
@@ -125,6 +126,13 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
     }
 
+    private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
+        HashMap<String, Object> genericResponse = new HashMap<>();
+        genericResponse.put("code", code.value());
+        genericResponse.put("message", message);
+        return ResponseEntity.status(code).body(genericResponse);
+    }
+
     @PostMapping("/testConnection")
     public ResponseEntity<Object> testConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
             throws InvalidAccessTypeException {
@@ -140,12 +148,5 @@ public class AwsConnectionController {
         }else{
             return returnResInstance(HttpStatus.BAD_REQUEST, CONNECTION_FAILED);
         }
-    }
-
-    private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
-        HashMap<String, Object> genericResponse = new HashMap<>();
-        genericResponse.put("code", code.value());
-        genericResponse.put("message", message);
-        return ResponseEntity.status(code).body(genericResponse);
     }
 }
