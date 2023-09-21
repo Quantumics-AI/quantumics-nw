@@ -23,6 +23,8 @@ public class DatasourceConstants {
   public static final String DATA_SOURCE_NOT_EXIST = "Data source does not exist";
   public static final String INVALID_ACCESS_TYPE = "Invalid Access Type";
   public static final String DATA_SOURCE_DELETED = "Data source deleted successfully";
+  public static final String EMPTY_BUCKET = "Oops! There is no bucket available under your account";
+  public static final String PUBLIC_SCHEMA = "public";
 
   private DatasourceConstants() {}
 

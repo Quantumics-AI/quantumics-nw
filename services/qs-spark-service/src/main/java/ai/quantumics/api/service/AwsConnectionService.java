@@ -4,6 +4,7 @@ import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
+import com.amazonaws.services.s3.model.Bucket;
 
 import java.util.List;
 
@@ -21,4 +22,5 @@ public interface AwsConnectionService {
 
     void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException;
 
+    List<String> getBuckets();
 }
