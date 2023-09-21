@@ -119,6 +119,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildResponseEntity(apiError);
 	}
 
+	@ExceptionHandler(BucketNotFoundException.class)
+	protected ResponseEntity<Object> bucketNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<Object> genericException(Exception ex) {
 		log.error(ex.getLocalizedMessage());
