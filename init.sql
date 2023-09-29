@@ -939,6 +939,51 @@ BEGIN
 	    modified_date timestamp without time zone NULL
 	)';
 
+	EXECUTE '
+            CREATE TABLE '||schemaName||'.qsp_rule (
+            rule_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+			source_and_target boolean DEFAULT false,
+			rule_name varchar(50) NOT NULL,
+			rule_description varchar(150) NOT NULL,
+			source_data text COLLATE pg_catalog."default",
+			target_data text COLLATE pg_catalog."default",
+			rule_details text COLLATE pg_catalog."default",
+			created_by character varying(100) COLLATE pg_catalog."default",
+			modified_by character varying(100) COLLATE pg_catalog."default",
+    		modified_date timestamp without time zone,
+    		created_date timestamp without time zone,
+    		user_id integer NOT NULL,
+    		status varchar(10) NOT NULL,
+    		CONSTRAINT qsp_rule_pkey PRIMARY KEY (rule_id)
+            )';
+
+	EXECUTE '
+            CREATE TABLE '||schemaName||'.qsp_rule_type (
+            id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+			rule_type_name varchar(255) NOT NULL,
+			level_name varchar(255),
+			column_level boolean default false,
+			active boolean default true,
+			creation_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+			)';
+
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Row Level');	
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Column level');	
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Table Level');	
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Column level');	
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Duplicate Row');	
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');	
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
+	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
+
 	--- Table Creation completed..
 
 	--- Trigger Creation started..
