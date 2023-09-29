@@ -8,13 +8,18 @@ import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
+import ai.quantumics.api.service.impl.FileListParser;
+import ai.quantumics.api.service.impl.FileStructure;
+import ai.quantumics.api.service.impl.Folder;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +139,18 @@ public class AwsConnectionController {
         dbUtil.changeSchema(project.getDbSchemaName());
         List<String> bucketsName = awsConnectionService.getBuckets();
         return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
+    }
+
+    @GetMapping(value="/buckets/{userId}/{projectId}/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getFoldersAndFilePath(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId,
+                                                   @PathVariable(value = "bucketName") final String bucketName) throws IOException {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getFoldersAndFilePath(bucketName));
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
