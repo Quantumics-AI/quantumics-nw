@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_DELETED;
+import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
 
 @RestController
 @RequestMapping("/api/v1/aws")
@@ -121,6 +122,18 @@ public class AwsConnectionController {
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
         return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
+    }
+
+    @GetMapping("/buckets/{userId}/{projectId}")
+    public ResponseEntity<List<String>> getBuckets(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        List<String> bucketsName = awsConnectionService.getBuckets();
+        return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
