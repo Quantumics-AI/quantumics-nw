@@ -976,7 +976,7 @@ BEGIN
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
 	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Column level');	
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);	
+	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
 	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Duplicate Row');	
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
