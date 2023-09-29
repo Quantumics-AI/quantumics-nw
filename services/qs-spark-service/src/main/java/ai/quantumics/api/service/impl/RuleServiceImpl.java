@@ -64,7 +64,7 @@ public class RuleServiceImpl implements RuleService {
 
 
 	@Override
-	public ResponseEntity<Object> saveRule(RuleDetails ruleDetails, int projectId) {
+	public ResponseEntity<Object> saveRule(RuleDetails ruleDetails, int userId, int projectId) {
 		final Map<String, Object> response = new HashMap<>();
 		log.info("Invoking saveRule  API {}", ruleDetails.toString());
 		try {
@@ -111,7 +111,7 @@ public class RuleServiceImpl implements RuleService {
 	}
 
 	@Override
-	public ResponseEntity<Object> editRule(RuleDetails ruleDetails, int projectId) {
+	public ResponseEntity<Object> editRule(RuleDetails ruleDetails, int userId, int projectId) {
 		final Map<String, Object> response = new HashMap<>();
 		log.info("Invoking editRule  API {}", ruleDetails.toString());
 		try {
@@ -164,7 +164,7 @@ public class RuleServiceImpl implements RuleService {
 	}
 
 	@Override
-	public ResponseEntity<Object> getRuleList(int projectId, String status, int page, int pageSize)  {
+	public ResponseEntity<Object> getRuleList(int userId, int projectId, String status, int page, int pageSize)  {
 		dbUtil.changeSchema("public");
 		final Projects project = projectService.getProject(projectId);
 		final Map<String, Object> response = new HashMap<>();

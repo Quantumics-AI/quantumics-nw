@@ -12,8 +12,8 @@ import ai.quantumics.api.vo.RuleDetails;
 import org.springframework.http.ResponseEntity;
 
 public interface RuleService {
-    ResponseEntity<Object> saveRule(RuleDetails ruleDetails, int projectId);
-    ResponseEntity<Object> getRuleList(int projectId, String status, int page, int pageSize);
-    ResponseEntity<Object> editRule(RuleDetails ruleDetails, int projectId);
+    ResponseEntity<Object> saveRule(RuleDetails ruleDetails, int userId, int projectId);
+    ResponseEntity<Object> getRuleList(int userId, int projectId, String status, int page, int pageSize);
+    ResponseEntity<Object> editRule(RuleDetails ruleDetails, int userId, int projectId);
 
 }

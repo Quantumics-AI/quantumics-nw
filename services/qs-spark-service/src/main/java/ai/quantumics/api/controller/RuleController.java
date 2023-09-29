@@ -25,7 +25,7 @@ public class RuleController {
     }
 
     @ApiOperation(value = "rules", response = Json.class)
-    @PostMapping("/{projectId}")
+    @PostMapping("/{userId}/{projectId}")
     @ApiResponses(
             value = {
                     @ApiResponse(code = 200, message = "OKAY"),
@@ -33,13 +33,14 @@ public class RuleController {
             })
     public ResponseEntity<Object> saveRule(
             @RequestBody final RuleDetails ruleDetails,
+            @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId)
             throws Exception {
-        return ruleService.saveRule(ruleDetails, projectId);
+        return ruleService.saveRule(ruleDetails, userId, projectId);
     }
 
     @ApiOperation(value = "rules", response = Json.class)
-    @PutMapping("/{projectId}")
+    @PutMapping("/{userId}/{projectId}")
     @ApiResponses(
             value = {
                     @ApiResponse(code = 200, message = "OKAY"),
@@ -47,20 +48,22 @@ public class RuleController {
             })
     public ResponseEntity<Object> editRule(
             @RequestBody final RuleDetails ruleDetails,
+            @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId)
             throws Exception {
-        return ruleService.editRule(ruleDetails, projectId);
+        return ruleService.editRule(ruleDetails, userId, projectId);
     }
 
     @ApiOperation(value = "Rules", response = Json.class)
-    @GetMapping("/{projectId}")
+    @GetMapping("/{userId}/{projectId}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "List All Rules for Project ID")})
-    public ResponseEntity<Object> getFolders(
+    public ResponseEntity<Object> getRules(
             @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "userId") final int userId,
             @RequestParam(value = "status") final String status,
             @RequestParam(name = "page", required = true) int page,
             @RequestParam(name = "size", required = true) int size) {
-        return ruleService.getRuleList(projectId, status, page, size);
+        return ruleService.getRuleList(userId, projectId, status, page, size);
     }
 
 
