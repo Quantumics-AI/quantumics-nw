@@ -11,12 +11,12 @@ import java.util.Optional;
 @Repository
 public interface AwsConnectionRepo extends JpaRepository<AWSDatasource, Integer> {
 
-	Optional<AWSDatasource> findByDataSourceNameIgnoreCaseAndActive(String dataSource,boolean active);
+	Optional<AWSDatasource> findByConnectionNameIgnoreCaseAndActive(String connectionName,boolean active);
 
 	Optional<AWSDatasource> findByIdAndActive(Integer id,boolean active) throws DatasourceNotFoundException;
 
 	Optional<List<AWSDatasource>> findByActiveOrderByCreatedDateDesc(boolean active);
 
-	Optional<AWSDatasource> findByDataSourceNameIgnoreCase(String dataSource);
+	Optional<AWSDatasource> findByConnectionNameIgnoreCase(String connectionName);
 
 }

@@ -1,8 +1,6 @@
 package ai.quantumics.api.model;
 
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,21 +14,24 @@ public class AWSDatasource {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@Column(name = "data_source_name")
-	private String dataSourceName;
+	@Column(name = "connection_name")
+	private String connectionName;
+
+	@Column(name = "sub_data_source")
+	private String subDataSource;
 
 	@Column(name = "access_type")
 	private String accessType;
 
-	@Column(name = "connection_data", columnDefinition = "TEXT")
-	private String connectionData;
+	@Column(name = "bucket_name")
+	private String bucketName;
 
-	private int projectId;
 	private int userId;
+	private int projectId;
 	private boolean active;
 
-	private Date createdDate;
-	private Date modifiedDate;
 	private String createdBy;
+	private Date createdDate;
 	private String modifiedBy;
+	private Date modifiedDate;
 }

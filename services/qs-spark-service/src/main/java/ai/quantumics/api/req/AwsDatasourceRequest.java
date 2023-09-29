@@ -8,15 +8,14 @@ import javax.validation.constraints.Size;
 @Data
 public class AwsDatasourceRequest {
 
-    private Integer projectId;
     private Integer userId;
+    private Integer projectId;
     @NotNull(message="Data Source Name is mandatory")
-    @Size(min = 3, max = 50, message = "Data Source Name must be between 3 and 50 Characters long")
-    private String dataSourceName;
+    @Size(min = 3, max = 50, message = "Connection Name must be between 3 and 50 Characters long")
+    private String connectionName;
+    @NotNull(message="Data Source Name is mandatory")
+    private String subDataSource;
     @NotNull(message="Access Type is mandatory")
     private String accessType;
-    @NotNull(message="Data Source Name is mandatory")
-    @Size(max = 100, message = "IAM name can have alphabets, number and special characters only and maximum 100 Characters long")
-    private String connectionData;
-
+    private String bucketName;
 }
