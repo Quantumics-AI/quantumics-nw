@@ -927,16 +927,17 @@ BEGIN
         EXECUTE '
 	    CREATE TABLE '||schemaName||'.qsp_aws_datasource (
 	    id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
-	    data_source_name character varying(255) NOT NULL UNIQUE,
-	    access_type character varying(50) NOT NULL,
-	    connection_data character varying(100) NOT NULL,
-	    project_id int4 NOT NULL,
-            user_id int4 NOT NULL,
-            active bool NULL DEFAULT true,
-            created_by varchar(255) NOT NULL,
-	    created_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	    modified_by varchar(255) NULL,
-	    modified_date timestamp without time zone NULL
+        connection_name character varying(50) CHECK (LENGTH(connection_name) >= 3 AND LENGTH(connection_name) <= 50) NOT NULL UNIQUE,
+        sub_data_source varchar(255) NOT NULL,
+        access_type varchar(255) NOT NULL,
+        bucket_name varchar(255) NOT NULL,
+        user_id int4 NOT NULL,
+        project_id int4 NOT NULL,
+        active boolean default true,
+        created_by varchar(255) NOT NULL,
+        created_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        modified_by varchar(255) NULL,
+        modified_date timestamp without time zone NULL
 	)';
 
 	EXECUTE '
