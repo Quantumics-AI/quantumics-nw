@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataSourceDetails {
+    private String dataSourceType;
+    private String subDataSourceType;
     private int dataSourceId;
     private String bucketName;
     private String filePath;
