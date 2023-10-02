@@ -79,16 +79,12 @@ public class RuleServiceImpl implements RuleService {
 			QsUserV2 userObj = userService.getUserById(ruleDetails.getUserId());
 
 			dbUtil.changeSchema(project.getDbSchemaName());
-			//ObjectMapper objectMapper = new ObjectMapper();
 			Gson gson = new Gson();
 
 			QsRule qsRule = new QsRule();
 			qsRule.setRuleName(ruleDetails.getRuleName());
 			qsRule.setRuleDescription(ruleDetails.getRuleDescription());
 			qsRule.setSourceAndTarget(ruleDetails.isSourceAndTarget());
-			/*qsRule.setSourceData(objectMapper.writeValueAsString(ruleDetails.getSourceData()));
-			qsRule.setTargetData(objectMapper.writeValueAsString(ruleDetails.getTargetData()));
-			qsRule.setRuleDetails(objectMapper.writeValueAsString(ruleDetails.getRuleDetails()));*/
 			qsRule.setSourceData(gson.toJson(ruleDetails.getSourceData()));
 			if(ruleDetails.isSourceAndTarget()) {
 				qsRule.setTargetData(gson.toJson(ruleDetails.getTargetData()));
