@@ -200,9 +200,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         if (depth == parts.length - 1) {
             String fileName = parts[parts.length - 1];
             if(!folder.endsWith("/")){
-                JsonNode node = parentFolders.get("files");
+                JsonNode node = parentFolders.get(Files);
                 if(node == null){
-                    ArrayNode filesNode = parentFolders.putArray("files");
+                    ArrayNode filesNode = parentFolders.putArray(Files);
                     filesNode.add(fileName);
                 } else {
                     ((ArrayNode) node).add(fileName);
