@@ -153,15 +153,16 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getFoldersAndFilePath(bucketName));
     }
 
-    @GetMapping("/testConnection/{userId}/{projectId}")
-    public ResponseEntity<Object> testConnection(@PathVariable(value = "userId") final int userId,
+    @PostMapping("/testConnection/{userId}/{projectId}")
+    public ResponseEntity<Object> testConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest,
+                                                 @PathVariable(value = "userId") final int userId,
                                                  @PathVariable(value = "projectId") final int projectId) {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection());
+        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType()));
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {

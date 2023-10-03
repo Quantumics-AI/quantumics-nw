@@ -97,7 +97,7 @@ public class AwsCustomConfiguration {
     }
   }
 
-  private AmazonS3 createAmazonS3(String accessKey, String secretKey) {
+  public AmazonS3 createAmazonS3(String accessKey, String secretKey) {
     final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(accessKey, secretKey);
 
     ClientConfiguration config = new ClientConfiguration();
