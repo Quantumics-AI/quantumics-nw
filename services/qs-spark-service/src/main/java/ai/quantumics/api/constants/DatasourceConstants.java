@@ -26,7 +26,8 @@ public class DatasourceConstants {
   public static final String EMPTY_BUCKET = "Oops! There is no bucket available under your account";
   public static final String PUBLIC_SCHEMA = "public";
   public static final String Files = "files";
-
+  public static final String CONNECTION_SUCCESSFUL = "Connection Established successfully!";
+  public static final String CONNECTION_FAILED = "Connection failed";
   private DatasourceConstants() {}
 
 }

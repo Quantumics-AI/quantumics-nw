@@ -136,6 +136,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return getFoldersAndFilePathHierarchy(objectNames);
     }
 
+    @Override
+    public String testConnection() {
+        awsS3Client.listBuckets();
+        return CONNECTION_SUCCESSFUL;
+    }
+
     private String getFoldersAndFilePathHierarchy(List<String> objectNames) throws IOException {
         ObjectNode rootNode = createFolderHierarchy(objectNames);
         ObjectMapper objectMapper = new ObjectMapper();
