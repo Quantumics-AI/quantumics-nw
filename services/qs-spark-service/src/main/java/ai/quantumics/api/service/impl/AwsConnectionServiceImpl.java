@@ -11,13 +11,21 @@ import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -121,6 +129,34 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }
     }
 
+    @Override
+    public String getFoldersAndFilePath(String bucketName) throws IOException {
+        List<String> objectNames = new ArrayList<>();
+        listObjects(bucketName, "", objectNames);
+        return getFoldersAndFilePathHierarchy(objectNames);
+    }
+
+    private String getFoldersAndFilePathHierarchy(List<String> objectNames) throws IOException {
+        ObjectNode rootNode = createFolderHierarchy(objectNames);
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+    }
+
+    private void listObjects(String bucketName, String prefix, List<String> objectNames) {
+        ListObjectsV2Request request = new ListObjectsV2Request()
+                .withBucketName(bucketName)
+                .withPrefix(prefix);
+        ListObjectsV2Result result = awsS3Client.listObjectsV2(request);
+
+        for (String commonPrefix : result.getCommonPrefixes()) {
+            objectNames.add(commonPrefix);
+            listObjects(bucketName, commonPrefix, objectNames);
+        }
+        objectNames.addAll(Arrays.asList(result.getObjectSummaries().stream()
+                .map(S3ObjectSummary::getKey)
+                .toArray(String[]::new)));
+    }
+
     private List<String> getBucketsName(final List<Bucket> buckets) {
         return buckets.stream().map(Bucket::getName).collect(Collectors.toList());
     }
@@ -138,5 +174,45 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsDatasource.setCreatedDate(DateTime.now().toDate());
         awsDatasource.setActive(true);
         return awsDatasource;
+    }
+
+    private static ObjectNode createFolderHierarchy(List<String> objectNames) {
+        ObjectNode rootNode = new ObjectMapper().createObjectNode();
+        for (String path : objectNames) {
+            String[] parts = path.split("/");
+            addFolder(path, rootNode,  parts, 0);
+        }
+        return rootNode;
+    }
+
+    private static void addFolder(String folder, ObjectNode parentFolders, String[] parts, int depth) {
+        if (depth >= parts.length) {
+            return;
+        }
+        String folderName = parts[depth];
+        ObjectNode childFolders = (ObjectNode) parentFolders.get(folderName);
+
+        if (childFolders == null && depth != parts.length - 1) {
+            childFolders = new ObjectMapper().createObjectNode();
+            parentFolders.set(folderName, childFolders);
+        }
+
+        if (depth == parts.length - 1) {
+            String fileName = parts[parts.length - 1];
+            if(!folder.endsWith("/")){
+                JsonNode node = parentFolders.get(Files);
+                if(node == null){
+                    ArrayNode filesNode = parentFolders.putArray(Files);
+                    filesNode.add(fileName);
+                } else {
+                    ((ArrayNode) node).add(fileName);
+                }
+            } else {
+                childFolders = new ObjectMapper().createObjectNode();
+                parentFolders.set(folderName, childFolders);
+            }
+        } else {
+            addFolder(folder, childFolders, parts, depth + 1);
+        }
     }
 }

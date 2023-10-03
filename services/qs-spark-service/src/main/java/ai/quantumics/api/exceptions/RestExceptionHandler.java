@@ -10,6 +10,7 @@ package ai.quantumics.api.exceptions;
 
 import javax.persistence.EntityNotFoundException;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -121,6 +122,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(BucketNotFoundException.class)
 	protected ResponseEntity<Object> bucketNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
+	@ExceptionHandler(AmazonS3Exception.class)
+	protected ResponseEntity<Object> amazonS3xception(Exception ex) {
 		log.error(ex.getLocalizedMessage());
 		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
 		apiError.setMessage(ex.getLocalizedMessage());
