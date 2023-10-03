@@ -11,6 +11,7 @@ package ai.quantumics.api.exceptions;
 import javax.persistence.EntityNotFoundException;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import org.hibernate.exception.ConstraintViolationException;
 import com.amazonaws.services.securitytoken.model.AWSSecurityTokenServiceException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
