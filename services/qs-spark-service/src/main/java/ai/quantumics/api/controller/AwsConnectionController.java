@@ -45,7 +45,7 @@ public class AwsConnectionController {
     public ResponseEntity<AwsDatasourceResponse> saveConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
             throws InvalidAccessTypeException {
 
-            dbUtil.changeSchema("public");
+            dbUtil.changeSchema(PUBLIC_SCHEMA);
             QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
             Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
             dbUtil.changeSchema(project.getDbSchemaName());
@@ -58,7 +58,7 @@ public class AwsConnectionController {
     public ResponseEntity<List<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
                                                                  @PathVariable(value = "projectId") final int projectId) throws Exception {
 
-        dbUtil.changeSchema("public");
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
@@ -72,7 +72,7 @@ public class AwsConnectionController {
             @PathVariable(value = "datasourceName") final String datasourceName)
             throws Exception {
 
-        dbUtil.changeSchema("public");
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
@@ -87,7 +87,7 @@ public class AwsConnectionController {
             @PathVariable(value = "id") final int id)
             throws Exception {
 
-        dbUtil.changeSchema("public");
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
@@ -100,7 +100,7 @@ public class AwsConnectionController {
                                                                         @PathVariable(value = "projectId") final int projectId,
                                                                         @PathVariable(value = "id") final int id) throws DatasourceNotFoundException {
 
-        dbUtil.changeSchema("public");
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
@@ -120,7 +120,7 @@ public class AwsConnectionController {
                                                                   @PathVariable(value = "id") final int id)
             throws DatasourceNotFoundException {
 
-        dbUtil.changeSchema("public");
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
         Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
         dbUtil.changeSchema(project.getDbSchemaName());

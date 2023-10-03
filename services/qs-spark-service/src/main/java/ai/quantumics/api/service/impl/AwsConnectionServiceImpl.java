@@ -43,7 +43,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCase(awsDatasourceRequest.getDataSourceName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
         if (dataSources.isPresent()) {
             throw new BadRequestException(DATA_SOURCE_EXIST);
         }
@@ -62,12 +62,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
 
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCase(awsDatasourceRequest.getDataSourceName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
         if (dataSources.isPresent()) {
             throw new BadRequestException(DATA_SOURCE_EXIST);
         }
 
-        dataSource.setDataSourceName(awsDatasourceRequest.getDataSourceName());
+        dataSource.setConnectionName(awsDatasourceRequest.getConnectionName());
         dataSource.setModifiedBy(userName);
         dataSource.setModifiedDate(DateTime.now().toDate());
         return createResponse(awsConnectionRepo.saveAndFlush(dataSource));
@@ -91,7 +91,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public AwsDatasourceResponse getConnectionByName(String datasourceName) {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByDataSourceNameIgnoreCaseAndActive(datasourceName,true);
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(datasourceName,true);
         if (dataSources.isPresent()) {
             return createResponse(dataSources.get());
         }else{
@@ -115,6 +115,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
         dataSource.setActive(false);
         dataSource.setModifiedBy(userName);
+        dataSource.setModifiedDate(DateTime.now().toDate());
         awsConnectionRepo.saveAndFlush(dataSource);
     }
 
@@ -163,11 +164,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, String userName) {
 
         AWSDatasource awsDatasource = new AWSDatasource();
-        awsDatasource.setProjectId(awsDatasourceRequest.getProjectId());
         awsDatasource.setUserId(awsDatasourceRequest.getUserId());
-        awsDatasource.setDataSourceName(awsDatasourceRequest.getDataSourceName().trim());
+        awsDatasource.setProjectId(awsDatasourceRequest.getProjectId());
+        awsDatasource.setConnectionName(awsDatasourceRequest.getConnectionName().trim());
+        awsDatasource.setSubDataSource(awsDatasourceRequest.getSubDataSource());
         awsDatasource.setAccessType(awsDatasourceRequest.getAccessType());
-        awsDatasource.setConnectionData(awsDatasourceRequest.getConnectionData());
+        awsDatasource.setBucketName(awsDatasourceRequest.getBucketName().trim());
         awsDatasource.setCreatedBy(userName);
         awsDatasource.setCreatedDate(DateTime.now().toDate());
         awsDatasource.setActive(true);

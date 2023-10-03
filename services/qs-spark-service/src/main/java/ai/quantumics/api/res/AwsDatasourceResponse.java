@@ -8,9 +8,10 @@ import java.util.Date;
 public class AwsDatasourceResponse {
 
     private Integer id;
-    private String dataSourceName;
+    private String connectionName;
+    private String subDataSource;
     private String accessType;
-    private String connectionData;
+    private String bucketName;
     private Date createdDate;
     private Date modifiedDate;
 }
