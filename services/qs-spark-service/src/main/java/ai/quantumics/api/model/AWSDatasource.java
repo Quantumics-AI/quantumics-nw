@@ -20,9 +20,6 @@ public class AWSDatasource {
 	@Column(name = "sub_data_source")
 	private String subDataSource;
 
-	@Column(name = "access_type")
-	private String accessType;
-
 	@Column(name = "bucket_name")
 	private String bucketName;
 

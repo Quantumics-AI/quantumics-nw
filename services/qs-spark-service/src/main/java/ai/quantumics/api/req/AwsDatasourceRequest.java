@@ -15,7 +15,5 @@ public class AwsDatasourceRequest {
     private String connectionName;
     @NotNull(message="Data Source Name is mandatory")
     private String subDataSource;
-    @NotNull(message="Access Type is mandatory")
-    private String accessType;
     private String bucketName;
 }

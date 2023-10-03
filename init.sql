@@ -929,7 +929,6 @@ BEGIN
 	    id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
         connection_name character varying(50) CHECK (LENGTH(connection_name) >= 3 AND LENGTH(connection_name) <= 50) NOT NULL UNIQUE,
         sub_data_source varchar(255) NOT NULL,
-        access_type varchar(255) NOT NULL,
         bucket_name varchar(255) NOT NULL,
         user_id int4 NOT NULL,
         project_id int4 NOT NULL,

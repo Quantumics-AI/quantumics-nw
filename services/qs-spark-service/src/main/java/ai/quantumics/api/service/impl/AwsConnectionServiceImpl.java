@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -40,6 +41,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
     private AmazonS3 awsS3Client;
 
+    @Value("${qs.aws.access.method}")
+    private String accessMethod;
+
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
@@ -48,7 +52,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             throw new BadRequestException(DATA_SOURCE_EXIST);
         }
 
-        if (AwsAccessType.getAccessTypeAsMap().containsValue(awsDatasourceRequest.getAccessType())) {
+        if (AwsAccessType.getAccessTypeAsMap().containsValue(accessMethod)) {
 
             AWSDatasource awsDatasource = awsConnectionRepo.saveAndFlush(awsDatasourceMapper(awsDatasourceRequest, userName));
 
@@ -174,7 +178,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsDatasource.setProjectId(awsDatasourceRequest.getProjectId());
         awsDatasource.setConnectionName(awsDatasourceRequest.getConnectionName().trim());
         awsDatasource.setSubDataSource(awsDatasourceRequest.getSubDataSource());
-        awsDatasource.setAccessType(awsDatasourceRequest.getAccessType());
         awsDatasource.setBucketName(awsDatasourceRequest.getBucketName().trim());
         awsDatasource.setCreatedBy(userName);
         awsDatasource.setCreatedDate(DateTime.now().toDate());
