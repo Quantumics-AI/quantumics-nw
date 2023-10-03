@@ -1,5 +1,6 @@
 package ai.quantumics.api.service.impl;
 
+import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.BucketNotFoundException;
@@ -16,29 +17,30 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang.ObjectUtils;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.*;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
-
     @Autowired
     private AwsConnectionRepo awsConnectionRepo;
     @Autowired
     private AmazonS3 awsS3Client;
+    @Autowired
+    private AwsCustomConfiguration awsCustomConfiguration;
+    private AmazonS3 amazonS3Client;
 
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
@@ -134,6 +136,13 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         List<String> objectNames = new ArrayList<>();
         listObjects(bucketName, "", objectNames);
         return getFoldersAndFilePathHierarchy(objectNames);
+    }
+
+    @Override
+    public String testConnection(String accessMethod) {
+        amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+        amazonS3Client.listBuckets();
+        return CONNECTION_SUCCESSFUL;
     }
 
     private String getFoldersAndFilePathHierarchy(List<String> objectNames) throws IOException {
