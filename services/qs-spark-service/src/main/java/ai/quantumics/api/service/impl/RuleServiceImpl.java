@@ -77,6 +77,12 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 			QsUserV2 userObj = userService.getUserById(ruleDetails.getUserId());
+			if(userObj == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested User with Id: "+ userId  +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
 
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Gson gson = new Gson();
@@ -126,6 +132,12 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 			QsUserV2 userObj = userService.getUserById(ruleDetails.getUserId());
+			if(userObj == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested User with Id: "+ userId  +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
 			dbUtil.changeSchema(project.getDbSchemaName());
 			QsRule qsRule = ruleRepository.findByRuleId(ruleDetails.getRuleId());
 			if(qsRule == null){
@@ -161,11 +173,25 @@ public class RuleServiceImpl implements RuleService {
 
 	@Override
 	public ResponseEntity<Object> getRuleList(int userId, int projectId, String status, int page, int pageSize)  {
-		dbUtil.changeSchema("public");
-		final Projects project = projectService.getProject(projectId);
 		final Map<String, Object> response = new HashMap<>();
-		dbUtil.changeSchema(project.getDbSchemaName());
 		try {
+			dbUtil.changeSchema("public");
+			final Projects project = projectService.getProject(projectId);
+			if(project == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested project with Id: "+ projectId +" for User with Id: " + userId +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+			QsUserV2 userObj = userService.getUserById(userId);
+			if(userObj == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested User with Id: "+ userId  +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+
+			dbUtil.changeSchema(project.getDbSchemaName());
 			Pageable paging = PageRequest.of(page-1, pageSize);
 			Page<QsRule> rulesPage = ruleRepository.findAllByStatus(status, paging);
 
@@ -178,6 +204,45 @@ public class RuleServiceImpl implements RuleService {
 		} catch (Exception exception) {
 			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			response.put("message", "Error -" + exception.getMessage());
+		}
+		return ResponseEntity.ok().body(response);
+	}
+
+	@Override
+	public ResponseEntity<Object> getRule(int userId, int projectId, int ruleId) {
+		final Map<String, Object> response = new HashMap<>();
+		try {
+			dbUtil.changeSchema("public");
+			final Projects project = projectService.getProject(projectId, userId);
+			if(project == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested project with Id: "+ projectId +" for User with Id: " + userId +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+			QsUserV2 userObj = userService.getUserById(userId);
+			if(userObj == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested User with Id: "+ userId  +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+			dbUtil.changeSchema(project.getDbSchemaName());
+			QsRule qsRule = ruleRepository.findByRuleId(ruleId);
+			if(qsRule == null){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "No Rule found with Id: "+ ruleId);
+
+				return ResponseEntity.ok().body(response);
+			}
+
+			response.put("code", HttpStatus.SC_OK);
+			response.put("message", "Rules Fetched Successfully");
+			response.put("projectName", project.getProjectDisplayName());
+			response.put("result", convertToRuleDetails(qsRule));
+		} catch (final Exception ex) {
+			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			response.put("message", "Error while Fetching rule :  " + ex.getMessage());
 		}
 		return ResponseEntity.ok().body(response);
 	}

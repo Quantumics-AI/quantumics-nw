@@ -66,6 +66,16 @@ public class RuleController {
         return ruleService.getRuleList(userId, projectId, status, page, size);
     }
 
+    @ApiOperation(value = "Rule", response = Json.class)
+    @GetMapping("/{userId}/{projectId}/{ruleId}")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule for Rule ID")})
+    public ResponseEntity<Object> getRule(
+            @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "ruleId") final int ruleId) {
+        return ruleService.getRule(userId, projectId, ruleId);
+    }
+
 
 
 }
