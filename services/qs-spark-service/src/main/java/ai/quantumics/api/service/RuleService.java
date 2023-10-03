@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 public interface RuleService {
     ResponseEntity<Object> saveRule(RuleDetails ruleDetails, int userId, int projectId);
     ResponseEntity<Object> getRuleList(int userId, int projectId, String status, int page, int pageSize);
+    ResponseEntity<Object> getRule(int userId, int projectId, int ruleId);
     ResponseEntity<Object> editRule(RuleDetails ruleDetails, int userId, int projectId);
 
 }
