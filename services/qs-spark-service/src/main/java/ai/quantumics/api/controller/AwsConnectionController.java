@@ -162,7 +162,7 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType()));
+        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType().trim()));
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {

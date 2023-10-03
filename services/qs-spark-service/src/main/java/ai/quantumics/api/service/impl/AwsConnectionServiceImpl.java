@@ -34,11 +34,6 @@ import static ai.quantumics.api.constants.DatasourceConstants.*;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
-
-    @Value("${aws.credentials.accessKey}")
-    private String accessKey;
-    @Value("${aws.credentials.secretKey}")
-    private String secretKey;
     @Autowired
     private AwsConnectionRepo awsConnectionRepo;
     @Autowired
@@ -145,21 +140,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String testConnection(String accessMethod) {
-        amazonS3Client = amazonS3Client(accessMethod);
+        amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
         amazonS3Client.listBuckets();
         return CONNECTION_SUCCESSFUL;
-    }
-
-    public AmazonS3 amazonS3Client(String accessMethod) {
-        if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
-            return awsCustomConfiguration.createAmazonS3(accessKey, secretKey);
-        } else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
-            return awsCustomConfiguration.createAmazonRoleS3();
-        } else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
-            return awsCustomConfiguration.createAmazonProfileS3();
-        } else {
-            throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
-        }
     }
 
     private String getFoldersAndFilePathHierarchy(List<String> objectNames) throws IOException {

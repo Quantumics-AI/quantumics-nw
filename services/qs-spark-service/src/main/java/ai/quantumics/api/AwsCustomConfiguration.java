@@ -9,6 +9,7 @@
 package ai.quantumics.api;
 
 import ai.quantumics.api.enums.AwsAccessType;
+import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.*;
 import com.amazonaws.services.athena.AmazonAthena;
@@ -25,6 +26,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+
+import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 
 @Configuration
 public class AwsCustomConfiguration {
@@ -86,6 +89,10 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AmazonS3 awsS3Client() {
+    return amazonS3Client(accessMethod);
+  }
+
+  public AmazonS3 amazonS3Client(String accessMethod) {
     if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
       return createAmazonS3(accessKey, secretKey);
     } else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
@@ -93,7 +100,7 @@ public class AwsCustomConfiguration {
     } else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
       return createAmazonProfileS3();
     } else {
-      return null;
+      throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
     }
   }
 
