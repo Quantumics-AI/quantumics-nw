@@ -81,9 +81,12 @@ public class AwsCustomConfiguration {
 
 		int sessionDurationSeconds = 3600; // 1 hour
 
+		final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(accessKey, secretKey);
+
 		// Set the desired duration for the assumed role session (in seconds).
 		AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
 				.withRegion(cloudRegion) // Set your desired region
+				.withCredentials(new AWSStaticCredentialsProvider(awsS3Credentials))
 				.build();
 		// Create a session credentials provider that assumes the role with the specified duration.
 		AWSCredentialsProvider credentialsProvider = new STSAssumeRoleSessionCredentialsProvider.Builder(roleArn, "my-session")
