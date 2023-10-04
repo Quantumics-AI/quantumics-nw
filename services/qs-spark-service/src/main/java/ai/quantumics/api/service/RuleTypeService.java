@@ -14,5 +14,5 @@ import java.util.List;
 
 public interface RuleTypeService {
 
-  List<QsRuleType> getActiveRuleTypes();
+  List<QsRuleType> getActiveRuleTypes(boolean sourceOnly);
 }

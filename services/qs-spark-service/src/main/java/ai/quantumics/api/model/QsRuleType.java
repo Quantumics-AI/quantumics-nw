@@ -25,5 +25,6 @@ public class QsRuleType {
   private String levelName;
   private boolean columnLevel;
   private boolean active;
+  private boolean sourceOnly;
   private Date creationDate;
 }

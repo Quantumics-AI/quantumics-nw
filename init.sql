@@ -964,25 +964,26 @@ BEGIN
 			level_name varchar(255),
 			column_level boolean default false,
 			active boolean default true,
+			source_only boolean default false,
 			creation_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 			)';
 
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Row Level');	
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Column level');	
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Table Level');	
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Column level');	
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,false,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Duplicate Row');	
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');	
-	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, creation_date)
-	    values (%L,%L,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Row count check');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Sum of column value');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Table Level');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Column level');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Duplicate Row');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
 
 	--- Table Creation completed..
 
