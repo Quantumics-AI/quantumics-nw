@@ -23,10 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.spring.web.json.Json;
 
 import java.util.*;
@@ -55,13 +52,14 @@ public class RuleTypeController {
     @GetMapping("/{projectId}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "List All RuleTypes for Project ID")})
     public ResponseEntity<Object> getRuleTypes(
-            @PathVariable(value = "projectId") final int projectId) {
+            @PathVariable(value = "projectId") final int projectId,
+            @RequestParam(value = "sourceOnly") final boolean sourceOnly) {
         dbUtil.changeSchema("public");
         final Projects project = projectService.getProject(projectId);
         final Map<String, Object> response = new HashMap<>();
         dbUtil.changeSchema(project.getDbSchemaName());
         try {
-            List<QsRuleType> qsRuleTypes = ruleTypeService.getActiveRuleTypes();
+            List<QsRuleType> qsRuleTypes = ruleTypeService.getActiveRuleTypes(sourceOnly);
             List<RuleTypeResponse> responseList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(qsRuleTypes)) {
                 Collections.sort(qsRuleTypes, Comparator.comparingInt(QsRuleType::getId));
