@@ -8,39 +8,16 @@
 
 package ai.quantumics.api.livy;
 
-import static ai.quantumics.api.constants.QsConstants.ENG_OP;
-import static ai.quantumics.api.constants.QsConstants.PROCESSED;
-import static ai.quantumics.api.constants.QsConstants.RAW;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import ai.quantumics.api.adapter.AwsAdapter;
+import ai.quantumics.api.constants.QsConstants;
+import ai.quantumics.api.model.*;
+import ai.quantumics.api.req.*;
+import ai.quantumics.api.service.*;
+import ai.quantumics.api.util.DbSessionUtil;
+import ai.quantumics.api.util.MetadataHelper;
+import ai.quantumics.api.util.QsUtil;
+import ai.quantumics.api.vo.BatchJobInfo;
+import ai.quantumics.api.vo.QsFileContent;
 import com.amazonaws.services.glue.model.JobRunState;
 import com.amazonaws.services.s3.model.S3Object;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,38 +28,25 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
-import ai.quantumics.api.adapter.AwsAdapter;
-import ai.quantumics.api.constants.QsConstants;
-import ai.quantumics.api.model.EngFlowMetaDataAwsRef;
-import ai.quantumics.api.model.FileMetaDataAwsRef;
-import ai.quantumics.api.model.Projects;
-import ai.quantumics.api.model.QsFiles;
-import ai.quantumics.api.model.QsFolders;
-import ai.quantumics.api.model.QsUdf;
-import ai.quantumics.api.model.RunJobStatus;
-import ai.quantumics.api.req.ColumnMetaData;
-import ai.quantumics.api.req.DataFrameRequest;
-import ai.quantumics.api.req.EngFileOperationRequest;
-import ai.quantumics.api.req.FileJoinColumnMetadata;
-import ai.quantumics.api.req.JoinOperationRequest;
-import ai.quantumics.api.req.Metadata;
-import ai.quantumics.api.req.UdfOperationRequest;
-import ai.quantumics.api.req.UdfReqColumn;
-import ai.quantumics.api.service.FileMetaDataAwsService;
-import ai.quantumics.api.service.FileService;
-import ai.quantumics.api.service.FolderService;
-import ai.quantumics.api.service.ProjectService;
-import ai.quantumics.api.service.RunJobService;
-import ai.quantumics.api.service.UdfService;
-import ai.quantumics.api.util.DbSessionUtil;
-import ai.quantumics.api.util.MetadataHelper;
-import ai.quantumics.api.util.QsUtil;
-import ai.quantumics.api.vo.BatchJobInfo;
-import ai.quantumics.api.vo.QsFileContent;
-import ai.quantumics.api.vo.S3FileUploadResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static ai.quantumics.api.constants.QsConstants.*;
 
 @Slf4j
 @Component
@@ -1135,6 +1099,47 @@ public class LivyActions {
             }
         } else {
             updateJobEntry(runJobId, JobRunState.FAILED.toString(), batchJobId, "Batch job aborted, as the job execution time exceeded the threshold of 5mins. Couldn't capture the batch job log.", -1);
+        }
+
+        return batchJobId;
+    }
+
+    public int invokeRuleJobOperation(final int jobId, final String pysparkScriptS3FileLoc)
+            throws Exception {
+        log.info("Invoked the Livy Job for running this Rule Job...");
+
+        Instant start = Instant.now();
+
+
+        final JsonObject payload = new JsonObject();
+        payload.addProperty("file", pysparkScriptS3FileLoc);
+        payload.addProperty("executorMemory", executorMemory);
+        payload.addProperty("driverMemory", driverMemory);
+        payload.addProperty("jars", "/opt/postgresql-driver/postgresql-42.2.5.jar");
+        String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+
+        final JsonNode fromJson = mapper.readTree(jsonRes);
+        final int batchJobId = fromJson.get("id").asInt();
+        log.info(" Batch Job ID {}", batchJobId);
+
+        final JsonNode batchResponse = livyClient.getApacheLivyBatchState(batchJobId, mapper);
+        if (batchResponse != null) {
+            String batchJobState = batchResponse.get("state").asText();
+            Instant end = Instant.now();
+            long elapsedTime = Duration.between(start, end).toMillis();
+
+            if ("success".equals(batchJobState)) {
+
+
+                log.info("Completed running the cleanse Job...");
+            } else {
+                //updateJobEntry(runJobId, JobRunState.FAILED.toString(), batchJobId, batchJobLog, elapsedTime);
+            }
+        } else {
+           // updateJobEntry(runJobId, JobRunState.FAILED.toString(), batchJobId, "Batch job aborted, as the job execution time exceeded the threshold of 5mins. Couldn't capture the batch job log.", -1);
         }
 
         return batchJobId;
