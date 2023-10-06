@@ -70,8 +70,8 @@ public class RuleJobServiceImpl implements RuleJobService {
 	public static final String RULE_TYPE_NAME = "$RULE_TYPE_NAME";
 	public static final String LEVEL_NAME = "$LEVEL_NAME";
 
-	@Value("${qs.rule.etl.output}")
-	private String qsEtlScriptBucket;
+	/*@Value("${qs.rule.etl.output}")
+	private String qsEtlScriptBucket;*/
 
 
 	public RuleJobServiceImpl(RuleJobRepository ruleJobRepositoryCi,
@@ -143,8 +143,10 @@ public class RuleJobServiceImpl implements RuleJobService {
 			String scriptStr = etlScriptVarsInit(fileContents, project, ruleJob, ruleDetails);
 			final String jobName = getJobName(ruleJob);
 
-			final URL s3ContentUpload = awsAdapter.s3ContentUpload(qsEtlScriptBucket, jobName, scriptStr);
-			final String scriptFilePath = String.format("%s%s", qsEtlScriptBucket, jobName);
+			/*final URL s3ContentUpload = awsAdapter.s3ContentUpload(qsEtlScriptBucket, jobName, scriptStr);
+			final String scriptFilePath = String.format("%s%s", qsEtlScriptBucket, jobName);*/
+			final URL s3ContentUpload = awsAdapter.s3ContentUpload(null, jobName, scriptStr);
+			final String scriptFilePath = String.format("%s%s", null, jobName);
 			log.info("uploaded to - s3 Full Path - {} and to path {}", s3ContentUpload, scriptFilePath);
 
 			int batchId = livyActions.invokeRuleJobOperation(ruleJob.getJobId(), scriptFilePath);
