@@ -156,17 +156,14 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
             String[] nextLine;
+            String[] headerLine;
             int rowCount = 0;
-
+            headerLine = reader.readNext();
+            if(headerLine != null && headerLine.length > 0) {
+                headers = Arrays.asList(headerLine);
+            }
             while ((nextLine = reader.readNext()) != null && rowCount < 500) {
                 Map<String, String> row = new HashMap<>();
-                // Assuming the CSV file has headers, you can map data to headers
-                // Adjust this part based on your CSV structure
-                if(rowCount == 0) {
-                    headers = Arrays.asList(nextLine);
-                    rowCount++;
-                    continue;
-                }
                 for (int i = 0; i < nextLine.length; i++) {
                     row.put(headers.get(i), nextLine[i]);
                 }
