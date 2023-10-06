@@ -8,11 +8,9 @@ import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
-import ai.quantumics.api.service.impl.FileListParser;
-import ai.quantumics.api.service.impl.FileStructure;
-import ai.quantumics.api.service.impl.Folder;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
+import ai.quantumics.api.vo.BucketFileContent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -163,6 +161,19 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
         return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType().trim()));
+    }
+
+    @GetMapping("/content/{userId}/{projectId}")
+    public ResponseEntity<Object> getFileContent(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId,
+                                                       @RequestParam(value = "bucket") final String bucket,
+                                                       @RequestParam(value = "file") final String file) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        validatorUtils.checkProject(projectId);
+        BucketFileContent content = awsConnectionService.getContent(bucket, file);
+        return ResponseEntity.status(HttpStatus.OK).body(content);
     }
 
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
