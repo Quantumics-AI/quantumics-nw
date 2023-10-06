@@ -4,8 +4,7 @@ import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
-import ai.quantumics.api.service.impl.Folder;
-import com.amazonaws.services.s3.model.Bucket;
+import ai.quantumics.api.vo.BucketFileContent;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,4 +28,6 @@ public interface AwsConnectionService {
     String getFoldersAndFilePath(String bucketName) throws IOException;
 
     String testConnection(String accessMethod);
+
+    BucketFileContent getContent(String bucketName, String file);
 }

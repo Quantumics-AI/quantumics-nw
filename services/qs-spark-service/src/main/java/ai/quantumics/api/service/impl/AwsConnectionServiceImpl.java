@@ -11,20 +11,20 @@ import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
+import ai.quantumics.api.vo.BucketFileContent;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.lang.ObjectUtils;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -143,6 +143,39 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
         amazonS3Client.listBuckets();
         return CONNECTION_SUCCESSFUL;
+    }
+
+    @Override
+    public BucketFileContent getContent(String bucketName, String file) {
+        List<Map<String, String>> data = new ArrayList<>();
+        BucketFileContent bucketFileContent = new BucketFileContent();
+        List<String> headers = new ArrayList<>();
+
+        S3Object s3Object = awsS3Client.getObject(bucketName, file);
+        S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
+
+        try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
+            String[] nextLine;
+            String[] headerLine;
+            int rowCount = 0;
+            headerLine = reader.readNext();
+            if(headerLine != null && headerLine.length > 0) {
+                headers = Arrays.asList(headerLine);
+            }
+            while ((nextLine = reader.readNext()) != null && rowCount < 500) {
+                Map<String, String> row = new HashMap<>();
+                for (int i = 0; i < nextLine.length; i++) {
+                    row.put(headers.get(i), nextLine[i]);
+                }
+                data.add(row);
+                rowCount++;
+            }
+        } catch (IOException | CsvValidationException e) {
+            e.printStackTrace();
+        }
+        bucketFileContent.setHeaders(headers);
+        bucketFileContent.setContent(data);
+        return bucketFileContent;
     }
 
     private String getFoldersAndFilePathHierarchy(List<String> objectNames) throws IOException {
