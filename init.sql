@@ -969,6 +969,20 @@ BEGIN
 			creation_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 			)';
 
+	EXECUTE '
+            CREATE TABLE '||schemaName||'.qsp_rule_job (
+            job_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+    		rule_id integer NOT NULL,
+    		job_status varchar(10) NOT NULL,
+            job_output text COLLATE pg_catalog."default",
+    		created_by character varying(100) COLLATE pg_catalog."default",
+    		modified_by character varying(100) COLLATE pg_catalog."default",
+        	modified_date timestamp without time zone,
+        	created_date timestamp without time zone,
+        	user_id integer NOT NULL,
+        	CONSTRAINT qsp_rule_job_pkey PRIMARY KEY (job_id)
+            )';
+
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
 	    values (%L,%L,false,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Row count check');
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)

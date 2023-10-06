@@ -107,6 +107,7 @@ public class QsConstants {
   public static final String QS_LIVY_TEMPLATE_ENG_NAME = "ai/quantumics/ml/etl_livy_template_eng.py";
   public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/Write_Xlsx_To_Csv.py";
   public static final String QS_LIVY_TEMPLATE_NAME = "ai/quantumics/ml/etl_livy_template.py";
+  public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Row_Count_Template.py";
   
   // Email Template Actions
   public static final String USER_NAME_PLACE_HOLDER = "{USER_NAME}";
