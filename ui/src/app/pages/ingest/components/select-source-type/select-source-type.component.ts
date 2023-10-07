@@ -21,6 +21,7 @@ export class SelectSourceTypeComponent implements OnInit {
   projectName: string;
   type: 'all' | 'crm' | 'db' = 'all';
 
+
   constructor(
     private router: Router,
     private location: Location,
@@ -73,6 +74,10 @@ export class SelectSourceTypeComponent implements OnInit {
 
   private redirectToCreateFolder(): void {
     this.router.navigate([`projects/${this.projectId}/ingest/local-file`]);
+  }
+
+  public redirectToCloud(): void {
+    this.router.navigate([`projects/${this.projectId}/ingest/generate-aws`]);
   }
 
   private redirectToCreateDb(): void {

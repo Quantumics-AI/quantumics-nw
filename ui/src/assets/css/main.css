@@ -1128,3 +1128,22 @@ label {
 }
 
 /*  */
+
+.tp2 {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: #475467;
+}
+
+
+/* Text overflow - wrap  */
+.text-over {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}

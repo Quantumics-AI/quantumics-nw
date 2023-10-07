@@ -1,0 +1,138 @@
+<app-loader [loading]="loading">
+    <div class="page-header1 pd-l-20">
+        <ol class="breadcrumb breadcrumb-top pd-l-0">
+            <li class="breadcrumb-item">Dataset</li>
+            <li class="breadcrumb-item active" aria-current="page">AWS</li>
+        </ol>
+    </div>
+    <div class="page-content pd-20">
+        <ng-container *ngIf="sourceListData.length > 0">
+            <div class="card card-d">
+                <div class="card-header ch pd-16">
+                    <div class="di mr-t-6" *ngIf="!searchDiv">
+                        <p class="card-main-text">AWS</p>
+                        <!-- <p class="p1 mr-b-0">Folders have same metadata dataset. To create new folder, go to import dataset.</p> -->
+                    </div>
+                    <div class="di" *ngIf="searchDiv">
+                        <p class="card-main-text">Search result</p>
+                    </div>
+                    <div class="pull-right">
+                        <div class="input-group br-bx-a">
+                            <div class="input-group-prepend h36">
+                                <span class="input-group-text search-icon br-bx-n" id="basic-addon1">
+                                    <img src="assets/img/govern/search.svg">
+                                </span>
+                            </div>
+                            <input type="text" id="searchTerm" [(ngModel)]="searchTerm.connectionName" class="form-control search-input br-bx-n h36"
+                                placeholder="Enter connection name" aria-label="Username" aria-describedby="basic-addon1"
+                                (ngModelChange)="searchInput($event)">
+                        </div>
+    
+                    </div>
+                </div>
+                <div class="card-body pd-0">
+                    <div class="table-responsive br-r">
+                        <table class="table m-0 table-fixed table-striped">
+                            <thead class="thead-light">
+                                <tr class="fixed-th">
+                                    <th class="pd-l-24">Connection name
+                                        <span> <img class="cp" (click)="sortSorceData();"
+                                                src="assets/img/govern/down-arrow.svg"></span>
+                                    </th>
+                                    <th class="pd-l-24">Sub data source
+                                        <!-- <span> <img class="cp"
+                                            src="assets/img/govern/down-arrow.svg"></span> -->
+                                    </th>
+                                    <!-- <th class="pd-l-24">Access type
+                                        <span> <img class="cp" (click)="sortAccessType();"
+                                            src="assets/img/govern/down-arrow.svg"></span>
+                                    </th> -->
+                                    <!-- <th class="pd-l-24">IAM role</th> -->
+                                    <th class="pd-l-24">Created date
+                                        <span> <img class="cp" (click)="sortDataByCreatedDate();"
+                                            src="assets/img/govern/down-arrow.svg"></span>
+                                    </th>
+                                    <th class="pd-l-24">Modified date
+                                        <span> <img class="cp" (click)="sortDataByModifiedDate();"
+                                            src="assets/img/govern/down-arrow.svg"></span>
+                                    </th>
+                                    <th class="pd-l-24">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="td-text" *ngFor="let d of sourceListData | filterBy: searchTerm | slice:startIndex:endIndex">
+                                    <td class="fn">
+                                        <span><img src="assets/img/project-stats/folder-i.svg"></span>
+                                        {{ d?.connectionName }}</td>
+                                    <td>{{d.subDataSource}}</td>
+                                    <!-- <td >{{d.accessType}}</td> -->
+                                    <!-- <td>{{ parseConnectionData(d.connectionData)?.iam }}</td> -->
+                                    <td >
+                                        {{d?.createdDate | date: 'dd-MM-yy, hh:mm a'}}
+                                    </td>
+                                    <td >{{d.modifiedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                    <td class="text-center">
+                                        <div ngbDropdown container="body">
+                                            <a ngbDropdownToggle class="menu-icon">
+                                                <img src="assets/img/project-stats/menu.svg" class="default-img">
+                                                <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
+                                            </a>
+    
+                                            <div ngbDropdownMenu class="dr-m">
+                                                <button ngbDropdownItem class="h-37" (click)="edit(d)">Edit</button>
+                                                <button ngbDropdownItem class="h-37" (click)="delete(d.id)">Delete</button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr style="background-color: white !important;"
+                                    *ngIf="(sourceListData | filterBy: searchTerm).length == 0">
+                                    <td colspan="5">
+                                        <div class="text-center s-div">
+                                            <img src="assets/img/govern/no-search.svg">
+                                            <p class="no-term">No connection found</p>
+                                            <p class="term-2">Your search {{searchString}} did not match any connection name.
+                                                Please try again .</p>
+                                            <button type="button" class="btn saveBtn"
+                                                (click)="clearSearhInput()">Clear to go back</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr  *ngIf="(sourceListData | filterBy: searchTerm).length > 10" style="background-color: white !important;" class="pg-tr">
+                                    <td colspan="6" class="pg-pd">
+                                        <div class="text-center">
+                                            <ngb-pagination [collectionSize]="sourceListData.length" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
+                                            [rotate]="true" aria-label="Custom pagination" (pageChange)="onPageChange($event)">
+                                                <ng-template ngbPaginationPrevious>
+                                                    <span class="btn nextBtn">
+                                                    <img src="assets/img/govern/arrow-left.svg">Previous
+                                                </span></ng-template>
+                                                <ng-template ngbPaginationNext><span class="btn nextBtn">
+                                                    Next <img src="assets/img/govern/arrow-right.svg">
+                                                </span></ng-template>
+                                            </ngb-pagination>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container  *ngIf="sourceListData.length == 0">
+            <div class="connect-source-div">
+                <div class="card card-d mr-t-16">
+                    <div class="card-body">
+                        <div class="connect-s text-center">
+                            <img src="assets/img/govern/no-dq.svg" class="img-fluid">
+                            <p class="tp1 wm">There arre no Valid Data Source Connections available.</p>
+                            <p class="tp1 mr-b-24">Please create one!</p>
+                            <a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type']" class="btn btn-design mr-b-56">Create connection</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</app-loader>

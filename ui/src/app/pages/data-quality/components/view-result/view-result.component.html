@@ -1,0 +1,28 @@
+<div class="modal-header border-bottom-0">
+    <button type="button" class="close" aria-describedby="modal-title" (click)="modal.close();">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+    <div class="container">
+        <p class="p2 text-center fsw">Row level check</p>
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <p class="p2">Source</p>
+                <p class="p1">{{output?.source}}</p>
+            </div>
+            <div class="col-md-6 text-center">
+                <p class="p2">Target</p>
+                <p class="p1">{{output?.target}}</p>
+            </div>
+        </div>
+        <p class="p2 text-center fsw">
+            <span *ngIf="output.match" class="pass">Passed</span>
+            <span *ngIf="!output.match" class="fail">Failed</span>
+        </p>
+        <div class="btn-div text-center">
+            <button class="btn btn-design" (click)="modal.close();">Okay</button>
+        </div>
+    </div>
+</div>

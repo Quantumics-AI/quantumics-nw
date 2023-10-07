@@ -1,0 +1,155 @@
+<app-loader [loading]="loading">
+    <div class="page-header1 pd-l-20">
+        <ol class="breadcrumb breadcrumb-top">
+            <!-- <li class="breadcrumb-item">Dataset</li> -->
+            <li class="breadcrumb-item active" aria-current="page">Rules</li>
+        </ol>
+    </div>
+    
+    <div class="page-content pd-20">
+        <!-- <ng-container>
+            <div class="connect-source-div">
+                <div class="card card-d mr-t-16">
+                    <div class="card-body">
+                        <div class="connect-s text-center">
+                            <p class="tp1 fs-26">Rule</p>
+                            <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid">
+                            <p class="tp1 mr-b-24 mr-t-40">There is no Data Quality Rule created. Please create one.</p>
+                            <a [routerLink]="['/projects', 'projectId', 'ingest', 'select-source-type']"
+                                class="btn btn-design mr-b-56">Create</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container> -->
+        <ng-container *ngIf="ruleCount?.length > 0; else noDataQualityRules">
+            <div class="card card-d">
+                <div class="card-header ch pd-b-0">
+                    <div class="di mr-t-6">
+                        <p class="card-main-text">List of rules</p>
+                        <p></p>
+                    </div>
+                    <div class="pull-right">
+                        <span (click)="viewRunning()" class="mr-r-20 view-list cp">View running rules</span>
+                        <button class="btn btn-design" [routerLink]="['./create']">Create rule</button>
+                    </div>
+                    <div>
+                        <p class="pull-right mr-b-8">
+                            <ng-container *ngFor="let i of ruleFilter">
+                                <input type="checkbox" class="form-check-input" id="inactive" 
+                                (change)="changeFilter($event, i)" [checked]="i.selected">
+                                <label class="form-check-label p2 " for="inactive" [ngClass]="{'mr-r-35': i.label == 'Inactive'}">{{i.label}}</label>
+                            </ng-container>
+                        </p>
+                    </div>
+                </div>
+                <div class="card-body pd-0">
+                    <div class="table-responsive br-r">
+                        <table class="table m-0 table-fixed table-striped">
+                            <thead class="thead-light">
+                                <tr class="fixed-th">
+                                    <th class="pd-l-24"><label class="mr-b-0">
+                                        <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="selectAllChecked" (change)="selectRuleAll($event)"></label>
+                                    </th>
+                                    <th class="pd-l-24">Rule name</th>
+                                    <th class="pd-l-24">Rule type</th>
+                                    <th class="pd-l-24">Created by</th>
+                                    <th class="pd-l-24">Created date</th>
+                                    <th class="pd-l-24">Modified date</th>
+                                    <th class="pd-l-24">Status</th>
+                                    <th class="float-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngIf="dataQualityList.length else noRules">
+                                    <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
+                                        <td class="pt-2"> <label>
+                                            <input type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
+                                        </label></td>
+                                        <td class="fn text-over">
+                                            <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>
+                                        </td>
+                                        <td class="cp">{{dataQuality?.ruleDetails?.ruleTypeName}}</td>
+                                        <td class="cp">{{dataQuality?.createdBy}}</td>
+                                        <td class="cp">{{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                        <td class="cp">{{dataQuality?.modifiedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                        <td class="cp">{{(dataQuality?.status)}}</td>
+        
+                                        <td class="float-right">
+                                            <div ngbDropdown container="body" *ngIf="ruleStatus != 'delete'">
+                                                <a ngbDropdownToggle class="menu-icon">
+                                                    <img src="assets/img/project-stats/menu.svg" class="default-img">
+                                                    <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
+                                                </a>
+        
+                                                <div ngbDropdownMenu class="dr-m">
+                                                    <button ngbDropdownItem class="h-37" (click)="edit(dataQuality);">Edit</button>
+                                                    <!-- <button ngbDropdownItem class="h-37">View</button>
+                                                    <button ngbDropdownItem class="h-37">Delete</button> -->
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="(dataQualityList)?.length > 10"
+                                        style="background-color: white !important;" class="pg-tr">
+                                        <td colspan="8" class="pg-pd">
+                                            <div class="text-center">
+                                                <ngb-pagination [collectionSize]="dataQualityList?.length" [(page)]="page"
+                                                    [pageSize]="pageSize" [maxSize]="5" [rotate]="true"
+                                                    aria-label="Custom pagination" (pageChange)="onPageChange($event)">
+                                                    <ng-template ngbPaginationPrevious>
+                                                        <span class="btn nextBtn">
+                                                            <img src="assets/img/govern/arrow-left.svg">Previous
+                                                        </span></ng-template>
+                                                    <ng-template ngbPaginationNext><span class="btn nextBtn">
+                                                            Next <img src="assets/img/govern/arrow-right.svg">
+                                                        </span></ng-template>
+                                                </ngb-pagination>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <ng-template #noRules>
+                                    <tr class="no-dataset">
+                                        <!-- <td colspan="6" *ngIf="loading">Loading...</td> -->
+                                        <td colspan="8" >
+                                            <div class="card shadow-n mr-b-0">
+                                                <div class="card-body">
+                                                    <div class="no-content-div text-center">
+                                                        <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid mr-tb">
+                                                        <h5 class="summary-p1 mr-b-20">No {{ruleStatus}} rule is available.</h5>
+                                                        <!-- <a [routerLink]="['/projects', projectId, 'ingest', 'pipelines']"
+                                                            class="btn btn-design height-36 mr-b-20">Go to pipeline</a> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-div text-center" *ngIf="ruleStatus == 'Active'">
+                <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run rule</button>
+            </div>
+        </ng-container>
+        <ng-template #noDataQualityRules>
+            <div class="connect-source-div">
+                <div class="card card-d mr-t-16">
+                    <div class="card-body">
+                        <div class="connect-s text-center">
+                            <p class="tp1 fs-26">Rule</p>
+                            <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid">
+                            <!-- <p class="tp1 mr-b-0 wm">Set business related rules for your dataset.</p> -->
+                            <p class="tp1 mr-b-24 mr-t-40">There is no Data Quality Rule created. Please create one.</p>
+                            <a [routerLink]="['/projects', projectId, 'data-quality', 'create']" 
+                                class="btn btn-design mr-b-56">Create rule</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </div>
+</app-loader>

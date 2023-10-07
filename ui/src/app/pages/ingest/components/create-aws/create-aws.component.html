@@ -1,0 +1,133 @@
+<div class="main-container">
+    <div class="page-header1">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item breadcrumb-top">
+                <ol class="breadcrumb">
+                    <!-- <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type' ]">Dataset</a>
+                    </li> -->
+                    <li class="breadcrumb-item active" aria-current="page">AWS</li>
+                </ol>
+            </li>
+        </ol>
+    </div>
+    <nav class="navbar navbar-light src-nav">
+        <div class="bck">
+            <a class="navbar-brand back-func" (click)="back()">
+                <img src="assets/img/db-connectors/back-arrow.svg" alt="">&nbsp;
+                GO BACK
+            </a>
+        </div>
+    </nav>
+    <div class="aws-div">
+        <p class="local-file">
+            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg"> -->
+            Configure Data Source
+        </p>
+        <form [formGroup]="fg">
+            <div class="row gutters justify-content-center mt-5 rounded-lg ">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 ">
+                    <div class="card file-card">
+                        <div class="card-body pii-card-body">
+                            <div class="row gutters">
+                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <!-- <div class="form-group">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input cp" type="radio" name="inlineRadioOptions" 
+                                            [(ngModel)]="queryFolders" [value]="true" formControlName="markAsDefault">
+                                            <label class="form-check-label p2" for="inlineRadio1">AWS</label>
+                                        </div>
+                                    </div> -->
+                                    <p class="local-file">
+                                        <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg">
+                                        AWS
+                                    </p>
+                                    
+                                </div>
+                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">
+                                            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
+                                            Connection name*
+                                        </label>
+                                        <input type="text" class="form-control input-design" id="sourceName" #source
+                                            formControlName="dataSourceName" autocomplete="off" placeholder="Input connection name" 
+                                            minlength="3" maxlength="50" (ngModelChange)="modelChangeDataSourceName($event)"
+                                            (focus)="f.open()"
+                                            (input)="source.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
+                                            triggers="manual" #f="ngbPopover" [ngbPopover]="popFolderContent"
+                                            popoverClass="folder-pophover" placement="bottom">
+                                        <small id="workspaceNameHelp" class="form-text body-text-muted">Connection name must be
+                                                between 3 and 50 characters long.</small>
+                                        <div *ngIf="fg.get('dataSourceName').invalid && fg.get('dataSourceName').dirty || fg.get('dataSourceName').touched">
+                                            <div class="text-error" *ngIf="fg.get('dataSourceName').hasError('required')">
+                                                <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                Connection name is mandatory
+                                            </div>
+                                        </div>
+                                        <div class="text-error" *ngIf="invalidPattern">
+                                            <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                            Connection name should have Alphabates, Numbers and Special characters (Colon, Hypen and Underscore).
+                                        </div>
+                                        <div class="text-error" *ngIf="invalidCapitalPattern">
+                                            <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                            Connection name must start with capital letter.
+                                        </div>
+                                    </div>
+
+                                    <ng-template #popFolderContent>
+                                        <div class="col-12">
+                                            <ul>
+                                                <li>Connection name is mandatory.</li>
+                                                <li>Connection name must be between 3 and 30 characters long.</li>
+                                                <li>Connection name should have Alphabets,Numbers, and Special characters ( Colon, Hypen and Underscore ).
+                                                </li>
+                                                <li>Connection name must start with capital letter</li>
+                                                <li>Data source name must be unique.</li>
+                                            </ul>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">
+                                            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
+                                            Sub data source*
+                                        </label>
+                                        <input type="text" class="form-control input-design" id="sourceName" #policyName
+                                            formControlName="subDataSource" autocomplete="off" placeholder="Sub data source name" [value]="'S3'">
+                                        
+                                    </div>
+                                </div>
+                                <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">
+                                            Access type*
+                                        </label>
+                                        <select class="form-control input-design" #policyName formControlName="connectionType"
+                                            (change)="onSelectAcceptType(policyName.value)">
+                                            <option *ngFor="let item of transformedData" [value]="item.type" [selected]="item.type === 'PROFILE'">
+                                                {{ item.type }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div> -->
+
+                                <div class="col-12 mt-2">
+                                    <div class="float-right">
+                                        <button type="button" class="btn btn-outline-success connectionBtns" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid"
+                                        (click)="testConnection()">Test Connection</button>
+
+                                        <button type="button" class="btn btn-outline-success connectionBtns mr-l-10" [ngClass]="{'validBtn': connection}" 
+                                        [disabled]="!connection" (click)="continue()">Continue</button>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+</div>

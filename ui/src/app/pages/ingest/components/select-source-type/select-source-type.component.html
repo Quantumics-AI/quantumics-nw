@@ -5,7 +5,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type' ]">Dataset</a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Import dataset</li>
+                    <li class="breadcrumb-item active" aria-current="page">Data source</li>
                 </ol>
             </li>
         </ol>
@@ -42,13 +42,23 @@
             <p class="source-content">Bring data from multiple Sources in near real-time and analyze it using your favorite DataOps tool.</p>
             <div class="source-div">
                 <ng-container>
-                    <div class="card source-card" style="width: 13rem;" *ngFor="let sourceType of  sourceTypes$ | async | filter:searchBy:type">
+                    <div class="card source-card" *ngFor="let sourceType of  sourceTypes$ | async | filter:searchBy:type">
                         <div class="card-body" style="cursor: pointer;" (click)="handleSelection(sourceType?.dataSourceName, sourceType.dataSourceType)">
                             <p style="text-align:center;">
                                 <img class="img-fluid" alt="Responsive image" src="assets/img/{{sourceType.dataSourceImage}}" alt="">
                             </p>
                             
                             <p class="source-text">{{sourceType.dataSourceName}}</p>
+                        </div>
+                    </div>
+
+                    <div class="card source-card" >
+                        <div class="card-body" style="cursor: pointer;" (click)="redirectToCloud()">
+                            <p style="text-align:center;">
+                                <img class="img-fluid" alt="Responsive image" src="assets/img/pgsql.png" alt="">
+                            </p>
+                            
+                            <p class="source-text">AWS</p>
                         </div>
                     </div>
                 </ng-container>

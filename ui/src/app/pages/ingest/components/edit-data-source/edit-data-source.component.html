@@ -1,0 +1,56 @@
+<div class="modal-header">
+    <h5 class="modal-title">Edit</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form [formGroup]="fg">
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                Data source name*
+            </label>
+            <input type="text" class="form-control input-design" id="sourceName" #source
+                formControlName="sourceName" autocomplete="off" placeholder="Data source Name" >
+        </div>
+
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
+                Sub data source*
+            </label>
+            <input type="text" class="form-control input-design" id="sourceName" #subdataSource
+                formControlName="subDataSource" autocomplete="off" placeholder="Sub data source name" [value]="'S3'">
+            
+        </div>
+
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                Access type*
+            </label>
+            <select class="form-control input-design" formControlName="connectionType" #connectionType
+                >
+                <option *ngFor="let item of transformedData" [value]="item.type">
+                    {{item.type}}
+                </option>
+            </select>
+        </div>
+        <!-- <div class="form-group">
+            <label for="inputName" class="p2">
+                Role name
+            </label>
+            <input type="text" class="form-control input-design" id="role" #role
+                formControlName="roleName" autocomplete="off" placeholder="Role Name" disabled>
+        </div> -->
+
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-success connectionBtns" 
+            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid" (click)="updateData()"
+            >Update</button>
+
+            <button type="button" class="btn btn-outline-dark cancel-btn" 
+             (click)="modal.dismiss('Cancel click')"
+            >Cancel</button>
+        </div>
+    </form>
+</div>
