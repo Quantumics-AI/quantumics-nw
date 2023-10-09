@@ -1,12 +1,16 @@
-<div class="modal-header border-bottom-0">
+<!-- <div class="modal-header border-bottom-0">
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.close();">
         <span aria-hidden="true">&times;</span>
     </button>
-</div>
+</div> -->
 
 <div class="modal-body">
-    <div class="container">
-        <p class="p2 text-center fsw">Row level check</p>
+    <!-- <div class="container"> -->
+        <div class="rd">
+            <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
+            <p class="p2 text-center fsw">{{output?.levelName}}</p>
+        </div>
+        
         <div class="row">
             <div class="col-md-6 text-center">
                 <p class="p2">Source</p>
@@ -24,5 +28,5 @@
         <div class="btn-div text-center">
             <button class="btn btn-design" (click)="modal.close();">Okay</button>
         </div>
-    </div>
+    <!-- </div> -->
 </div>

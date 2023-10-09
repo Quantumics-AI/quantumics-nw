@@ -10,7 +10,9 @@ package ai.quantumics.api.livy;
 
 import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.constants.QsConstants;
+import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.model.*;
+import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.req.*;
 import ai.quantumics.api.service.*;
 import ai.quantumics.api.util.DbSessionUtil;
@@ -18,8 +20,10 @@ import ai.quantumics.api.util.MetadataHelper;
 import ai.quantumics.api.util.QsUtil;
 import ai.quantumics.api.vo.BatchJobInfo;
 import ai.quantumics.api.vo.QsFileContent;
+import ai.quantumics.api.vo.RuleJobOutput;
 import com.amazonaws.services.glue.model.JobRunState;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,6 +70,7 @@ public class LivyActions {
     private final MetadataHelper metadataHelper;
     private final RunJobService runJobService;
     private final UdfService udfService;
+    private final RuleJobRepository ruleJobRepository;
 
     @Value("${qs.s3.result.store}")
     private String resultStore;
@@ -94,7 +99,8 @@ public class LivyActions {
             AwsAdapter awsAdapter,
             MetadataHelper metadataHelper,
             RunJobService runJobService,
-            final UdfService udfService) {
+            final UdfService udfService,
+            RuleJobRepository ruleJobRepositoryCi) {
         dbUtil = sessionUtil;
         qsUtil = qsutil;
         livyClient = livyClientCi;
@@ -106,6 +112,7 @@ public class LivyActions {
         this.metadataHelper = metadataHelper;
         this.runJobService = runJobService;
         this.udfService = udfService;
+        ruleJobRepository = ruleJobRepositoryCi;
     }
 
     @Async("qsThreadPool")
@@ -1104,18 +1111,14 @@ public class LivyActions {
         return batchJobId;
     }
 
-    public int invokeRuleJobOperation(final int jobId, final String pysparkScriptS3FileLoc)
-            throws Exception {
+    public int invokeRuleJobOperation(final String pysparkScriptS3FileLoc, String bucketName, String jobName, int ruleJobId,
+                                      String modifiedBy, int projectId) throws Exception {
         log.info("Invoked the Livy Job for running this Rule Job...");
-
-        Instant start = Instant.now();
-
 
         final JsonObject payload = new JsonObject();
         payload.addProperty("file", pysparkScriptS3FileLoc);
         payload.addProperty("executorMemory", executorMemory);
         payload.addProperty("driverMemory", driverMemory);
-        payload.addProperty("jars", "/opt/postgresql-driver/postgresql-42.2.5.jar");
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -1128,21 +1131,48 @@ public class LivyActions {
         final JsonNode batchResponse = livyClient.getApacheLivyBatchState(batchJobId, mapper);
         if (batchResponse != null) {
             String batchJobState = batchResponse.get("state").asText();
-            Instant end = Instant.now();
-            long elapsedTime = Duration.between(start, end).toMillis();
 
             if ("success".equals(batchJobState)) {
+                jobName = jobName.replace(".py", "");
+                S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                S3ObjectInputStream inputStream = s3Object.getObjectContent();
 
-
-                log.info("Completed running the cleanse Job...");
+                // Read the JSON data from the input stream
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+                    RuleJobOutput ruleJobOutput = objectMapper.readValue(stringBuilder.toString(), RuleJobOutput.class);
+                    updateRuleJobEntry(ruleJobId, RuleJobStatus.COMPLETE.getStatus(), ruleJobOutput.getJobOutput(), modifiedBy, projectId);
+                    awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                }
+                log.info("Completed running the Rule Job...");
             } else {
-                //updateJobEntry(runJobId, JobRunState.FAILED.toString(), batchJobId, batchJobLog, elapsedTime);
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+                log.info("Failed running the Rule Job...");
             }
         } else {
-           // updateJobEntry(runJobId, JobRunState.FAILED.toString(), batchJobId, "Batch job aborted, as the job execution time exceeded the threshold of 5mins. Couldn't capture the batch job log.", -1);
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+            log.info("Failed running the Rule Job...");
         }
 
         return batchJobId;
+    }
+    private void updateRuleJobEntry(final int ruleJobId, final String status, String jobOutput, String modifiedBy, int projectId) throws SQLException {
+        dbUtil.changeSchema("public");
+        final Projects project = projectService.getProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        QsRuleJob ruleJob = ruleJobRepository.findByJobId(ruleJobId);
+        if(ruleJob != null) {
+            ruleJob.setJobStatus(status);
+            ruleJob.setJobOutput(jobOutput);
+            ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+            ruleJob.setModifiedBy(modifiedBy);
+            ruleJobRepository.save(ruleJob);
+        }
     }
 
     private RunJobStatus updateJobEntry(final int runJobId, final String status, final int batchJobId, final String batchJobLog,

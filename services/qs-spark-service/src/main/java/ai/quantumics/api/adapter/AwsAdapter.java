@@ -2660,6 +2660,21 @@ public class AwsAdapter {
 		return runExternalCommand(commands);
 	}
 
+	public void deleteFolderAndContents(String bucketName, String folderKey) {
+		try {
+			amazonS3Client.listObjects(bucketName, folderKey).getObjectSummaries()
+					.forEach(objectSummary -> {
+						amazonS3Client.deleteObject(new DeleteObjectRequest(bucketName, objectSummary.getKey()));
+					});
+
+			amazonS3Client.deleteObject(bucketName, folderKey);
+		} catch (final AmazonServiceException serviceException) {
+			log.error("Error - {}", serviceException.getErrorMessage());
+		} catch (final AmazonClientException exception) {
+			log.error("Error while deleting file {}", exception.getMessage());
+		}
+	}
+
 	public static AmazonS3 createNewS3Client(AmazonS3 awsS3Client, String bucketName){
 		AmazonS3 s3Client = awsS3Client;
 		try {
@@ -2680,7 +2695,7 @@ public class AwsAdapter {
 		return s3Client;
 	}
 
-	public static String getRegionFromMessage(String errorMessage){
+	public static String getRegionFromMessage(String errorMessage) {
 		String expectedRegion = null;
 		// Define a regular expression pattern to match the expected region
 		Pattern pattern = Pattern.compile(REGION_PATTERN);
@@ -2692,5 +2707,4 @@ public class AwsAdapter {
 		}
 		return expectedRegion;
 	}
-
 }
