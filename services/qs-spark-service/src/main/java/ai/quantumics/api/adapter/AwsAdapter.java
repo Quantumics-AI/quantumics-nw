@@ -11,6 +11,7 @@ package ai.quantumics.api.adapter;
 import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.AwsAccessType;
+import ai.quantumics.api.exceptions.BucketNotFoundException;
 import ai.quantumics.api.exceptions.QsRecordNotFoundException;
 import ai.quantumics.api.model.*;
 import ai.quantumics.api.req.ColumnMetaData;
@@ -32,6 +33,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.cloudwatch.model.*;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -59,6 +61,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ai.quantumics.api.constants.DatasourceConstants.BUCKET_NOT_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.REGION_PATTERN;
 import static ai.quantumics.api.constants.QsConstants.*;
 
 @Slf4j
@@ -2654,6 +2658,39 @@ public class AwsAdapter {
 
 
 		return runExternalCommand(commands);
+	}
+
+	public static AmazonS3 createNewS3Client(AmazonS3 awsS3Client, String bucketName){
+		AmazonS3 s3Client = awsS3Client;
+		try {
+			s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+		}catch(AmazonServiceException exception){
+			String region = getRegionFromMessage(exception.getErrorMessage());
+			if(region == null){
+				throw new BucketNotFoundException(BUCKET_NOT_EXIST);
+			}
+			s3Client = AmazonS3ClientBuilder
+					.standard()
+					.withRegion(region)
+					.build();
+			return s3Client;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return s3Client;
+	}
+
+	public static String getRegionFromMessage(String errorMessage){
+		String expectedRegion = null;
+		// Define a regular expression pattern to match the expected region
+		Pattern pattern = Pattern.compile(REGION_PATTERN);
+		Matcher matcher = pattern.matcher(errorMessage);
+
+		// Find the expected region
+		if (matcher.find()) {
+			expectedRegion = matcher.group(1);
+		}
+		return expectedRegion;
 	}
 
 }

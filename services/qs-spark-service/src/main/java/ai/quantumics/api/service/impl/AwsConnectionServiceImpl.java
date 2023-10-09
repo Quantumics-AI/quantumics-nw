@@ -1,6 +1,7 @@
 package ai.quantumics.api.service.impl;
 
 import ai.quantumics.api.AwsCustomConfiguration;
+import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.BucketNotFoundException;
@@ -12,10 +13,7 @@ import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +21,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +29,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.*;
@@ -145,39 +140,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return getFoldersAndFilePathHierarchy(objectNames);
     }
 
-    public AmazonS3 createS3Client(String bucketName){
-        AmazonS3 s3Client = awsS3Client;
-        try {
-            s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
-        }catch(AmazonServiceException exception){
-            String region = getRegionFromMessage(exception.getErrorMessage());
-            if(region == null){
-              throw new BucketNotFoundException(BUCKET_NOT_EXIST);
-            }
-            s3Client = AmazonS3ClientBuilder
-                                      .standard()
-                                      .withRegion(region)
-                                      .build();
-            return s3Client;
-        }catch(Exception e){
-          e.printStackTrace();
-        }
-        return s3Client;
-    }
-
-    public static String getRegionFromMessage(String errorMessage){
-        String expectedRegion = null;
-        // Define a regular expression pattern to match the expected region
-        Pattern pattern = Pattern.compile(REGION_PATTERN);
-        Matcher matcher = pattern.matcher(errorMessage);
-
-        // Find the expected region
-        if (matcher.find()) {
-            expectedRegion = matcher.group(1);
-        }
-        return expectedRegion;
-    }
-
     @Override
     public String testConnection(String accessMethod) {
         amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
@@ -226,7 +188,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     
     private void listObjects(String bucketName, String prefix, List<String> objectNames) {
 
-        AmazonS3 s3Client = createS3Client(bucketName);
+        AmazonS3 s3Client = AwsAdapter.createNewS3Client(awsS3Client,bucketName);
 
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
