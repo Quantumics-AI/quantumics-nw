@@ -16,13 +16,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.spring.web.json.Json;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -49,11 +45,7 @@ public class RuleJobController {
           @PathVariable(value = "userId") final int userId,
           @PathVariable(value = "projectId") final int projectId)
           throws Exception {
-    final Map<String, Object> response = new HashMap<>();
-    response.put("code", HttpStatus.SC_OK);
-    response.put("message", "Rule Job submitted successfully");
-    return ResponseEntity.ok().body(response);
-    //return ruleJobService.runRuleJob(ruleJobRequest, userId, projectId);
+    return ruleJobService.runRuleJob(ruleJobRequest, userId, projectId);
   }
 
   @ApiOperation(value = "RuleJobs", response = Json.class)
