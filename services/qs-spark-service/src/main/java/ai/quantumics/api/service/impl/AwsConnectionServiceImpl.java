@@ -12,7 +12,10 @@ import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.*;
@@ -133,9 +139,33 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String getFoldersAndFilePath(String bucketName) throws IOException {
+
         List<String> objectNames = new ArrayList<>();
         listObjects(bucketName, "", objectNames);
         return getFoldersAndFilePathHierarchy(objectNames);
+    }
+
+    public AmazonS3 createS3Client(String bucketName){
+        AmazonS3 s3Client = awsS3Client;
+        try {
+            awsS3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+        }catch(AmazonServiceException e){
+            String region = parseAuthorizationHeader(e.getErrorMessage());
+            if(region == null){
+              throw new BucketNotFoundException(BUCKET_NOT_EXIST);
+            }
+            s3Client = AmazonS3ClientBuilder
+                                      .standard()
+                                      .withRegion(region)
+                                      .build();
+            if(!s3Client.doesBucketExistV2(bucketName)){
+                throw new BucketNotFoundException(BUCKET_NOT_EXIST);
+            }
+            return s3Client;
+        }catch(Exception e){
+            System.out.println("Exception occurs while getting bucket region: " + e.getStackTrace().toString());
+        }
+        return awsS3Client;
     }
 
     @Override
@@ -184,11 +214,35 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
     }
 
+    public static String parseAuthorizationHeader(String errorMessage){
+        String expectedRegion = null;
+        // Define a regular expression pattern to match the expected region
+        Pattern pattern = Pattern.compile("expecting\\s+'(\\S+)'");
+        Matcher matcher = pattern.matcher(errorMessage);
+
+        // Find the expected region
+        if (matcher.find()) {
+            expectedRegion = matcher.group(1);
+            System.out.println("Expected region: " + expectedRegion);
+        } else {
+            System.out.println("Expected region not found in the error message.");
+        }
+         return expectedRegion;
+    }
+
+    public static String getBucketRegion(AmazonS3 s3, String bucketName) throws Exception{
+        return s3.getBucketLocation(new GetBucketLocationRequest(bucketName));
+    }
+    
     private void listObjects(String bucketName, String prefix, List<String> objectNames) {
+
+        AmazonS3 validClientRegionForBucket = createS3Client(bucketName);
+
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
-        ListObjectsV2Result result = awsS3Client.listObjectsV2(request);
+
+        ListObjectsV2Result result = validClientRegionForBucket.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             objectNames.add(commonPrefix);

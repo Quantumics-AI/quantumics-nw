@@ -28,6 +28,7 @@ public class DatasourceConstants {
   public static final String Files = "files";
   public static final String CONNECTION_SUCCESSFUL = "Connection Established successfully!";
   public static final String CONNECTION_FAILED = "Connection failed";
+  public static final String BUCKET_NOT_EXIST = "The specified bucket does not exist";
   private DatasourceConstants() {}
 
 }
