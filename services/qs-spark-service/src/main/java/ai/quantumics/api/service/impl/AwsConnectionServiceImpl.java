@@ -148,9 +148,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     public AmazonS3 createS3Client(String bucketName){
         AmazonS3 s3Client = awsS3Client;
         try {
-            awsS3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
-        }catch(AmazonServiceException e){
-            String region = parseAuthorizationHeader(e.getErrorMessage());
+            s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+        }catch(AmazonServiceException exception){
+            String region = getRegionFromMessage(exception.getErrorMessage());
             if(region == null){
               throw new BucketNotFoundException(BUCKET_NOT_EXIST);
             }
@@ -158,14 +158,24 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                                       .standard()
                                       .withRegion(region)
                                       .build();
-            if(!s3Client.doesBucketExistV2(bucketName)){
-                throw new BucketNotFoundException(BUCKET_NOT_EXIST);
-            }
             return s3Client;
         }catch(Exception e){
-            System.out.println("Exception occurs while getting bucket region: " + e.getStackTrace().toString());
+          e.printStackTrace();
         }
-        return awsS3Client;
+        return s3Client;
+    }
+
+    public static String getRegionFromMessage(String errorMessage){
+        String expectedRegion = null;
+        // Define a regular expression pattern to match the expected region
+        Pattern pattern = Pattern.compile(REGION_PATTERN);
+        Matcher matcher = pattern.matcher(errorMessage);
+
+        // Find the expected region
+        if (matcher.find()) {
+            expectedRegion = matcher.group(1);
+        }
+        return expectedRegion;
     }
 
     @Override
@@ -213,36 +223,16 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
     }
-
-    public static String parseAuthorizationHeader(String errorMessage){
-        String expectedRegion = null;
-        // Define a regular expression pattern to match the expected region
-        Pattern pattern = Pattern.compile("expecting\\s+'(\\S+)'");
-        Matcher matcher = pattern.matcher(errorMessage);
-
-        // Find the expected region
-        if (matcher.find()) {
-            expectedRegion = matcher.group(1);
-            System.out.println("Expected region: " + expectedRegion);
-        } else {
-            System.out.println("Expected region not found in the error message.");
-        }
-         return expectedRegion;
-    }
-
-    public static String getBucketRegion(AmazonS3 s3, String bucketName) throws Exception{
-        return s3.getBucketLocation(new GetBucketLocationRequest(bucketName));
-    }
     
     private void listObjects(String bucketName, String prefix, List<String> objectNames) {
 
-        AmazonS3 validClientRegionForBucket = createS3Client(bucketName);
+        AmazonS3 s3Client = createS3Client(bucketName);
 
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
 
-        ListObjectsV2Result result = validClientRegionForBucket.listObjectsV2(request);
+        ListObjectsV2Result result = s3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             objectNames.add(commonPrefix);
