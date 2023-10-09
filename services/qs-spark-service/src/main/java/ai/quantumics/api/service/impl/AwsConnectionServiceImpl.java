@@ -12,6 +12,7 @@ import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
+import ai.quantumics.api.vo.ColumnDataType;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +32,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.*;
-
+import static ai.quantumics.api.util.RegexUtils.isDouble;
+import ai.quantumics.api.adapter.AwsAdapter;
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
@@ -148,8 +150,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public BucketFileContent getContent(String bucketName, String file) {
         List<Map<String, String>> data = new ArrayList<>();
+
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
+        List<ColumnDataType> dataTypes = new ArrayList<>();
 
         S3Object s3Object = awsS3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
@@ -162,10 +166,28 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             if(headerLine != null && headerLine.length > 0) {
                 headers = Arrays.asList(headerLine);
             }
+
+            if((nextLine = reader.readNext()) != null){
+                Map<String, String> row = new HashMap<>();
+                ColumnDataType columnDataType = null;
+                for (int i = 0; i < nextLine.length ; i++) {
+                    columnDataType = new ColumnDataType();
+                    row.put(headers.get(i), nextLine[i]);
+                    columnDataType.setColumnName(headers.get(i));
+                    columnDataType.setDataType(AwsAdapter.getColumnDataType(nextLine[i]));
+                    dataTypes.add(columnDataType);
+                }
+                data.add(row);
+                dataTypes.add(columnDataType);
+                rowCount++;
+            }
+
             while ((nextLine = reader.readNext()) != null && rowCount < 500) {
                 Map<String, String> row = new HashMap<>();
                 for (int i = 0; i < nextLine.length; i++) {
-                    row.put(headers.get(i), nextLine[i]);
+                    String header = headers.get(i);
+                    String nxt = nextLine[i];
+                    row.put(header, nxt);
                 }
                 data.add(row);
                 rowCount++;
@@ -175,6 +197,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }
         bucketFileContent.setHeaders(headers);
         bucketFileContent.setContent(data);
+        bucketFileContent.setColumnDatatype(dataTypes);
         return bucketFileContent;
     }
 

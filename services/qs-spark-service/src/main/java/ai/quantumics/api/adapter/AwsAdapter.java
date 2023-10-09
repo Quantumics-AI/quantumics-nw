@@ -1770,6 +1770,30 @@ public class AwsAdapter {
 
 		return dataType;
 	}
+	public static String getColumnDataType(String value) {
+		String dataType = "string"; // default type
+
+		if(value != null && !value.isEmpty()) {
+			if (RegexUtils.isInteger(value)) {
+				dataType = "int";
+			} else if (RegexUtils.isLong(value) || RegexUtils.isDouble(value)) {
+				dataType = "float";
+			} else if (ValidatorUtils.isDate(value)) {
+				dataType = "timestamp";
+			} else if (RegexUtils.isAlphaNumeric(value)) {
+				dataType = "string";
+			} else {
+				dataType = "string";
+			}
+		}
+
+		//if (!flag && ValidatorUtils.isCurrency(value)) {
+		//flag = true;
+		//dataType = "currency";
+		//}
+
+		return dataType;
+	}
 
 	/**
 	 * Utility method used to normalize the String by replacing all the special chars with "_" chars
