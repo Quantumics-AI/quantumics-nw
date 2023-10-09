@@ -134,7 +134,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String getFoldersAndFilePath(String bucketName) throws IOException {
-
         List<String> objectNames = new ArrayList<>();
         listObjects(bucketName, "", objectNames);
         return getFoldersAndFilePathHierarchy(objectNames);
@@ -185,15 +184,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
     }
-    
+
     private void listObjects(String bucketName, String prefix, List<String> objectNames) {
-
         AmazonS3 s3Client = AwsAdapter.createNewS3Client(awsS3Client,bucketName);
-
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
-
         ListObjectsV2Result result = s3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
