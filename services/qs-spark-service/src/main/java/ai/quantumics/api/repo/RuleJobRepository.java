@@ -15,4 +15,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RuleJobRepository extends JpaRepository<QsRuleJob, Integer> {
     QsRuleJob findByRuleId(int ruleId);
+    QsRuleJob findByJobId(int jobId);
 }

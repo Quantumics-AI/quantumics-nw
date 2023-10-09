@@ -7,31 +7,22 @@ import json
 # Initialize a Spark session
 spark = SparkSession.builder.appName("Quantumics").getOrCreate()
 
-
-# AWS S3 configurations
-#aws_access_key_id = "your_access_key_id"
-#aws_secret_access_key = "your_secret_access_key"
 bucket1 = $SOURCE_BUCKET
 filepath1 = $SOURCE_PATH
 
 bucket2 = $TARGET_BUCKET
 filepath2 = $TARGET_PATH
 
-job_id = $JOB_ID  # Replace with your job ID
-rule_id = $RULE_ID # Replace with your rule ID
-modified_by = $MODIFIED_BY
-db_schema = $DB_SCHEMA
+job_id = $JOB_ID
+rule_id = $RULE_ID
 rule_type_name = $RULE_TYPE_NAME
 level_name = $LEVEL_NAME
+s3Path= $S3_OUTPUT_PATH
 
 file_paths = [
     (filepath1, bucket1),
     (filepath2, bucket2)
 ]
-
-# Set AWS credentials
-#spark.conf.set("spark.hadoop.fs.s3a.access.key", aws_access_key_id)
-#spark.conf.set("spark.hadoop.fs.s3a.secret.key", aws_secret_access_key)
 
 # Create a list to store counts, filenames, and bucket names
 file_counts = []
@@ -70,30 +61,13 @@ job_output = json.dumps({
     "levelName": level_name
 })
 
-# Define job_status (for demonstration purposes)
-job_status = "Completed"
-
-# Create a DataFrame for the RuleJob table
-if job_id:
-    rule_job_data = spark.createDataFrame([(job_id, rule_id, job_status, job_output, current_utc_datetime, modified_by)],
-                                          ["job_id", "rule_id", "job_status", "job_output", "modified_date", "modified_by"])
-else:
-    rule_job_data = spark.createDataFrame([(rule_id, job_status, job_output, current_utc_datetime, modified_by)],
-                                          ["rule_id", "job_status", "job_output", "modified_date", "modified_by"])
-
 # Print the counts and job_output
-count_results_df.show()
 print("Job Output:")
-print(job_output)
+
+print(job_output, flush=True)
+
+job_output_df = spark.createDataFrame([(job_output,)], ["jobOutput"])
+
+job_output_df.repartition(1).write.format('json').options(mode='overwrite').json(s3Path)
 
 
-# Configure JDBC properties for PostgreSQL
-database_url = "jdbc:postgresql://qsdev-db.carnmyut5cka.us-east-1.rds.amazonaws.com:5432/opensource"
-properties = {
-    "user": "rahul",
-    "password": "Qsai@1234567890",
-    "driver": "org.postgresql.Driver"
-}
-table_name = f"{db_schema}.qsp_rule_job"
-# Write the data to the RuleJob table in PostgreSQL
-rule_job_data.write.mode("update").jdbc(database_url, table_name, properties=properties)
