@@ -15,27 +15,17 @@ export class EditDataSourceComponent implements OnInit {
   @Input() sourceData: any;
   @Input() awsId: number;
   // @Input() rolename: string;
-
+  public loading: boolean;
   fg: FormGroup;
   public accessType: string;
-  // public policyData: any = [
-  //   {
-  //     id: 1,
-  //     policyName: "IAM",
-  //   },
-  //   {
-  //     id: 2,
-  //     policyName: "Resource Policy",
-  //   },
-  //   {
-  //     id: 3,
-  //     policyName: "Secret Key / Access Key"
-  //   }
-  // ];
+  invalidPattern: boolean = false;
+  invalidCapitalPattern: boolean = false;
 
   public accessData:any;
   transformedData: any[] = [];
   public selectedType: string;
+  public sourceListData: any;
+  public alreadyExist: boolean = false;
 
   constructor(
     public modal: NgbActiveModal,
@@ -48,9 +38,10 @@ export class EditDataSourceComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAccessTypes();
+    this.getAwsList()
     this.fg = this.fb.group({
       sourceId: [this.sourceData.id],
-      sourceName : [this.sourceData.connectionName, Validators.required],
+      dataSourceName: [this.sourceData.connectionName, [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
       connectionType:[{ value: this.sourceData.accessType, disabled: true }],
       // roleName:[{ value: this.rolename, disabled: true }],
       subDataSource: [{ value: this.sourceData.subDataSource, disabled: true }, Validators.required],
@@ -78,16 +69,84 @@ export class EditDataSourceComponent implements OnInit {
         id++;
       }
     }
+  }
+
+  public getAwsList(): void {
+    this.loading = true;
+    this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
+      this.loading = false;
+      this.sourceListData = response;
+      if (this.sourceListData.length > 1) {
+        this.sourceListData.sort((val1, val2) => {
+          return (
+            (new Date(val2.createdDate) as any) -
+            (new Date(val1.createdDate) as any)
+          );
+        });
+      }
+    }, (error) => {
+      this.loading = false;
+    })
+  }
+
+  checkIfNameExists() {
+    if (this.sourceListData.length > 0) {
+      const value = this.fg.get('dataSourceName').value;
+      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+      // const enteredName = this.fg.get('dataSourceName').value;
+      const nameExists = this.sourceListData.some(item => item.connectionName === titleCaseValue);
+      
+      if (nameExists) {
+        this.alreadyExist = true;
+      } else {
+        this.alreadyExist = false;
+      }
+    }
     
+  }
+
+  modelChangeDataSourceName(str) {
+
+    // const re = /^[a-zA-Z0-9_]+$/;
+
+    if (this.fg.controls.dataSourceName.value != "") {
+
+      const validCapital = String(str).match(/^([A-Z])/);
+      
+      if (validCapital == null) {
+        this.invalidCapitalPattern = true;
+      } else {
+        this.invalidCapitalPattern = false;
+        const validWorkSpaceName = String(str)
+        .match(
+          /^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/
+        );
+
+        if (validWorkSpaceName == null) {
+          this.invalidPattern = true;
+
+        } else {
+          this.invalidPattern = false;
+        }
+      }
+    } else {
+      this.invalidPattern = false;
+      this.invalidCapitalPattern = false;
+    }
+
   }
 
 
   public updateData(): void {
+    const value = this.fg.get('dataSourceName').value;
+    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    this.fg.get('dataSourceName').setValue(titleCaseValue);
     
     const request = {
       projectId: this.projectId,
       userId: this.userId,
-      connectionName: this.fg.value.sourceName,
+      connectionName: this.fg.controls.dataSourceName.value,
       accessType: this.sourceData.accessType,
       // connectionData: this.sourceData.connectionData,
       subDataSource: this.fg.controls.subDataSource.value,

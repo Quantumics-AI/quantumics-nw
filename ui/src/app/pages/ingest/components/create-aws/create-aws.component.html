@@ -19,7 +19,7 @@
         </div>
     </nav>
     <div class="aws-div">
-        <p class="local-file">
+        <p class="local-file text-center">
             <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg"> -->
             Configure Data Source
         </p>
@@ -38,7 +38,7 @@
                                         </div>
                                     </div> -->
                                     <p class="local-file">
-                                        <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg">
+                                        <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg"> -->
                                         AWS
                                     </p>
                                     
@@ -52,8 +52,7 @@
                                         <input type="text" class="form-control input-design" id="sourceName" #source
                                             formControlName="dataSourceName" autocomplete="off" placeholder="Input connection name" 
                                             minlength="3" maxlength="50" (ngModelChange)="modelChangeDataSourceName($event)"
-                                            (focus)="f.open()"
-                                            (input)="source.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
+                                            (focus)="f.open()" (input)="checkIfNameExists(); source.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
                                             triggers="manual" #f="ngbPopover" [ngbPopover]="popFolderContent"
                                             popoverClass="folder-pophover" placement="bottom">
                                         <small id="workspaceNameHelp" class="form-text body-text-muted">Connection name must be
@@ -71,6 +70,10 @@
                                         <div class="text-error" *ngIf="invalidCapitalPattern">
                                             <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
                                             Connection name must start with capital letter.
+                                        </div>
+                                        <div class="text-error" *ngIf="alreadyExist">
+                                            <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                            Entered Connection name is already used. Please enter a diffrent one.
                                         </div>
                                     </div>
 
@@ -114,11 +117,11 @@
 
                                 <div class="col-12 mt-2">
                                     <div class="float-right">
-                                        <button type="button" class="btn btn-outline-success connectionBtns" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid"
+                                        <button type="button" class="btn btn-outline-success connectionBtns" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid || alreadyExist"
                                         (click)="testConnection()">Test Connection</button>
 
                                         <button type="button" class="btn btn-outline-success connectionBtns mr-l-10" [ngClass]="{'validBtn': connection}" 
-                                        [disabled]="!connection" (click)="continue()">Continue</button>
+                                        [disabled]="!connection" (click)="continue()">Connect</button>
                                     </div>
                                     
                                 </div>

@@ -38,3 +38,18 @@
     margin-left: 20px;
     background-color: #e9ecef;
 }
+
+::ng-deep {
+    .popover .arrow {
+        display: none;
+    }
+
+    .folder-pophover {
+        max-width: 450px !important;
+        width: auto !important;
+    }
+
+    ul {
+        padding-left: 0;
+    }
+}

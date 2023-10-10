@@ -47,6 +47,8 @@ export class CreateAwsComponent {
   public connectionParams: AwsData;
   public accessData: any;
   transformedData: any[] = [];
+  public sourceListData: any;
+  public alreadyExist: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -80,7 +82,44 @@ export class CreateAwsComponent {
     });
 
     this.getAccessTypes();
+    this.getAwsList()
   }
+
+  public getAwsList(): void {
+    this.loading = true;
+    this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
+      this.loading = false;
+      this.sourceListData = response;
+      if (this.sourceListData.length > 1) {
+        this.sourceListData.sort((val1, val2) => {
+          return (
+            (new Date(val2.createdDate) as any) -
+            (new Date(val1.createdDate) as any)
+          );
+        });
+      }
+    }, (error) => {
+      this.loading = false;
+    })
+  }
+
+  checkIfNameExists() {
+    if (this.sourceListData.length > 0) {
+      const value = this.fg.get('dataSourceName').value;
+      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+      // const enteredName = this.fg.get('dataSourceName').value;
+      const nameExists = this.sourceListData.some(item => item.connectionName === titleCaseValue);
+      
+      if (nameExists) {
+        this.alreadyExist = true;
+      } else {
+        this.alreadyExist = false;
+      }
+    }
+    
+  }
+
 
   public getAccessTypes(): void {
     this.sourceDataService.getAccessTypes().subscribe((res) => {
@@ -117,7 +156,6 @@ export class CreateAwsComponent {
   }
 
   modelChangeDataSourceName(str) {
-
     // const re = /^[a-zA-Z0-9_]+$/;
 
     if (this.fg.controls.dataSourceName.value != "") {
@@ -140,18 +178,6 @@ export class CreateAwsComponent {
           this.invalidPattern = false;
         }
       }
-
-      // const validWorkSpaceName = String(str)
-      //   .match(
-      //     /^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/
-      //   );
-
-      // if (validWorkSpaceName == null) {
-      //   this.invalidPattern = true;
-
-      // } else {
-      //   this.invalidPattern = false;
-      // }
     } else {
       this.invalidPattern = false;
       this.invalidCapitalPattern = false;
@@ -170,6 +196,10 @@ export class CreateAwsComponent {
     // const role_data = {
     //   iam: this.fg.controls.roleName.value,
     // } as RoleData;
+
+    const value = this.fg.get('dataSourceName').value;
+    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    this.fg.get('dataSourceName').setValue(titleCaseValue);
 
     this.connectionParams = {
       projectId: this.projectId,

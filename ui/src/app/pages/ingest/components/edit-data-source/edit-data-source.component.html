@@ -8,11 +8,48 @@
     <form [formGroup]="fg">
         <div class="form-group">
             <label for="inputName" class="p2">
-                Data source name*
+                <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
+                Connection name*
             </label>
             <input type="text" class="form-control input-design" id="sourceName" #source
-                formControlName="sourceName" autocomplete="off" placeholder="Data source Name" >
+                formControlName="dataSourceName" autocomplete="off" placeholder="Input connection name" 
+                minlength="3" maxlength="50" (ngModelChange)="modelChangeDataSourceName($event)"
+                (focus)="f.open()" (input)="checkIfNameExists(); source.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
+                triggers="manual" #f="ngbPopover" [ngbPopover]="popFolderContent"
+                popoverClass="folder-pophover" placement="bottom">
+            <small id="workspaceNameHelp" class="form-text body-text-muted">Connection name must be
+                    between 3 and 50 characters long.</small>
+            <div *ngIf="fg.get('dataSourceName').invalid && fg.get('dataSourceName').dirty || fg.get('dataSourceName').touched">
+                <div class="text-error" *ngIf="fg.get('dataSourceName').hasError('required')">
+                    <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                    Connection name is mandatory
+                </div>
+            </div>
+            <div class="text-error" *ngIf="invalidPattern">
+                <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                Connection name should have Alphabates, Numbers and Special characters (Colon, Hypen and Underscore).
+            </div>
+            <div class="text-error" *ngIf="invalidCapitalPattern">
+                <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                Connection name must start with capital letter.
+            </div>
+            <div class="text-error" *ngIf="alreadyExist">
+                <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                Entered Connection name is already used. Please enter a diffrent one.
+            </div>
         </div>
+        <ng-template #popFolderContent>
+            <div class="col-12">
+                <ul>
+                    <li>Connection name is mandatory.</li>
+                    <li>Connection name must be between 3 and 30 characters long.</li>
+                    <li>Connection name should have Alphabets,Numbers, and Special characters ( Colon, Hypen and Underscore ).
+                    </li>
+                    <li>Connection name must start with capital letter</li>
+                    <li>Data source name must be unique.</li>
+                </ul>
+            </div>
+        </ng-template>
 
         <div class="form-group">
             <label for="inputName" class="p2">
@@ -24,7 +61,7 @@
             
         </div>
 
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label for="inputName" class="p2">
                 Access type*
             </label>
@@ -34,7 +71,7 @@
                     {{item.type}}
                 </option>
             </select>
-        </div>
+        </div> -->
         <!-- <div class="form-group">
             <label for="inputName" class="p2">
                 Role name
@@ -45,12 +82,8 @@
 
         <div class="text-center">
             <button type="button" class="btn btn-outline-success connectionBtns" 
-            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid" (click)="updateData()"
+            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid || alreadyExist" (click)="updateData()"
             >Update</button>
-
-            <button type="button" class="btn btn-outline-dark cancel-btn" 
-             (click)="modal.dismiss('Cancel click')"
-            >Cancel</button>
         </div>
     </form>
 </div>
