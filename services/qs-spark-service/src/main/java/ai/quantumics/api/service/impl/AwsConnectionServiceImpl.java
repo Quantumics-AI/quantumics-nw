@@ -1,6 +1,7 @@
 package ai.quantumics.api.service.impl;
 
 import ai.quantumics.api.AwsCustomConfiguration;
+import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.BucketNotFoundException;
@@ -43,6 +44,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
     private AwsCustomConfiguration awsCustomConfiguration;
     private AmazonS3 amazonS3Client;
+    @Autowired
+    private AwsAdapter awsAdapter;
 
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
@@ -208,10 +211,11 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     private void listObjects(String bucketName, String prefix, List<String> objectNames) {
+        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
-        ListObjectsV2Result result = awsS3Client.listObjectsV2(request);
+        ListObjectsV2Result result = s3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             objectNames.add(commonPrefix);
