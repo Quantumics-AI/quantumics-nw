@@ -28,32 +28,7 @@ export class ViewRunningRulesComponent implements OnInit {
   certificateData: Certificate;
   private unsubscribe: Subject<void> = new Subject<void>();
 
-  public runningList = [
-    {
-      jobId: 1,
-      ruleId: 1,
-      ruleName: "Rule 1",
-      jobStatus: "Completed",
-      jobOutput: "{\"source\":100,\"target\":100,\"match\":true}",
-      userId: 1,
-      createdDate: 1696502540587,
-      createdBy: "Test Test",
-      modifiedBy: "Test Test",
-      modifiedDate: 1696502540587
-    },
-    {
-      jobId: 2,
-      ruleId: 2,
-      ruleName: "Rule 2",
-      jobStatus: "InProcess",
-      jobOutput: null,
-      userId: 1,
-      createdDate: 1696502540587,
-      createdBy: "Test Test",
-      modifiedBy: "Test Test",
-      modifiedDate: 1696502540587
-    }
-  ];
+  public runningList: any;
 
   constructor(
     // public modal: NgbActiveModal,
@@ -83,6 +58,7 @@ export class ViewRunningRulesComponent implements OnInit {
   public getRulJobs(): void {
     this.ruleCreationService.getRuleJobs(this.userId, this.projectId).subscribe((response) => {
       console.log("Rule data:", response);
+      this.runningList = response?.result;
       
     })
   }
@@ -90,7 +66,7 @@ export class ViewRunningRulesComponent implements OnInit {
   public viewResult(r: any): void {
     const data = JSON.parse(r.jobOutput);
     console.log(data);
-    const modalRef = this.modalService.open(ViewResultComponent, { size: 'sm', windowClass: 'modal-size', scrollable: false });
+    const modalRef = this.modalService.open(ViewResultComponent, { size: 'sm modal-dialog-centered', windowClass: 'modal-size', scrollable: false });
     modalRef.componentInstance.userId = this.userId;
     modalRef.componentInstance.projectId = this.projectId;
     modalRef.componentInstance.output = data;

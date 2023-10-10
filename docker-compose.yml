@@ -176,6 +176,7 @@ services:
       S3_ENG_RESULT_LOCATION : ${S3_ENG_RESULT_LOCATION}
       SERVICE_HOST_URL : ${SERVICE_HOST_URL}
       PROJECT_NAME : ${PROJECT_NAME}
+      S3_RULE_JOB_BUCKET : ${S3_RULE_JOB_BUCKET}
     ports:
       - "8082:8082"
     healthcheck:

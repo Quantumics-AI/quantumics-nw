@@ -103,7 +103,7 @@ export class SelectSourceTargetComponent {
     // this.router.navigate([`projects/${this.projectId}/ingest/aws`]);
     this.sourceDataService.saveSourceData(this.connectionParams).subscribe((response) => {
       console.log("API", response);
-      this.snakbar.open("Data source saved succesfully");
+      this.snakbar.open("New connection created successfully");
       this.router.navigate([`projects/${this.projectId}/ingest/aws`]);
     }, (error) => {
       this.snakbar.open(error);

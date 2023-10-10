@@ -2680,4 +2680,19 @@ public class AwsAdapter {
 		return runExternalCommand(commands);
 	}
 
+	public void deleteFolderAndContents(String bucketName, String folderKey) {
+		try {
+			amazonS3Client.listObjects(bucketName, folderKey).getObjectSummaries()
+					.forEach(objectSummary -> {
+						amazonS3Client.deleteObject(new DeleteObjectRequest(bucketName, objectSummary.getKey()));
+					});
+
+			amazonS3Client.deleteObject(bucketName, folderKey);
+		} catch (final AmazonServiceException serviceException) {
+			log.error("Error - {}", serviceException.getErrorMessage());
+		} catch (final AmazonClientException exception) {
+			log.error("Error while deleting file {}", exception.getMessage());
+		}
+	}
+
 }

@@ -108,6 +108,23 @@ public class QsConstants {
   public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/Write_Xlsx_To_Csv.py";
   public static final String QS_LIVY_TEMPLATE_NAME = "ai/quantumics/ml/etl_livy_template.py";
   public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Row_Count_Template.py";
+
+  public static final String RULE_OUTPUT_FOLDER = "ruleoutput";
+  public static final String SOURCE_BUCKET = "$SOURCE_BUCKET";
+  public static final String SOURCE_PATH = "$SOURCE_PATH";
+  public static final String TARGET_BUCKET = "$TARGET_BUCKET";
+  public static final String TARGET_PATH = "$TARGET_PATH";
+  public static final String JOB_ID = "$JOB_ID";
+  public static final String RULE_ID = "$RULE_ID";
+  public static final String S3_OUTPUT_PATH = "$S3_OUTPUT_PATH";
+  public static final String RULE_TYPE_NAME = "$RULE_TYPE_NAME";
+  public static final String LEVEL_NAME = "$LEVEL_NAME";
+  public static final String DATA_COMPLETENESS = "Data Completeness";
+  public static final String ROW_COUNT = "Row count check";
+  public static final String SUM_OF_COLUMN_VALUE = "Sum of column value";
+  public static final String DATA_PROFILER = "Data Profiler";
+  public static final String TABLE_LEVEL = "Table Level";
+  public static final String COLUMN_LEVEL = "Column level";
   
   // Email Template Actions
   public static final String USER_NAME_PLACE_HOLDER = "{USER_NAME}";

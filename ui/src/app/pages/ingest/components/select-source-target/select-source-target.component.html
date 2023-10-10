@@ -6,7 +6,7 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type' ]">Dataset</a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page">Import dataset</li>
+                        <li class="breadcrumb-item active" aria-current="page">Data source</li>
                     </ol>
                 </li>
             </ol>
@@ -20,62 +20,48 @@
             </div>
         </nav>
     
-        <div class="source-div">
-            <p class="local-file">
+        <div class="source-div" *ngIf="!loading">
+            <!-- <p class="local-file">
                 <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg">
                 Select Source - Target
-            </p>
+            </p> -->
             <div class="card mr-a">
                 <div class="card-body">
-                    <div class="container">
-                        <div class="list-div">
-                            <p class="card-main-text">Source</p>
-                            <div>
-                                <form [formGroup]="fg" class="form-height">
-                                    <ul class="list-group">
-                                        <li class="list-group-item p2">Bucket</li>
-                                        <li class="list-group-item" *ngFor="let bucket of sourceData">
-                                            <div class="form-group mr-b-0">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input cp" type="radio" name="inlineRadioOptions" 
-                                                    [value]="bucket" formControlName="source">
-                                                    <label class="form-check-label p1" for="inlineRadio1">{{bucket}}</label>
+                    <ng-container *ngIf="sourceData else nobucket;">
+                        <div class="container">
+                            <div class="list-div">
+                                <p class="card-main-text">Select bucket*</p>
+                                <div>
+                                    <form [formGroup]="fg" class="form-height">
+                                        <ul class="list-group">
+                                            <li class="list-group-item p2">Bucket</li>
+                                            <li class="list-group-item" *ngFor="let bucket of sourceData">
+                                                <div class="form-group mr-b-0">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input cp" type="radio" name="inlineRadioOptions" 
+                                                        [value]="bucket" formControlName="source">
+                                                        <label class="form-check-label p1" for="inlineRadio1">{{bucket}}</label>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </li>
-                                      </ul>
-                                </form>
+                                            </li>
+                                          </ul>
+                                    </form>
+                                </div>
                             </div>
-                            
-                        </div>
-                        <!-- <div class="col-md-6">
-                            <p class="card-main-text">Target</p>
-                            <div>
-                                <form [formGroup]="fgt">
-                                    <ul class="list-group">
-                                        <li class="list-group-item p2">Bucket</li>
-                                        <li class="list-group-item" *ngFor="let item of targetData">
-                                            <div class="form-group mr-b-0">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input cp" type="radio" name="inlineRadioOptions" 
-                                                    [value]="item.name" formControlName="target">
-                                                    <label class="form-check-label p1" for="inlineRadio1">{{item.name}}</label>
-                                                </div>
-                                            </div>
-                                        </li>
-                                      </ul>
-                                </form>
+        
+                            <div class="col-md-12 mr-t-30 text-center">
+                                <button type="button" class="btn btn-outline-success connectionBtns" [disabled]="fg.invalid"
+                                [ngClass]="{'validBtn': fg.valid}" (click)="save()">Save</button>
                             </div>
-                            
-                        </div> -->
-    
-                        <div class="col-md-12 mr-t-30 text-center">
-                            <button type="button" class="btn btn-outline-success connectionBtns" [disabled]="fg.invalid"
-                            [ngClass]="{'validBtn': fg.valid}" (click)="save()">Save</button>
                         </div>
-    
-                        
-                    </div>
+                    </ng-container>
+                    <ng-template #nobucket>
+                        <div class="connect-s text-center">
+                            <img src="assets/img/govern/no-dq.svg" class="img-fluid">
+                            <p class="tp1 wm">Oops! There is no bucket available under your account</p>
+                        </div>
+                    </ng-template>
+                    
                 </div>
             </div>
         </div>
