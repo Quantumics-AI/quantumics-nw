@@ -101,12 +101,12 @@ export class ListAwsComponent {
 
     if (this.isDescending) {
       this.sourceListData = this.sourceListData.sort((a, b) => {
-        var source_name_order = a.dataSourceName.localeCompare(b.dataSourceName);
+        var source_name_order = a.connectionName.localeCompare(b.connectionName);
         return source_name_order;
       });
     } else {
       this.sourceListData = this.sourceListData.sort((a, b) => {
-        var source_name_order = b.dataSourceName.localeCompare(a.dataSourceName);
+        var source_name_order = b.connectionName.localeCompare(a.connectionName);
         return source_name_order;
       });
     }
@@ -205,7 +205,7 @@ export class ListAwsComponent {
   }
 
   clearSearhInput() {
-    this.searchTerm = { dataSourceName: '' };
+    this.searchTerm = { connectionName: '' };
     this.searchDiv = false;
   }
 
