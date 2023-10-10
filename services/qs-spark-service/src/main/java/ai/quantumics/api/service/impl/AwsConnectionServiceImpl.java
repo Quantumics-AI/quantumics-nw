@@ -42,6 +42,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
     private AwsCustomConfiguration awsCustomConfiguration;
     private AmazonS3 amazonS3Client;
+    @Autowired
+    private AwsAdapter awsAdapter;
 
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
@@ -186,7 +188,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     private void listObjects(String bucketName, String prefix, List<String> objectNames) {
-        AmazonS3 s3Client = AwsAdapter.createNewS3Client(awsS3Client,bucketName);
+        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);

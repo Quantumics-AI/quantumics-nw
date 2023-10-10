@@ -86,6 +86,8 @@ public class AwsAdapter {
 	private final AwsCustomConfiguration awsCustomConfiguration;
 
 	@Autowired private QsUtil qsUtil;
+	@Autowired
+	private AmazonS3 awsS3Client;
 
 	@Value("${qs.athena.query.output}")
 	private String qsAthenaOpBucket;
@@ -2675,7 +2677,7 @@ public class AwsAdapter {
 		}
 	}
 
-	public static AmazonS3 createNewS3Client(AmazonS3 awsS3Client, String bucketName){
+	public AmazonS3 createS3BucketClient(String bucketName){
 		AmazonS3 s3Client = awsS3Client;
 		try {
 			s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
@@ -2690,7 +2692,7 @@ public class AwsAdapter {
 					.build();
 			return s3Client;
 		}catch(Exception e){
-			e.printStackTrace();
+			log.info(e.getMessage());
 		}
 		return s3Client;
 	}
