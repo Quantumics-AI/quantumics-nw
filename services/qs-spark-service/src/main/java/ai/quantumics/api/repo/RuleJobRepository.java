@@ -12,8 +12,12 @@ import ai.quantumics.api.model.QsRuleJob;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RuleJobRepository extends JpaRepository<QsRuleJob, Integer> {
-    QsRuleJob findByRuleId(int ruleId);
-    QsRuleJob findByJobId(int jobId);
+    QsRuleJob findByRuleIdAndActiveIsTrue(int ruleId);
+    QsRuleJob findByJobIdAndActiveIsTrue(int jobId);
+    List<QsRuleJob> findByJobIdInAndActiveIsTrue(List<Integer> jobIds);
+    List<QsRuleJob> findAllByActiveTrue();
 }

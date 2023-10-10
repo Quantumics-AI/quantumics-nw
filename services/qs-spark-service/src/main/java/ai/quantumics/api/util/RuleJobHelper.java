@@ -27,11 +27,14 @@ import static ai.quantumics.api.constants.QsConstants.SOURCE_BUCKET;
 import static ai.quantumics.api.constants.QsConstants.SOURCE_PATH;
 import static ai.quantumics.api.constants.QsConstants.TARGET_BUCKET;
 import static ai.quantumics.api.constants.QsConstants.TARGET_PATH;
-import static ai.quantumics.api.constants.QsConstants.JOB_ID;
-import static ai.quantumics.api.constants.QsConstants.RULE_ID;
 import static ai.quantumics.api.constants.QsConstants.S3_OUTPUT_PATH;
 import static ai.quantumics.api.constants.QsConstants.RULE_TYPE_NAME;
 import static ai.quantumics.api.constants.QsConstants.LEVEL_NAME;
+import static ai.quantumics.api.constants.QsConstants.DQ_COLUMN_SUM_TEMPLATE_NAME;
+import static ai.quantumics.api.constants.QsConstants.DQ_NULL_VALUE_TEMPLATE_NAME;
+import static ai.quantumics.api.constants.QsConstants.ACCEPTANCE_PER;
+import static ai.quantumics.api.constants.QsConstants.COLUMNS_DETAILS;
+import static ai.quantumics.api.constants.QsConstants.NULL_VALUE;
 
 @Slf4j
 @Component
@@ -67,9 +70,14 @@ public class RuleJobHelper {
                         scriptStr = rowCountEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                         break;
                     case SUM_OF_COLUMN_VALUE:
-                        //TODO: Implement
+                        readLinesFromTemplate(fileContents, DQ_COLUMN_SUM_TEMPLATE_NAME);
+                        scriptStr = sumColumnEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                         break;
                 }
+                break;
+            case NULL_VALUE:
+                readLinesFromTemplate(fileContents, DQ_NULL_VALUE_TEMPLATE_NAME);
+                scriptStr = nullValueEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                 break;
             case DATA_PROFILER:
                 switch (levelName) {
@@ -113,6 +121,22 @@ public class RuleJobHelper {
             RuleDetails ruleDetails,
             String jobName) {
 
+        String temp = prepareDataCompletenessEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
+        return temp;
+    }
+
+    private String sumColumnEtlScriptVarsInit(
+            StringBuilder fileContents,
+            QsRuleJob ruleJob,
+            RuleDetails ruleDetails,
+            String jobName) {
+
+        String temp = prepareDataCompletenessEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
+        temp = temp.replace(COLUMNS_DETAILS, String.format("'%s'", String.join(",", ruleDetails.getRuleDetails().getRuleLevel().getColumns())));
+        return temp;
+    }
+
+    private String prepareDataCompletenessEtlScriptVarsInit(StringBuilder fileContents, QsRuleJob ruleJob, RuleDetails ruleDetails, String jobName) {
         String temp;
         jobName = jobName.replace(".py", "");
 
@@ -123,11 +147,32 @@ public class RuleJobHelper {
         temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
         temp = temp.replace(TARGET_BUCKET, String.format("'%s'", ruleDetails.getTargetData().getBucketName()));
         temp = temp.replace(TARGET_PATH, String.format("'%s'", ruleDetails.getTargetData().getFilePath()));
-        temp = temp.replace(JOB_ID, String.format("'%s'", ruleJob.getJobId()));
-        temp = temp.replace(RULE_ID, String.format("'%s'", ruleJob.getRuleId()));
         temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", targetBucketName));
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
+        temp = temp.replace(ACCEPTANCE_PER, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getAcceptance()));
         return temp;
     }
+
+    private String nullValueEtlScriptVarsInit(
+            StringBuilder fileContents,
+            QsRuleJob ruleJob,
+            RuleDetails ruleDetails,
+            String jobName) {
+
+        String temp;
+        jobName = jobName.replace(".py", "");
+
+        final String targetBucketName =
+                String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
+
+        temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", ruleDetails.getSourceData().getBucketName()));
+        temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", targetBucketName));
+        temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
+        temp = temp.replace(ACCEPTANCE_PER, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getAcceptance()));
+        temp = temp.replace(COLUMNS_DETAILS, String.format("'%s'", String.join(",", ruleDetails.getRuleDetails().getRuleLevel().getColumns())));
+        return temp;
+    }
+
 }

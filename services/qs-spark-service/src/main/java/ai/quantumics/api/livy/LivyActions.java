@@ -1135,6 +1135,11 @@ public class LivyActions {
             if ("success".equals(batchJobState)) {
                 jobName = jobName.replace(".py", "");
                 S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                if(s3Object == null) { //Error in livy job
+                    updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+                    log.info("Failed running the Rule Job...");
+                    return batchJobId;
+                }
                 S3ObjectInputStream inputStream = s3Object.getObjectContent();
 
                 // Read the JSON data from the input stream
@@ -1165,7 +1170,7 @@ public class LivyActions {
         dbUtil.changeSchema("public");
         final Projects project = projectService.getProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        QsRuleJob ruleJob = ruleJobRepository.findByJobId(ruleJobId);
+        QsRuleJob ruleJob = ruleJobRepository.findByJobIdAndActiveIsTrue(ruleJobId);
         if(ruleJob != null) {
             ruleJob.setJobStatus(status);
             ruleJob.setJobOutput(jobOutput);
