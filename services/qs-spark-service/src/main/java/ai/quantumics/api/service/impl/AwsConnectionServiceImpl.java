@@ -152,13 +152,18 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public BucketFileContent getContent(String bucketName, String file) {
+        if(file == null){
+            throw new BadRequestException(FILE_NAME);
+        }else if(!file.endsWith(".csv")){
+            throw new BadRequestException(CSV_FILE);
+        }
         List<Map<String, String>> data = new ArrayList<>();
 
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
-
-        S3Object s3Object = awsS3Client.getObject(bucketName, file);
+        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
+        S3Object s3Object = s3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
@@ -174,10 +179,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 Map<String, String> row = new HashMap<>();
                 ColumnDataType columnDataType = null;
                 for (int i = 0; i < nextLine.length ; i++) {
+                    String header = headers.get(i);
+                    String nxtLine = nextLine[i];
                     columnDataType = new ColumnDataType();
-                    row.put(headers.get(i), nextLine[i]);
-                    columnDataType.setColumnName(headers.get(i));
-                    columnDataType.setDataType(AwsAdapter.getColumnDataType(nextLine[i]));
+                    row.put(header, nxtLine);
+                    columnDataType.setColumnName(header);
+                    columnDataType.setDataType(AwsAdapter.getColumnDataType(nxtLine));
                     dataTypes.add(columnDataType);
                 }
                 data.add(row);
