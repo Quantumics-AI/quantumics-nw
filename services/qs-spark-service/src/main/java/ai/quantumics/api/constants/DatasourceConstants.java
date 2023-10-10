@@ -30,7 +30,8 @@ public class DatasourceConstants {
   public static final String CONNECTION_FAILED = "Connection failed";
   public static final String BUCKET_NOT_EXIST = "The specified bucket does not exist";
   public static final String REGION_PATTERN = "expecting\\s+'(\\S+)'";
-  public static final String FILE_NAME = "File name can't be null";
+  public static final String CSV_EXTENSION = ".csv";
+  public static final String FILE_NAME_NOT_NULL = "File name can't be null";
   public static final String CSV_FILE = "Please provide only .csv file";
   private DatasourceConstants() {}
 

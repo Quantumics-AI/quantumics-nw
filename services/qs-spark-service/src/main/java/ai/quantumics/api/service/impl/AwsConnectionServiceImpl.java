@@ -153,8 +153,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public BucketFileContent getContent(String bucketName, String file) {
         if(file == null){
-            throw new BadRequestException(FILE_NAME);
-        }else if(!file.endsWith(".csv")){
+            throw new BadRequestException(FILE_NAME_NOT_NULL);
+        }else if(!file.endsWith(CSV_EXTENSION)){
             throw new BadRequestException(CSV_FILE);
         }
         List<Map<String, String>> data = new ArrayList<>();
@@ -195,9 +195,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             while ((nextLine = reader.readNext()) != null && rowCount < 500) {
                 Map<String, String> row = new HashMap<>();
                 for (int i = 0; i < nextLine.length; i++) {
-                    String header = headers.get(i);
-                    String nxt = nextLine[i];
-                    row.put(header, nxt);
+                    row.put(headers.get(i), nextLine[i]);
                 }
                 data.add(row);
                 rowCount++;

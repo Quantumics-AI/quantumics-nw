@@ -1792,12 +1792,6 @@ public class AwsAdapter {
 				dataType = "string";
 			}
 		}
-
-		//if (!flag && ValidatorUtils.isCurrency(value)) {
-		//flag = true;
-		//dataType = "currency";
-		//}
-
 		return dataType;
 	}
 
