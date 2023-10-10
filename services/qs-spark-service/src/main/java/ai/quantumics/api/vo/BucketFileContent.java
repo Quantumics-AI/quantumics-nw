@@ -12,5 +12,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class BucketFileContent {
     private List<String> headers;
+    private List<ColumnDataType> columnDatatype;
     private List<Map<String, String>> content;
 }

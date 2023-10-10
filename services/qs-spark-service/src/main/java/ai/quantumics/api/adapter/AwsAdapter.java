@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -1774,6 +1775,22 @@ public class AwsAdapter {
 		//dataType = "currency";
 		//}
 
+		return dataType;
+	}
+	public static String getColumnDataType(String value) {
+		String dataType = "string"; // default type
+
+		if(!StringUtils.isEmpty(value)) {
+			if (RegexUtils.isInteger(value)) {
+				dataType = "int";
+			} else if (RegexUtils.isLong(value) || RegexUtils.isDouble(value)) {
+				dataType = "float";
+			} else if (ValidatorUtils.isDate(value)) {
+				dataType = "date";
+			} else if (RegexUtils.isAlphaNumeric(value)) {
+				dataType = "string";
+			}
+		}
 		return dataType;
 	}
 

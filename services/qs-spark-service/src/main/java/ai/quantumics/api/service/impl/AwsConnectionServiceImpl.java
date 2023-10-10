@@ -13,6 +13,7 @@ import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
+import ai.quantumics.api.vo.ColumnDataType;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,7 +33,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.*;
-
+import static ai.quantumics.api.util.RegexUtils.isDouble;
+import ai.quantumics.api.adapter.AwsAdapter;
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
@@ -150,11 +152,18 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public BucketFileContent getContent(String bucketName, String file) {
+        if(file == null){
+            throw new BadRequestException(FILE_NAME_NOT_NULL);
+        }else if(!file.endsWith(CSV_EXTENSION)){
+            throw new BadRequestException(CSV_FILE);
+        }
         List<Map<String, String>> data = new ArrayList<>();
+
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
-
-        S3Object s3Object = awsS3Client.getObject(bucketName, file);
+        List<ColumnDataType> dataTypes = new ArrayList<>();
+        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
+        S3Object s3Object = s3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
@@ -165,6 +174,24 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             if(headerLine != null && headerLine.length > 0) {
                 headers = Arrays.asList(headerLine);
             }
+
+            if((nextLine = reader.readNext()) != null){
+                Map<String, String> row = new HashMap<>();
+                ColumnDataType columnDataType = null;
+                for (int i = 0; i < nextLine.length ; i++) {
+                    String header = headers.get(i);
+                    String nxtLine = nextLine[i];
+                    columnDataType = new ColumnDataType();
+                    row.put(header, nxtLine);
+                    columnDataType.setColumnName(header);
+                    columnDataType.setDataType(AwsAdapter.getColumnDataType(nxtLine));
+                    dataTypes.add(columnDataType);
+                }
+                data.add(row);
+                dataTypes.add(columnDataType);
+                rowCount++;
+            }
+
             while ((nextLine = reader.readNext()) != null && rowCount < 500) {
                 Map<String, String> row = new HashMap<>();
                 for (int i = 0; i < nextLine.length; i++) {
@@ -178,6 +205,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }
         bucketFileContent.setHeaders(headers);
         bucketFileContent.setContent(data);
+        bucketFileContent.setColumnDatatype(dataTypes);
         return bucketFileContent;
     }
 
