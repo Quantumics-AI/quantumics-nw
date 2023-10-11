@@ -71,7 +71,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private boolean isUseConfigBuckets;
 
     @Value("${qs.aws.config.buckets}")
-    private String configBuckets;
+    private String configBucketNames;
 
     public static final String SPLIT_COMMA = ",";
 
@@ -158,10 +158,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public List<String> getBuckets() {
         if(isUseConfigBuckets) {
-            if(StringUtils.isEmpty(configBuckets)) {
+            if(StringUtils.isEmpty(configBucketNames)) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
-            List<String> buckets = Arrays.asList(configBuckets.split(SPLIT_COMMA));
+            List<String> buckets = Arrays.asList(configBucketNames.split(SPLIT_COMMA));
             for(String bucketName : buckets) {
                 AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
                 if(s3Client == null) {
@@ -189,10 +189,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public String testConnection(String accessMethod) {
         if(isUseConfigBuckets) {
-            if(StringUtils.isEmpty(configBuckets)) {
+            if(StringUtils.isEmpty(configBucketNames)) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
-            List<String> buckets = Arrays.asList(configBuckets.split(SPLIT_COMMA));
+            List<String> buckets = Arrays.asList(configBucketNames.split(SPLIT_COMMA));
             for(String bucketName : buckets) {
                 AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
                 if(s3Client == null) {
