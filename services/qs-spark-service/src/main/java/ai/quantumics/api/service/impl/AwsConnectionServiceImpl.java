@@ -57,6 +57,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -230,6 +231,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             String[] headerLine;
             int rowCount = 0;
             headerLine = reader.readNext();
+            if(headerLine == null){
+                throw new BadRequestException(EMPTY_FILE);
+            }
             if(headerLine != null && headerLine.length > 0) {
                 headers = Arrays.asList(headerLine);
             }
