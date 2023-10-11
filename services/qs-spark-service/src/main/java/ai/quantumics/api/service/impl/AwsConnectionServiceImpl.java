@@ -8,6 +8,7 @@ import ai.quantumics.api.exceptions.BucketNotFoundException;
 import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.model.AWSDatasource;
+import ai.quantumics.api.model.ObjectMetadata;
 import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
@@ -54,8 +56,8 @@ import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
-import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -182,8 +184,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public String getFoldersAndFilePath(String bucketName) throws IOException {
         List<String> objectNames = new ArrayList<>();
-        listObjects(bucketName, "", objectNames);
-        return getFoldersAndFilePathHierarchy(objectNames);
+        List<S3ObjectSummary> objectSummaries = new ArrayList<>();
+        listObjects(bucketName, "", objectNames,objectSummaries);
+        return getFoldersAndFilePathHierarchy(objectNames,objectSummaries);
     }
 
     @Override
@@ -228,6 +231,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             String[] headerLine;
             int rowCount = 0;
             headerLine = reader.readNext();
+            if(headerLine == null){
+                throw new BadRequestException(EMPTY_FILE);
+            }
             if(headerLine != null && headerLine.length > 0) {
                 headers = Arrays.asList(headerLine);
             }
@@ -266,13 +272,13 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return bucketFileContent;
     }
 
-    private String getFoldersAndFilePathHierarchy(List<String> objectNames) throws IOException {
-        ObjectNode rootNode = createFolderHierarchy(objectNames);
+    private String getFoldersAndFilePathHierarchy(List<String> objectNames, List<S3ObjectSummary> objectSummaries) throws IOException {
+        ObjectNode rootNode = createFolderHierarchy(objectNames, objectSummaries);
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
     }
 
-    private void listObjects(String bucketName, String prefix, List<String> objectNames) {
+    private void listObjects(String bucketName, String prefix, List<String> objectNames, List<S3ObjectSummary> objectSummaries) {
         AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
@@ -281,8 +287,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             objectNames.add(commonPrefix);
-            listObjects(bucketName, commonPrefix, objectNames);
+            listObjects(bucketName, commonPrefix, objectNames, objectSummaries);
         }
+        objectSummaries.addAll(result.getObjectSummaries());
         objectNames.addAll(Arrays.asList(result.getObjectSummaries().stream()
                 .map(S3ObjectSummary::getKey)
                 .toArray(String[]::new)));
@@ -307,16 +314,17 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return awsDatasource;
     }
 
-    private static ObjectNode createFolderHierarchy(List<String> objectNames) {
+    private static ObjectNode createFolderHierarchy(List<String> objectNames,List<S3ObjectSummary> objectSummaries) {
         ObjectNode rootNode = new ObjectMapper().createObjectNode();
-        for (String path : objectNames) {
+        for(S3ObjectSummary objectSummary :objectSummaries){
+            String path = objectSummary.getKey();
             String[] parts = path.split("/");
-            addFolder(path, rootNode,  parts, 0);
+            addFolder(path, rootNode,  parts, 0,objectSummary);
         }
         return rootNode;
     }
 
-    private static void addFolder(String folder, ObjectNode parentFolders, String[] parts, int depth) {
+    private static void addFolder(String folder, ObjectNode parentFolders, String[] parts, int depth,S3ObjectSummary objectSummary) {
         if (depth >= parts.length) {
             return;
         }
@@ -331,19 +339,26 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         if (depth == parts.length - 1) {
             String fileName = parts[parts.length - 1];
             if(!folder.endsWith("/")){
+                ObjectMetadata objectMetadata = new ObjectMetadata();
+                objectMetadata.setFileName(fileName);
+                objectMetadata.setFileLastModified(objectSummary.getLastModified());
+                objectMetadata.setFileSize(objectSummary.getSize());
+                ObjectMapper objectMapper = new ObjectMapper();
+                ObjectNode metaDataNode = objectMapper.valueToTree(objectMetadata);
                 JsonNode node = parentFolders.get(Files);
                 if(node == null){
                     ArrayNode filesNode = parentFolders.putArray(Files);
-                    filesNode.add(fileName);
+                    filesNode.add(metaDataNode);
                 } else {
-                    ((ArrayNode) node).add(fileName);
+                    ((ArrayNode) node).add(metaDataNode);
                 }
+
             } else {
                 childFolders = new ObjectMapper().createObjectNode();
                 parentFolders.set(folderName, childFolders);
             }
         } else {
-            addFolder(folder, childFolders, parts, depth + 1);
+            addFolder(folder, childFolders, parts, depth + 1,objectSummary);
         }
     }
 }

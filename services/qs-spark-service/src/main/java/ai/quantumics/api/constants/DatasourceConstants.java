@@ -8,15 +8,6 @@
 
 package ai.quantumics.api.constants;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
-import java.util.TimeZone;
-
 public class DatasourceConstants {
 
   public static final String DATA_SOURCE_EXIST = "Entered Data Source Name is already used.Please enter a different name";
@@ -33,6 +24,7 @@ public class DatasourceConstants {
   public static final String CSV_EXTENSION = ".csv";
   public static final String FILE_NAME_NOT_NULL = "File name can't be null";
   public static final String CSV_FILE = "Please provide only .csv file";
+  public static final String EMPTY_FILE = "File has no content";
   private DatasourceConstants() {}
 
 }
