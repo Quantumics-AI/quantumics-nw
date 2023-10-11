@@ -161,10 +161,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
             List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
-            if(CollectionUtils.isEmpty(buckets)) {
-                throw new BadRequestException(EMPTY_BUCKET);
-            }
-            if(StringUtils.isEmpty(buckets.get(0))) {
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
             AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
@@ -196,10 +193,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
             List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
-            if(CollectionUtils.isEmpty(buckets)) {
-                throw new BadRequestException(EMPTY_BUCKET);
-            }
-            if(StringUtils.isEmpty(buckets.get(0))) {
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
             AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
