@@ -12,6 +12,6 @@ import java.util.List;
 public class RuleLevel {
     private String levelName;
     private boolean columnLevel;
-    private double acceptance;
+    private int acceptance;
     private List<String> columns;
 }

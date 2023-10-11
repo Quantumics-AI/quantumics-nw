@@ -103,7 +103,7 @@ public class RuleJobServiceImpl implements RuleJobService {
                     response.put("code", HttpStatus.SC_BAD_REQUEST);
                     response.put("message", "Requested rule with Id: " + ruleId + " not found.");
                 }
-                if (ruleJob == null) {
+                if (ruleJob == null && ruleId > 0) {
                     ruleJob = new QsRuleJob();
                     ruleJob.setRuleId(ruleId);
                     ruleJob.setJobStatus(RuleJobStatus.INPROCESS.getStatus());
@@ -112,7 +112,7 @@ public class RuleJobServiceImpl implements RuleJobService {
                     ruleJob.setCreatedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-                    ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                    ruleJob.setModifiedBy(ruleJob.getCreatedBy());
                     ruleJob = ruleJobRepository.save(ruleJob);
                 }
 
