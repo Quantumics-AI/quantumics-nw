@@ -113,9 +113,13 @@ public class RuleJobServiceImpl implements RuleJobService {
                     ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                     ruleJob.setModifiedBy(ruleJob.getCreatedBy());
-                    ruleJob = ruleJobRepository.save(ruleJob);
+                } else {
+                    ruleJob.setJobStatus(RuleJobStatus.INPROCESS.getStatus());
+                    ruleJob.setJobOutput(null);
+                    ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+                    ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                 }
-
+                ruleJob = ruleJobRepository.save(ruleJob);
                 RuleDetails ruleDetails = convertToRuleDetails(rule);
                 ruleJobHelper.submitRuleJob(ruleJob, ruleDetails, controllerHelper.getFullName(userObj.getQsUserProfile()), projectId);
             }
