@@ -24,8 +24,8 @@ export class DataQualityListComponent implements OnInit {
   private certificateData: Certificate;
   public loading:boolean;
   public ruleFilter = [
-    { label: 'Inactive', name: 'inactive', selected: false },
-    { label: 'Deleted', name: 'delete', selected: false }
+    { label: 'Inactive', name: 'Inactive', selected: false },
+    { label: 'Deleted', name: 'Deleted', selected: false }
   ] as RuleFilter[];
 
   public dataQualityList: any;
@@ -143,7 +143,6 @@ export class DataQualityListComponent implements OnInit {
     this.dataQualityList.forEach(dataQuality => {
       dataQuality.selected = isChecked;
     });
-    console.log("selected rule id:", this.ruleId);
   }
   
 
@@ -163,8 +162,6 @@ export class DataQualityListComponent implements OnInit {
     this.anyCheckboxSelected = this.dataQualityList.some(item => item.selected);
     // Check if all checkboxes are selected and update the "Select All" checkbox accordingly
     this.selectAllChecked = this.dataQualityList.every(item => item.selected);
-
-    console.log("selected rule id:", this.ruleId);
     
   }
 
@@ -203,15 +200,13 @@ export class DataQualityListComponent implements OnInit {
     } else {
       this.ruleStatus = selectedFilter.name;
     }
-
-    console.log("Selected value:", this.ruleStatus);
     this.getStatusRules();
   }
 
   public getStatusRules(): void {
     this.loading = true;
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
-      console.log("rules list: ", response);
+      
       this.dataQualityList = response?.result?.content;
       this.loading = false;
     }, (error) => {

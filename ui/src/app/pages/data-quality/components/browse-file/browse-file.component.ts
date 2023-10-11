@@ -113,6 +113,10 @@ export class BrowseFileComponent implements OnInit {
     return Array.isArray(obj);
   }
 
+  convertKBtoMB(kb: number): number {
+    return kb / 1024; // 1 MB = 1024 KB
+  }
+
   toggleNode(node: string, indentLevel: number): void {
     if (indentLevel === 0) {
       this.openNodes = [];
@@ -161,17 +165,17 @@ export class BrowseFileComponent implements OnInit {
   }
   
 
-  public showTable(file: string): void {
+  public showTable(file: any): void {
     // debugger
-    this.selectedFile = file;
+    this.selectedFile = file.fileName;
     const index = this.openNodes.indexOf(file);
     if (index !== -1) {
       this.openNodes.splice(index, 1);
     } else {
-      this.openNodes.push(file);
+      this.openNodes.push(file.fileName);
     }
 
-    console.log('show table', file , 'open nodes:', this.openNodes );
+    console.log('show table', file.fileName , 'open nodes:', this.openNodes );
     console.log('path',this.openNodes.join('/') );
     this.filePath = this.openNodes.join('/');
     // myArray.join('/')

@@ -113,19 +113,19 @@ export class ViewRunningRulesComponent implements OnInit {
 
   public cancelInprocess(): void {
     this.loading = true;
-    // Initialize an empty array to store ruleIds
-    const ruleIds: number[] = [];
+    // Initialize an empty array to store jobIds
+    const jobIds: number[] = [];
 
     // Iterate through the runningList to find objects with jobStatus "Inprocess"
     for (const item of this.runningList) {
         if (item.jobStatus === 'Inprocess') {
-            // Push the ruleId into the array
-            ruleIds.push(item.ruleId);
+            // Push the jobIds into the array
+            jobIds.push(item.jobId);
         }
     }
 
     const req = {
-      jobIds : ruleIds
+      jobIds : jobIds
     };
 
     this.ruleCreationService.cancelRunningRule(this.userId, this.projectId, req).subscribe((res) => {
@@ -136,8 +136,8 @@ export class ViewRunningRulesComponent implements OnInit {
       this.loading = false;
     });
 
-    // Now, 'ruleIds' contains all the ruleIds for objects with jobStatus "Inprocess"
-    console.log(ruleIds); // You can use the 'ruleIds' array as needed
+    // Now, 'jobIds' contains all the jobIds for objects with jobStatus "Inprocess"
+    console.log(jobIds); // You can use the 'jobIds' array as needed
   }
 
   public refresh(): void {

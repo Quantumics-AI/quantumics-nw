@@ -346,7 +346,7 @@
                                                     placeholder="Select Attributes" 
                                                     bindLabel="name" groupBy="item" [selectableGroup]="true"
                                                     bindValue="id" [(ngModel)]="selectedMultipleAttributeName"
-                                                    [closeOnSelect]="false" [items]="duplicateDataTwo">
+                                                    [closeOnSelect]="false" [items]="completenessData">
 
                                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                                         <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
@@ -364,9 +364,10 @@
                             <ng-template #nullValue>
                                 <div class="form-group mr-b-0 dif">
                                 
-                                    <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectNullAttributes" [(ngModel)]="selectedNullName" placeholder="Select Attributes">
-                                        <option [value]="undefined" disabled selected> Select Attributes </option>
-                                        <option *ngFor="let i of completenessData" [value]="i">
+                                    <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
+                                    [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                        <!-- <option [value]="undefined"> Select Attributes </option> -->
+                                        <option *ngFor="let i of completenessData" [ngValue]="i">
                                             {{i}}
                                         </option>
                                     </select>

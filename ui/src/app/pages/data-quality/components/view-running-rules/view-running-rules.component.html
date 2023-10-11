@@ -45,7 +45,7 @@
                                         {{view?.jobStatus}}
                                     </td>
                                     <td>
-                                        {{ view?.jobOutput ? parseJobOutput(view.jobOutput) : 'MisMatch' }}
+                                        {{ view?.jobOutput ? parseJobOutput(view?.jobOutput) : '' }}
                                     </td>
                                     <td>
                                         <span *ngIf="view?.jobOutput" class="cp vr" (click)="viewResult(view)">View result</span>

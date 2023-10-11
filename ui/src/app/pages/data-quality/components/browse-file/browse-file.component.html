@@ -51,7 +51,7 @@
                                 <img class="pd-r-12" src="assets/img/pipline/r-arrow.svg">
                               </span>
                               <span class="pd-r-12"><img src="assets/img/project-stats/folder-i.svg"></span>
-                              <span>{{ node.key }}</span>
+                              <span [style.padding-left.px]="indentLevel * 10">{{ node.key }}</span>
                             </td>
                             <td [ngClass]="{'child-node': indentLevel > 0}"> <!-- Hardcoded createdDateTime for main node -->
                               <!-- 2023-09-30 10:00 AM -->
@@ -68,13 +68,14 @@
                               </ng-container>
                               <ng-container *ngIf="isArray(node.value[key])">
                                 <tr *ngFor="let file of node.value[key]; let i = index" class="td-text">
-                                  <td class="child-node pipe-n cp" (click)="showTable(file)" [style.padding-left.px]="indentLevel * 55">
+                                  <!-- [style.padding-left.px]="indentLevel * 55" -->
+                                  <td class="child-node pipe-n cp pd-l-55" (click)="showTable(file)">
                                     <span title="{{file}}" class="pd-r-12"><img src="assets/img/pipline/file.svg"></span>
-                                    {{ file }}
+                                    {{ file.fileName }}
                                   </td>
-                                  <td class="child-node"></td> <!-- Empty cell for createdDateTime for child nodes -->
-                                  <td class="child-node"></td>
-                                  <td class="child-node"></td> <!-- Empty cell for createdBy for child nodes -->
+                                  <td class="child-node">{{file?.fileLastModified | date: 'dd-MM-yy, hh:mm a'}}</td> <!-- Empty cell for createdDateTime for child nodes -->
+                                  <td class="child-node">File</td>
+                                  <td class="child-node">{{convertKBtoMB(file.fileSize) | number: '1.2-2'}} MB</td> <!-- Empty cell for createdBy for child nodes -->
                                 </tr>
                               </ng-container>
                             </ng-container>

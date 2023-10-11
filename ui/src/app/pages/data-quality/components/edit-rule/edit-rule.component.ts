@@ -24,18 +24,7 @@ export class EditRuleComponent implements OnInit {
   public projectId: number;
   userId: number;
   public selectedNullName: string;
-  public completenessData: any = [
-    "Salary",
-		"Basic",
-		"Gross",
-		"Age"
-  ];
-  public duplicateDataTwo: any = [
-    "Salary",
-		"Basic",
-		"Gross",
-		"Age"
-  ];
+  public completenessData: any = [];
   public ruleTypesData: any;
   public selectedMainRuleType: string;
   public selectedSubLevel: string;
@@ -107,7 +96,6 @@ export class EditRuleComponent implements OnInit {
       selectColumnAttribute: new FormControl({ value: '', disabled: true }),
       selectMultipleAttribute: new FormControl({ value: '', disabled: true }),
       percentage: new FormControl({ value: '', disabled: true }),
-      selectNullAttributes: new FormControl({ value: '', disabled: true }),
       //
       status: new FormControl('', Validators.required)
     });
@@ -122,9 +110,7 @@ export class EditRuleComponent implements OnInit {
 
   public getSelectedRule(): void {
     this.ruleCreationService.getEditRule(this.userId, this.projectId, this.ruleId).subscribe((response) => {
-      console.log(response.result);
       this.fetchEditRule = response.result;
-      console.log("Edit data:", this.fetchEditRule);
       
       this.fg.controls.ruleName.setValue(this.fetchEditRule?.ruleName);
       this.fg.controls.ruleDescription.setValue(this.fetchEditRule?.ruleDescription);
@@ -136,6 +122,7 @@ export class EditRuleComponent implements OnInit {
         this.bucketSourceOne.push(this.fetchEditRule?.sourceData.bucketName);
         this.fg.controls.sourceFolderPath.setValue(this.fetchEditRule?.sourceData.filePath);
         //source-2
+        this.selectedDataConnections2 = this.fetchEditRule?.targetData.dataSourceId;
         this.fg.controls.sourceDataConnectionTwo.setValue(this.fetchEditRule?.targetData.dataSourceId);
         this.fg.controls.sourceBucketTwo.setValue(this.fetchEditRule?.targetData.bucketName);
         this.bucketSourceTwo.push(this.fetchEditRule?.targetData.bucketName);
@@ -151,6 +138,7 @@ export class EditRuleComponent implements OnInit {
       // status
       this.fg.controls.status.setValue(this.fetchEditRule?.status)
       this.fg.controls.percentage.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.acceptance);
+      
       // this.fg.controls.status.setValue(result?.status)
       // this.fg.controls.synonymTerm.setValue(result?.synonymTerm);
       //Types
@@ -158,6 +146,9 @@ export class EditRuleComponent implements OnInit {
         this.fg.controls.ruleType.setValue(this.fetchEditRule?.ruleDetails.ruleTypeName);
         this.fg.controls.subLavelRadio.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.levelName);
         this.selectedSubLevel = this.fetchEditRule?.ruleDetails.ruleLevel.levelName;
+        this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
+        this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
+        this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns[0];
       }, 5000); // 5000 milliseconds (5 seconds)
       
     }, (error) => {
@@ -282,7 +273,6 @@ export class EditRuleComponent implements OnInit {
 
   public onSelectDataConnections1(d: string): void {
     const connectionBucket = this.dataConnectionList.find(e => e.id == +d);
-    console.log("selected connection:", connectionBucket);
     this.bucketSourceOne = []
     const arr = [];
     arr.push(connectionBucket.bucketName);
@@ -291,7 +281,6 @@ export class EditRuleComponent implements OnInit {
 
   public onSelectDataConnections2(d: string): void {
     const connectionBucket = this.dataConnectionList.find(e => e.id == +d);
-    console.log("selected connection:", connectionBucket);
     this.bucketSourceTwo = [];
     const arr = [];
     arr.push(connectionBucket.bucketName);
@@ -307,7 +296,6 @@ export class EditRuleComponent implements OnInit {
   }
 
   public updateRuleFunction(): void {
-    console.log("data", this.fg.controls);
     if (!this.fg.controls.sourceAndTarget.value) {
       this.saveRulePayload = {
         ruleId: this.ruleId,
@@ -341,7 +329,6 @@ export class EditRuleComponent implements OnInit {
         userId : this.userId,
         status: this.fg.controls.status.value   
       }
-      console.log("Rule save payload:", this.saveRulePayload);
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
       this.saveRulePayload = {
@@ -374,7 +361,6 @@ export class EditRuleComponent implements OnInit {
     }
 
     this.ruleCreationService.updateRule(this.userId, this.projectId, this.saveRulePayload).subscribe((response) => {
-      console.log(response);
       if (response?.code === 200) {
         this.snakbar.open(response.message);
         this.router.navigate([`projects/${this.projectId}/data-quality`]);

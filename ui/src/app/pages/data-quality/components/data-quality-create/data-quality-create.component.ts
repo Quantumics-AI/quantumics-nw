@@ -67,6 +67,12 @@ export class DataQualityCreateComponent implements OnInit {
   public filecheck: boolean;
   public columnData: any;
   public columnDataType: any;
+  public getRuleList: any;
+  public loading: boolean
+  public ruleStatus: string = 'Active';
+  public pageNumebr: number = 1;
+  public pageLength: number = 10;
+  public alreadyExist: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -99,7 +105,7 @@ export class DataQualityCreateComponent implements OnInit {
     const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
-      // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$'
+      // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$' ---- Validators.minLength(10), Validators.maxLength(150),
       ruleName: ['', [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
       ruleDescription: ['', [Validators.required, Validators.pattern(ruleDescriptionPattern)]],
       sourceAndTarget: [true],
@@ -118,18 +124,26 @@ export class DataQualityCreateComponent implements OnInit {
       sourceFolderPathTwo: new FormControl({ value: '', disabled: true }),
       //types
       ruleType: new FormControl('', Validators.required),
-      subLavelRadio: new FormControl('', Validators.required),
+      subLavelRadio: new FormControl(''),
       selectColumnAttribute: new FormControl(''),
       selectMultipleAttribute: new FormControl(''),
       acceptancePercentage: new FormControl('', [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
       //
     });
-
-    console.log("columns:",this.columnDataType);
-    
+    if(this.columnDataType){
+      this.columnDataType = this.removeDuplicates(this.columnDataType, "columnName");
+      // console.log("removed duplicate column", uniqueData);
+    }
 
     this.getDataConnection();
     this.getBucketData();
+    this.getRules();
+  }
+
+  public removeDuplicates(array: any[], key: string) {
+    return array.filter((obj, index, self) =>
+      index === self.findIndex((o) => o[key] === obj[key])
+    );
   }
 
   ngAfterViewInit(): void {
@@ -161,6 +175,35 @@ export class DataQualityCreateComponent implements OnInit {
       console.log("not added");
     }
     this.getRuleTypeList();
+  }
+
+  public getRules(): void {
+    this.loading = true;
+    this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
+      
+      this.loading = false;
+      this.getRuleList = response?.result?.content;
+      
+    }, (error) => {
+      this.loading = false;
+    });
+  }
+
+  checkIfNameExists() {
+    if (this.getRuleList.length > 0) {
+      const value = this.fg.get('ruleName').value;
+      // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+      // const enteredName = this.fg.get('dataSourceName').value;
+      const nameExists = this.getRuleList.some(item => item.ruleName === value);
+      
+      if (nameExists) {
+        this.alreadyExist = true;
+      } else {
+        this.alreadyExist = false;
+      }
+    }
+    
   }
 
   public getDataConnection(): void {
