@@ -72,4 +72,8 @@ export class RuleCreationService {
   public getRuleJobs(userId: number, projectId: number): Observable<any> {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/rulejob/${userId}/${projectId}`);
   }
+
+  public cancelRunningRule(userId:number, projectId:number, data: any): Observable<any> {
+    return this.http.put(`/QuantumSparkServiceAPI/api/v1/rulejob/${userId}/${projectId}`, data);
+  }
 }

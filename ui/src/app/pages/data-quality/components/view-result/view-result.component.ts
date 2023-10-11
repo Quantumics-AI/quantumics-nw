@@ -19,6 +19,7 @@ export class ViewResultComponent implements OnInit {
   @Input() userId: number;
   @Input() output: any;
 
+  public nullRule: string = "Null Value";
   constructor(
     public modal: NgbActiveModal,
   ){
@@ -26,6 +27,7 @@ export class ViewResultComponent implements OnInit {
   }
 
   ngOnInit(): void {
+      console.log(this.output);
       
   }
 }

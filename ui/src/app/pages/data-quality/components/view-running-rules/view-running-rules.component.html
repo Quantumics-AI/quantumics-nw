@@ -1,76 +1,77 @@
-<div class="page-header1">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb breadcrumb-top pd-l-0">
-            <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'data-quality']">Rule</a></li>
-            <li class="breadcrumb-item active" aria-current="page">View</li>
-        </ol>
-    </nav>
-</div>
-
-<div class="pipe-dataset-div">
-    <div class="card card-d">
-        <div class="card-header ch">
-            <div class="di mr-t-6" >
-                <a class="card-main-text mr-b-0" (click)="back()">
-                    <span><img src="/assets/img/pipline/back-pipe.svg" class="cp"></span>
-                    Back to rules
-                </a>
-            </div>
-        </div>
-        <ng-container *ngIf="runningList.length else noJobs">
-            <div class="card-body pd-0">
-                <div class="table-responsive br">
-                    <table class="table m-0 table-fixed table-striped">
-                        <thead class="thead-light">
-                            <tr class="fixed-th">
-                                <th class="pd-l-24">Rule name</th>
-                                <th class="pd-l-24">Status
-                                    <em>
-                                        <a id="lnkRefresh" placement="top" container="body" ngbTooltip="Refresh">
-                                            <img src="assets/img/refresh.svg" width="18" alt="refresh" (click)="refresh()">
-                                        </a>
-                                    </em>
-                                </th>
-                                <th class="pd-l-24">Result</th>
-                                <th class="pd-l-24">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="td-text" *ngFor="let view of runningList">
-                                <td>
-                                    {{view?.ruleName}}
-                                </td>
-                                <td>
-                                    {{view?.jobStatus}}
-                                </td>
-                                <td>
-                                    {{ view?.jobOutput ? (parseJobOutput(view.jobOutput)?.match ? 'Match' : 'MisMatch') : '' }}
-                                </td>
-                                <td>
-                                    <span *ngIf="view?.jobOutput" class="cp vr" (click)="viewResult(view)">View result</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </ng-container>
-        <ng-template #noJobs>
-            <div class="card-body pd-0">
-                <div class="connect-s text-center mr-t-16">
-                    <!-- <p class="tp1 fs-26">Running rules</p> -->
-                    <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid">
-                    <!-- <p class="tp1 mr-b-0 wm">Set business related rules for your dataset.</p> -->
-                    <p class="tp1 mr-b-24 mr-t-40">Currently no rule or set of rule is running.</p>
-                    <a [routerLink]="['/projects', projectId, 'data-quality']" 
-                        class="btn btn-design mr-b-56">Run rule</a>
-                </div>
-            </div>
-        </ng-template>
+<app-loader [loading]="loading">
+    <div class="page-header1">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-top pd-l-0">
+                <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'data-quality']">Rules</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Rule Status</li>
+            </ol>
+        </nav>
     </div>
     
-    
-    <!-- <div class="btn-div text-center">
-        <button class="btn btn-design" (click)="back()">Okay</button>
-    </div> -->
-</div>
+    <div class="pipe-dataset-div">
+        <div class="card card-d">
+            <div class="card-header ch">
+                <div class="di mr-t-6" >
+                    <a class="card-main-text mr-b-0" (click)="back()">
+                        <span><img src="/assets/img/pipline/back-pipe.svg" class="cp"></span>
+                        Back to rules
+                    </a>
+                </div>
+            </div>
+            <ng-container *ngIf="runningList.length else noJobs">
+                <div class="card-body pd-0">
+                    <div class="table-responsive br">
+                        <table class="table m-0 table-fixed table-striped">
+                            <thead class="thead-light">
+                                <tr class="fixed-th">
+                                    <th class="pd-l-24">Rule name</th>
+                                    <th class="pd-l-24">Status
+                                        <em>
+                                            <a id="lnkRefresh" placement="top" container="body" ngbTooltip="Refresh">
+                                                <img src="assets/img/refresh.svg" width="18" alt="refresh" (click)="refresh()">
+                                            </a>
+                                        </em>
+                                    </th>
+                                    <th class="pd-l-24">Result</th>
+                                    <th class="pd-l-24">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="td-text" *ngFor="let view of runningList">
+                                    <td>
+                                        {{view?.ruleName}}
+                                    </td>
+                                    <td>
+                                        {{view?.jobStatus}}
+                                    </td>
+                                    <td>
+                                        {{ view?.jobOutput ? parseJobOutput(view.jobOutput) : 'MisMatch' }}
+                                    </td>
+                                    <td>
+                                        <span *ngIf="view?.jobOutput" class="cp vr" (click)="viewResult(view)">View result</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-template #noJobs>
+                <div class="card-body pd-0">
+                    <div class="connect-s text-center mr-t-16">
+                        <!-- <p class="tp1 fs-26">Running rules</p> -->
+                        <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid">
+                        <!-- <p class="tp1 mr-b-0 wm">Set business related rules for your dataset.</p> -->
+                        <p class="tp1 mr-b-24 mr-t-40">Currently no rule or set of rule is running.</p>
+                        <a [routerLink]="['/projects', projectId, 'data-quality']" 
+                            class="btn btn-design mr-b-56">Run rule</a>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+        <div class="btn-div text-center" *ngIf="runningList.length">
+            <!-- <button class="btn btn-design mr-r-20" (click)="back()">Okay</button> -->
+            <button class="btn btn-design" *ngIf="cancelBtn" (click)="cancelInprocess()">Cancel</button>
+        </div>
+    </div>
+</app-loader>

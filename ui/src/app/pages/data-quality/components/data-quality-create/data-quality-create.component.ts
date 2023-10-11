@@ -10,6 +10,21 @@ import { Location } from '@angular/common';
 import { BrowseFileComponent } from '../browse-file/browse-file.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
 
+
+function acceptancePercentageValidator(control: FormControl) {
+  const inputValue = control.value;
+  if (inputValue === null || inputValue === '') {
+    return null; // Accept empty input
+  }
+
+  const numericValue = parseFloat(inputValue);
+  if (isNaN(numericValue) || numericValue < 0 || numericValue > 20) {
+    return { invalidPercentage: true };
+  }
+
+  return null;
+}
+
 @Component({
   selector: 'app-data-quality-create',
   templateUrl: './data-quality-create.component.html',
@@ -51,6 +66,7 @@ export class DataQualityCreateComponent implements OnInit {
   public selectedSource: string;
   public filecheck: boolean;
   public columnData: any;
+  public columnDataType: any;
 
   constructor(
     private fb: FormBuilder,
@@ -67,6 +83,7 @@ export class DataQualityCreateComponent implements OnInit {
       this.selectedSource = sessionStorage.getItem('source');
       this.filecheck = JSON.parse(sessionStorage.getItem('check'));
       this.columnData = JSON.parse(sessionStorage?.getItem('headersData'));
+      this.columnDataType = JSON.parse(sessionStorage?.getItem('columnData'));
       this.certificate$ = this.quantumFacade.certificate$;
       this.certificate$
         .pipe(takeUntil(this.unsubscribe))
@@ -79,7 +96,7 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const ruleDescriptionPattern = /^[A-Za-z\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
+    const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
       // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$'
@@ -88,11 +105,11 @@ export class DataQualityCreateComponent implements OnInit {
       sourceAndTarget: [true],
       //source
       //source1 - source2
-      sourceDataSource: new FormControl('aws'),
-      subDataSourceOne: new FormControl('s3'),
-      sourceDataConnection: new FormControl(),
-      sourceBucketOne: new FormControl(''),
-      sourceFolderPath: new FormControl({ value: '', disabled: true }),
+      sourceDataSource: new FormControl('aws', Validators.required),
+      subDataSourceOne: new FormControl('s3', Validators.required),
+      sourceDataConnection: new FormControl('', Validators.required),
+      sourceBucketOne: new FormControl('', Validators.required),
+      sourceFolderPath: new FormControl({ value: '', disabled: true }, Validators.required),
       //
       sourceDataSourceTwo: new FormControl('aws'),
       subDataSourceTwo: new FormControl('s3'),
@@ -101,16 +118,17 @@ export class DataQualityCreateComponent implements OnInit {
       sourceFolderPathTwo: new FormControl({ value: '', disabled: true }),
       //types
       ruleType: new FormControl('', Validators.required),
-      subLavelRadio: new FormControl(''),
+      subLavelRadio: new FormControl('', Validators.required),
       selectColumnAttribute: new FormControl(''),
       selectMultipleAttribute: new FormControl(''),
-      selectNullAttributes: new FormControl(''),
-      acceptancePercentage: new FormControl(''),
+      acceptancePercentage: new FormControl('', [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
       //
     });
 
+    console.log("columns:",this.columnDataType);
+    
+
     this.getDataConnection();
-    this.getRuleTypeList();
     this.getBucketData();
   }
 
@@ -142,6 +160,7 @@ export class DataQualityCreateComponent implements OnInit {
     } else {
       console.log("not added");
     }
+    this.getRuleTypeList();
   }
 
   public getDataConnection(): void {
@@ -153,7 +172,8 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   public getRuleTypeList(): void {
-    this.ruleCreationService.getRuleTypes(this.projectId, !this.sourceTargetType).subscribe((response) => {
+    const v = this.fg.get('sourceAndTarget').value;
+    this.ruleCreationService.getRuleTypes(this.projectId, !v).subscribe((response) => {
       this.ruleTypesData = response.result;
     }, (error) => {
 
@@ -195,6 +215,8 @@ export class DataQualityCreateComponent implements OnInit {
     }
   }
 
+  p
+
   public continue(): void {
     // this.router.navigate([`projects/${this.projectId}/data-quality/rule-types`]);
     this.snakbar.open("Rule saved");
@@ -221,6 +243,14 @@ export class DataQualityCreateComponent implements OnInit {
 
   public onChangeSubLevel(value: string): void {
     this.selectedSubLevel = value;
+    if (value == "Sum of column value") {
+      if (this.columnDataType) {
+        this.columnDataType = this.columnDataType.filter(item => item.dataType === "int" || item.dataType === "float");
+      } 
+    } else {
+      this.columnDataType = JSON.parse(sessionStorage?.getItem('columnData'));
+    }
+    
   }
 
   // browse table 
@@ -230,6 +260,7 @@ export class DataQualityCreateComponent implements OnInit {
 
   public browseSourceOne(s: string): void {
     sessionStorage.setItem("source", s);
+    sessionStorage.setItem("bucketName", this.fg.get('sourceBucketOne').value);
     const form_obj = {};
     Object.keys(this.fg.controls).forEach(key => {
       form_obj[key] = this.fg.get(key).value;
@@ -241,6 +272,7 @@ export class DataQualityCreateComponent implements OnInit {
 
   public browseSourceTwo(s: string): void {
     sessionStorage.setItem("source", s);
+    sessionStorage.setItem("bucketName", this.fg.get('sourceBucketTwo').value);
     const form_obj = {};
     Object.keys(this.fg.controls).forEach(key => {
       form_obj[key] = this.fg.get(key).value;
@@ -289,7 +321,7 @@ export class DataQualityCreateComponent implements OnInit {
     if(this.fg.controls.ruleDescription.value != ""){
       const validPattern = String(str)
       .match(
-        /^[A-Za-z\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/
+        /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/
       );
 
       if (validPattern == null) {

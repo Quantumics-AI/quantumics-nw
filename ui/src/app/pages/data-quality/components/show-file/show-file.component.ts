@@ -13,6 +13,7 @@ export class ShowFileComponent implements OnInit {
   @Input() filePath: string;
   @Input() headers: any;
   @Input() fileContent: any;
+  @Input() columnType: any;
 
   public projectId: number;
   userId: number;
@@ -68,6 +69,7 @@ export class ShowFileComponent implements OnInit {
   public submitFile(): void {
     if(this.getSource == 'source-1'){
       sessionStorage.setItem('headersData', JSON.stringify(this.headers));
+      sessionStorage.setItem('columnData', JSON.stringify(this.columnType));
     }
     sessionStorage.setItem('selectedFile', this.file);
     sessionStorage.setItem('SelectedPath', this.filePath);

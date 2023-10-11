@@ -124,6 +124,8 @@ export class EditRuleComponent implements OnInit {
     this.ruleCreationService.getEditRule(this.userId, this.projectId, this.ruleId).subscribe((response) => {
       console.log(response.result);
       this.fetchEditRule = response.result;
+      console.log("Edit data:", this.fetchEditRule);
+      
       this.fg.controls.ruleName.setValue(this.fetchEditRule?.ruleName);
       this.fg.controls.ruleDescription.setValue(this.fetchEditRule?.ruleDescription);
       this.fg.controls.sourceAndTarget.setValue(this.fetchEditRule?.sourceAndTarget);

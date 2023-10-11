@@ -6,21 +6,33 @@
 
 <div class="modal-body">
     <!-- <div class="container"> -->
-        <div class="rd">
-            <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
-            <p class="p2 text-center fsw">{{output?.levelName}}</p>
-        </div>
+        <ng-container *ngIf="output.ruleTypeName == nullRule; else other">
+            <div class="rd">
+                <p class="p2 text-center fsw">{{output?.ruleTypeName}} Check</p>
+            </div>
+            <div class="text-center">
+                <p class="p2 fs-16">Source</p>
+                <p class="p1 fs-16">{{output?.source}}</p>
+            </div>
+        </ng-container>
+        <ng-template #other>
+            <div class="rd">
+                <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
+                <p class="p2 text-center fsw">{{output?.levelName}}</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 text-center">
+                    <p class="p2 fs-16">Source</p>
+                    <p class="p1 fs-16">{{output?.source}}</p>
+                </div>
+                <div class="col-md-6 text-center">
+                    <p class="p2 fs-16">Target</p>
+                    <p class="p1 fs-16">{{output?.target}}</p>
+                </div>
+            </div>
+        </ng-template>
         
-        <div class="row">
-            <div class="col-md-6 text-center">
-                <p class="p2">Source</p>
-                <p class="p1">{{output?.source}}</p>
-            </div>
-            <div class="col-md-6 text-center">
-                <p class="p2">Target</p>
-                <p class="p1">{{output?.target}}</p>
-            </div>
-        </div>
         <p class="p2 text-center fsw">
             <span *ngIf="output.match" class="pass">Passed</span>
             <span *ngIf="!output.match" class="fail">Failed</span>

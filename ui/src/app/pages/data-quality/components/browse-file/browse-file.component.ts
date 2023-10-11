@@ -58,10 +58,11 @@ export class BrowseFileComponent implements OnInit {
 
   public headers: any;
   public fileContent: any;
+  public columnType: any;
 
   public childData: any;
   public isShowTable: boolean = false;
-  public bucketName: string = "qsai-apiautomationproject-processed";
+  public bucketName: string;
   public selectedFile: string;
   public filePath: string;
 
@@ -88,6 +89,7 @@ export class BrowseFileComponent implements OnInit {
   ngOnInit(): void {
     // getPipelineData
     this.projectId = localStorage.getItem('project_id');
+    this.bucketName = sessionStorage.getItem('bucketName');
     this.getBrowseFileData();
   }
 
@@ -182,6 +184,7 @@ export class BrowseFileComponent implements OnInit {
       console.log("Browse Data", res);
       this.headers = res.headers;
       this.fileContent = res.content;
+      this.columnType = res.columnDatatype;
       
       this.isShowTable = !this.isShowTable;
       // this.filePath = "";

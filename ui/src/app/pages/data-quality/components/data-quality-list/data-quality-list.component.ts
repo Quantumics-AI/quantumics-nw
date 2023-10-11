@@ -46,7 +46,7 @@ export class DataQualityListComponent implements OnInit {
   public pageNumebr: number = 1;
   public pageLength: number = 10;
 
-  public ruleId: number;
+  public ruleId: any = [];
 
   constructor(
     private readonly router: Router,
@@ -79,6 +79,15 @@ export class DataQualityListComponent implements OnInit {
       this.loading = false;
       this.dataQualityList = response?.result?.content;
       this.ruleCount =  response?.result?.content;
+
+      if (this.dataQualityList.length > 1) {
+        this.dataQualityList.sort((val1, val2) => {
+          return (
+            (new Date(val2.createdDate) as any) -
+            (new Date(val1.createdDate) as any)
+          );
+        });
+      }
       
     }, (error) => {
       this.loading = false;
@@ -113,21 +122,50 @@ export class DataQualityListComponent implements OnInit {
     this.selectAllChecked = isChecked;
     this.anyCheckboxSelected = isChecked;
     // Loop through your dataQualityList and update the selected state of each item
-    this.dataQualityList.map(dataQuality => {
+    // this.dataQualityList.map(dataQuality => {
+    //   dataQuality.selected = isChecked;
+    //   if (dataQuality.selected) {
+    //     this.ruleId.push(dataQuality.ruleId);
+    //   } else {
+        
+    //   }
+    // });
+
+    if (isChecked) {
+      // If "Select All" is checked, add all ruleIds to the ruleIds array
+      this.ruleId = this.dataQualityList.map(dataQuality => dataQuality.ruleId);
+    } else {
+      // If "Select All" is unchecked, clear the ruleIds array
+      this.ruleId = [];
+    }
+  
+    // Update the selected state of each item in the dataQualityList
+    this.dataQualityList.forEach(dataQuality => {
       dataQuality.selected = isChecked;
     });
+    console.log("selected rule id:", this.ruleId);
   }
   
 
   selectRule(evt: Event, dataQuality: DataQuailtyListResponse): void {
     dataQuality.selected = (evt.target as HTMLInputElement).checked;
     if (dataQuality.selected) {
-      this.ruleId = dataQuality.ruleId;
+      // Add the ruleId to the ruleIds array if it's selected
+      this.ruleId.push(dataQuality.ruleId);
+    } else {
+      // Remove the ruleId from the ruleIds array if it's deselected
+    const index = this.ruleId.indexOf(dataQuality.ruleId);
+    if (index !== -1) {
+      this.ruleId.splice(index, 1);
+    }
     }
     // Check if any checkbox is selected
     this.anyCheckboxSelected = this.dataQualityList.some(item => item.selected);
     // Check if all checkboxes are selected and update the "Select All" checkbox accordingly
     this.selectAllChecked = this.dataQualityList.every(item => item.selected);
+
+    console.log("selected rule id:", this.ruleId);
+    
   }
 
   public runRule(): void {
@@ -135,13 +173,14 @@ export class DataQualityListComponent implements OnInit {
       dataQuality.selected = false;
     });
     this.anyCheckboxSelected = false;
+    this.selectAllChecked = false;
     this.loading = true;
     const req = {
-      ruleId : this.ruleId
+      ruleIds : this.ruleId
     }
     this.ruleCreationService.runRule(this.userId, this.projectId, req).subscribe((response) => {
       this.loading = false;
-      console.log("RULE API:", response);
+      this.ruleId = [];
       this.snakbar.open(response.message);
       
     }, (error) => {

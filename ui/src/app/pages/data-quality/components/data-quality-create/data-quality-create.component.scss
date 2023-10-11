@@ -227,3 +227,15 @@ input[type=radio]:checked{
 .mr-r-20 {
     margin-right: 20px;
 }
+
+input[type="number"] {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+/* Webkit browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

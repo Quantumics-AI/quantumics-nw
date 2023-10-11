@@ -24,7 +24,7 @@
                                 </span>
                             </div>
                             <input type="text" id="searchTerm" [(ngModel)]="searchTerm.connectionName" class="form-control search-input br-bx-n h36"
-                                placeholder="Enter connection name" aria-label="Username" aria-describedby="basic-addon1"
+                                placeholder="Enter Connection Name" aria-label="Username" aria-describedby="basic-addon1"
                                 (ngModelChange)="searchInput($event)">
                         </div>
     
@@ -35,11 +35,11 @@
                         <table class="table m-0 table-fixed table-striped">
                             <thead class="thead-light">
                                 <tr class="fixed-th">
-                                    <th class="pd-l-24">Connection name
+                                    <th class="pd-l-24">Connection Name
                                         <span> <img class="cp" (click)="sortSorceData();"
-                                                src="assets/img/govern/down-arrow.svg"></span>
+                                                src="/assets/img/data-profile/sort.svg"></span>
                                     </th>
-                                    <th class="pd-l-24">Sub data source
+                                    <th class="pd-l-24">Sub Data Source
                                         <!-- <span> <img class="cp"
                                             src="assets/img/govern/down-arrow.svg"></span> -->
                                     </th>
@@ -48,13 +48,13 @@
                                             src="assets/img/govern/down-arrow.svg"></span>
                                     </th> -->
                                     <!-- <th class="pd-l-24">IAM role</th> -->
-                                    <th class="pd-l-24">Created date
+                                    <th class="pd-l-24">Created Date
                                         <span> <img class="cp" (click)="sortDataByCreatedDate();"
-                                            src="assets/img/govern/down-arrow.svg"></span>
+                                            src="/assets/img/data-profile/sort.svg"></span>
                                     </th>
-                                    <th class="pd-l-24">Modified date
+                                    <th class="pd-l-24">Modified Date
                                         <span> <img class="cp" (click)="sortDataByModifiedDate();"
-                                            src="assets/img/govern/down-arrow.svg"></span>
+                                            src="/assets/img/data-profile/sort.svg"></span>
                                     </th>
                                     <th class="pd-l-24">Actions</th>
                                 </tr>

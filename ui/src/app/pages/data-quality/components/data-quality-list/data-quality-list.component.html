@@ -30,8 +30,8 @@
                         <p></p>
                     </div>
                     <div class="pull-right">
-                        <span (click)="viewRunning()" class="mr-r-20 view-list cp">View running rules</span>
-                        <button class="btn btn-design" [routerLink]="['./create']">Create rule</button>
+                        <span (click)="viewRunning()" class="mr-r-20 view-list cp">View Running Rules</span>
+                        <button class="btn btn-design" [routerLink]="['./create']">Create</button>
                     </div>
                     <div>
                         <p class="pull-right mr-b-8">
@@ -51,11 +51,11 @@
                                     <th class="pd-l-24"><label class="mr-b-0">
                                         <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="selectAllChecked" (change)="selectRuleAll($event)"></label>
                                     </th>
-                                    <th class="pd-l-24">Rule name</th>
-                                    <th class="pd-l-24">Rule type</th>
-                                    <th class="pd-l-24">Created by</th>
-                                    <th class="pd-l-24">Created date</th>
-                                    <th class="pd-l-24">Modified date</th>
+                                    <th class="pd-l-24">Rule Name</th>
+                                    <th class="pd-l-24">Rule Type</th>
+                                    <th class="pd-l-24">Created By</th>
+                                    <th class="pd-l-24">Created Date</th>
+                                    <th class="pd-l-24">Modified Date</th>
                                     <th class="pd-l-24">Status</th>
                                     <th class="float-right">Action</th>
                                 </tr>
@@ -132,7 +132,7 @@
                 </div>
             </div>
             <div class="btn-div text-center" *ngIf="ruleStatus == 'Active'">
-                <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run rule</button>
+                <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run Rule</button>
             </div>
         </ng-container>
         <ng-template #noDataQualityRules>

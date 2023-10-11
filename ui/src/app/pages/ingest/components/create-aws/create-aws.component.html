@@ -47,7 +47,7 @@
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
                                             <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
-                                            Connection name*
+                                            Connection Name*
                                         </label>
                                         <input type="text" class="form-control input-design" id="sourceName" #source
                                             formControlName="dataSourceName" autocomplete="off" placeholder="Input connection name" 
@@ -55,8 +55,8 @@
                                             (focus)="f.open()" (input)="checkIfNameExists(); source.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
                                             triggers="manual" #f="ngbPopover" [ngbPopover]="popFolderContent"
                                             popoverClass="folder-pophover" placement="bottom">
-                                        <small id="workspaceNameHelp" class="form-text body-text-muted">Connection name must be
-                                                between 3 and 50 characters long.</small>
+                                        <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">Connection name must be
+                                                between 3 and 50 characters long.</small> -->
                                         <div *ngIf="fg.get('dataSourceName').invalid && fg.get('dataSourceName').dirty || fg.get('dataSourceName').touched">
                                             <div class="text-error" *ngIf="fg.get('dataSourceName').hasError('required')">
                                                 <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
@@ -73,7 +73,7 @@
                                         </div>
                                         <div class="text-error" *ngIf="alreadyExist">
                                             <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
-                                            Entered Connection name is already used. Please enter a diffrent one.
+                                            Entered Connection name is already used. Please enter a different name.
                                         </div>
                                     </div>
 
@@ -81,11 +81,11 @@
                                         <div class="col-12">
                                             <ul>
                                                 <li>Connection name is mandatory.</li>
-                                                <li>Connection name must be between 3 and 30 characters long.</li>
+                                                <li>Connection name must be between 3 and 50 characters long.</li>
                                                 <li>Connection name should have Alphabets,Numbers, and Special characters ( Colon, Hypen and Underscore ).
                                                 </li>
                                                 <li>Connection name must start with capital letter</li>
-                                                <li>Data source name must be unique.</li>
+                                                <li>Connection name must be unique.</li>
                                             </ul>
                                         </div>
                                     </ng-template>
@@ -94,7 +94,7 @@
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
                                             <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
-                                            Sub data source*
+                                            Sub Data Source*
                                         </label>
                                         <input type="text" class="form-control input-design" id="sourceName" #policyName
                                             formControlName="subDataSource" autocomplete="off" placeholder="Sub data source name" [value]="'S3'">
