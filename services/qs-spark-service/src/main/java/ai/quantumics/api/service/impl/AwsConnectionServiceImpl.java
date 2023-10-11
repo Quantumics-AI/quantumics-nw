@@ -28,9 +28,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -43,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
@@ -52,6 +56,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+import static ai.quantumics.api.constants.QsConstants.DELIMITER;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -65,10 +70,16 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
     private AwsAdapter awsAdapter;
 
+    @Value("${qs.aws.use.config.buckets}")
+    private boolean isUseConfigBuckets;
+
+    @Value("${qs.aws.config.buckets}")
+    private String configBucketNames;
+
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(awsDatasourceRequest.getConnectionName().trim(),true);
         if (dataSources.isPresent()) {
             throw new BadRequestException(DATA_SOURCE_EXIST);
         }
@@ -146,26 +157,55 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public List<String> getBuckets() {
-        List<Bucket> buckets = awsS3Client.listBuckets();
-        if(buckets.isEmpty()){
-            throw new BucketNotFoundException(EMPTY_BUCKET);
-        }else {
-            return getBucketsName(buckets);
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+            return buckets;
+        } else {
+            List<Bucket> buckets = awsS3Client.listBuckets();
+            if (buckets.isEmpty()) {
+                throw new BucketNotFoundException(EMPTY_BUCKET);
+            } else {
+                return getBucketsName(buckets);
+            }
         }
     }
 
     @Override
     public String getFoldersAndFilePath(String bucketName) throws IOException {
         List<String> objectNames = new ArrayList<>();
-        List<S3ObjectSummary> objectNames1 = new ArrayList<>();
-        listObjects(bucketName, "", objectNames,objectNames1);
-        return getFoldersAndFilePathHierarchy(objectNames,objectNames1);
+        List<S3ObjectSummary> objectSummaries = new ArrayList<>();
+        listObjects(bucketName, "", objectNames,objectSummaries);
+        return getFoldersAndFilePathHierarchy(objectNames,objectSummaries);
     }
 
     @Override
     public String testConnection(String accessMethod) {
-        amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
-        amazonS3Client.listBuckets();
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+        } else {
+            amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+            amazonS3Client.listBuckets();
+        }
         return CONNECTION_SUCCESSFUL;
     }
 
@@ -228,13 +268,13 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return bucketFileContent;
     }
 
-    private String getFoldersAndFilePathHierarchy(List<String> objectNames, List<S3ObjectSummary> objectNames1) throws IOException {
-        ObjectNode rootNode = createFolderHierarchy(objectNames,objectNames1);
+    private String getFoldersAndFilePathHierarchy(List<String> objectNames, List<S3ObjectSummary> objectSummaries) throws IOException {
+        ObjectNode rootNode = createFolderHierarchy(objectNames, objectSummaries);
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
     }
 
-    private void listObjects(String bucketName, String prefix, List<String> objectNames,List<S3ObjectSummary> objectNames1) {
+    private void listObjects(String bucketName, String prefix, List<String> objectNames, List<S3ObjectSummary> objectSummaries) {
         AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
@@ -243,9 +283,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             objectNames.add(commonPrefix);
-            listObjects(bucketName, commonPrefix, objectNames,objectNames1);
+            listObjects(bucketName, commonPrefix, objectNames, objectSummaries);
         }
-        objectNames1.addAll(result.getObjectSummaries());
+        objectSummaries.addAll(result.getObjectSummaries());
         objectNames.addAll(Arrays.asList(result.getObjectSummaries().stream()
                 .map(S3ObjectSummary::getKey)
                 .toArray(String[]::new)));
@@ -270,21 +310,17 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return awsDatasource;
     }
 
-    private static ObjectNode createFolderHierarchy(List<String> objectNames, List<S3ObjectSummary> objectNames1) {
+    private static ObjectNode createFolderHierarchy(List<String> objectNames,List<S3ObjectSummary> objectSummaries) {
         ObjectNode rootNode = new ObjectMapper().createObjectNode();
-        for(S3ObjectSummary objSum :objectNames1){
-            String path = objSum.getKey();
+        for(S3ObjectSummary objectSummary :objectSummaries){
+            String path = objectSummary.getKey();
             String[] parts = path.split("/");
-            addFolder(path, rootNode,  parts, 0,objSum);
+            addFolder(path, rootNode,  parts, 0,objectSummary);
         }
-//        for (String path : objectNames) {
-//            String[] parts = path.split("/");
-//            addFolder(path, rootNode,  parts, 0);
-//        }
         return rootNode;
     }
 
-    private static void addFolder(String folder, ObjectNode parentFolders, String[] parts, int depth,S3ObjectSummary objSum) {
+    private static void addFolder(String folder, ObjectNode parentFolders, String[] parts, int depth,S3ObjectSummary objectSummary) {
         if (depth >= parts.length) {
             return;
         }
@@ -297,13 +333,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }
 
         if (depth == parts.length - 1) {
-            //String fileName = parts[parts.length - 1];
+            String fileName = parts[parts.length - 1];
             if(!folder.endsWith("/")){
-                String fileName = parts[parts.length - 1];
                 ObjectMetadata objectMetadata = new ObjectMetadata();
                 objectMetadata.setFileName(fileName);
-                objectMetadata.setFileLastModified(objSum.getLastModified());
-                objectMetadata.setFileSize(objSum.getSize());
+                objectMetadata.setFileLastModified(objectSummary.getLastModified());
+                objectMetadata.setFileSize(objectSummary.getSize());
                 ObjectMapper objectMapper = new ObjectMapper();
                 ObjectNode metaDataNode = objectMapper.valueToTree(objectMetadata);
                 JsonNode node = parentFolders.get(Files);
@@ -319,7 +354,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 parentFolders.set(folderName, childFolders);
             }
         } else {
-            addFolder(folder, childFolders, parts, depth + 1,objSum);
+            addFolder(folder, childFolders, parts, depth + 1,objectSummary);
         }
     }
 }
