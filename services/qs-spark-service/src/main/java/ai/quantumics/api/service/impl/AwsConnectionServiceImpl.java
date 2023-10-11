@@ -78,7 +78,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(awsDatasourceRequest.getConnectionName().trim(),true);
         if (dataSources.isPresent()) {
             throw new BadRequestException(DATA_SOURCE_EXIST);
         }
