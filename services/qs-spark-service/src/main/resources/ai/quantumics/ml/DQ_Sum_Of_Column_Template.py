@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from datetime import datetime
+from pyspark.sql.functions import when, col
 from pyspark.sql.types import StructType, StructField, IntegerType, BooleanType, StringType
 import json
 
@@ -14,6 +15,7 @@ filepath2 = $TARGET_PATH
 rule_type_name = $RULE_TYPE_NAME
 level_name = $LEVEL_NAME
 s3Path= $S3_OUTPUT_PATH
+input_headers_str = $COLUMNS
 input_acceptance_percentage = $ACCEPTANCE_PER
 input_acceptance_percentage_float = float(input_acceptance_percentage)
 
@@ -22,8 +24,16 @@ file_paths = [
     (filepath2, bucket2)
 ]
 
+dataframes = []
+
 # Create a list to store counts, filenames, and bucket names
 file_counts = []
+
+# Convert the input headers string into an array of strings
+input_headers = input_headers_str.split(",")
+
+# Create a list to store header-wise results
+header_results = []
 
 # Loop through the file paths
 for s3_file_path, s3_bucket_name in file_paths:
@@ -35,6 +45,7 @@ for s3_file_path, s3_bucket_name in file_paths:
 
     # Append the count, filename, and bucket name to the list
     file_counts.append((s3_bucket_name, s3_file_path, record_count))
+    dataframes.append(df)
 
 # Create a DataFrame for count results
 schema = StructType([
@@ -49,24 +60,30 @@ if count_results_df.collect()[0]["record_count"] == 0 and count_results_df.colle
     # If neither file has records, print a statement and exit
     print("Neither file has records.")
 else:
-    source_count = count_results_df.collect()[0]["record_count"]
-    target_count = count_results_df.collect()[1]["record_count"]
-    max_count = max(source_count, target_count)
-    percentage_difference = (abs(source_count - target_count) / max_count) * 100.0
-    # Check if the percentage difference is higher than the input acceptance percentage
-    pass_status = percentage_difference <= input_acceptance_percentage_float
-    # Calculate whether the counts match or not
-    match = count_results_df.collect()[0]["record_count"] == count_results_df.collect()[1]["record_count"]
+    # Calculate header-wise sums and comparisons
+    for header in input_headers:
+        source_sum = dataframes[0].select(F.coalesce(col(header), F.lit(0))).collect()[0][0]
+        target_sum = dataframes[1].select(F.coalesce(col(header), F.lit(0))).collect()[0][0]
+        max_sum = max(source_sum, target_sum)
+        percentage_difference = (abs(source_sum - target_sum) / max_sum) * 100.0
+        # Check if the percentage difference is higher than the input acceptance percentage
+        pass_status = percentage_difference <= input_acceptance_percentage_float
+        match = source_sum == target_sum
+        header_results.append({
+            "source": source_sum,
+            "target": target_sum,
+            "header": header,
+            "match": match,
+            "pass": pass_status,
+            "ruleTypeName": rule_type_name,
+            "levelName": level_name
+        })
+
+    # Prepare response in the specified format
+    response = [{"source": r["source"], "target": r["target"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"], "levelName": r["levelName"]} for r in header_results]
 
     # Prepare job_output as a JSON string
-    job_output = json.dumps({
-        "source": count_results_df.collect()[0]["record_count"],
-        "target": count_results_df.collect()[1]["record_count"],
-        "match": match,
-        "ruleTypeName": rule_type_name,
-        "levelName": level_name,
-        "pass": pass_status
-    })
+    job_output = json.dumps(response)
 
     # Print the counts and job_output
     print("Job Output:")
@@ -75,5 +92,3 @@ else:
     job_output_df = spark.createDataFrame([(job_output,)], ["jobOutput"])
 
     job_output_df.repartition(1).write.format('json').options(mode='overwrite').json(s3Path)
-
-

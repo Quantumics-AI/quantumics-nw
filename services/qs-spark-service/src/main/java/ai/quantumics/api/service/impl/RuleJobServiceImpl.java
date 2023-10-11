@@ -17,6 +17,7 @@ import ai.quantumics.api.model.QsRuleJob;
 import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
+import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.RuleJobRequest;
 import ai.quantumics.api.service.ProjectService;
 import ai.quantumics.api.service.RuleJobService;
@@ -92,7 +93,7 @@ public class RuleJobServiceImpl implements RuleJobService {
             dbUtil.changeSchema(project.getDbSchemaName());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
 
-                QsRuleJob ruleJob = ruleJobRepository.findByRuleId(ruleId);
+                QsRuleJob ruleJob = ruleJobRepository.findByRuleIdAndActiveIsTrue(ruleId);
                 if (ruleJob != null && ruleJob.getJobStatus().equals(RuleJobStatus.INPROCESS.getStatus())) {
 					inProcessRules.add(ruleId);
 					continue;
@@ -102,15 +103,16 @@ public class RuleJobServiceImpl implements RuleJobService {
                     response.put("code", HttpStatus.SC_BAD_REQUEST);
                     response.put("message", "Requested rule with Id: " + ruleId + " not found.");
                 }
-                if (ruleJob == null) {
+                if (ruleJob == null && ruleId > 0) {
                     ruleJob = new QsRuleJob();
                     ruleJob.setRuleId(ruleId);
                     ruleJob.setJobStatus(RuleJobStatus.INPROCESS.getStatus());
                     ruleJob.setUserId(userId);
+                    ruleJob.setActive(true);
                     ruleJob.setCreatedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-                    ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                    ruleJob.setModifiedBy(ruleJob.getCreatedBy());
                     ruleJob = ruleJobRepository.save(ruleJob);
                 }
 
@@ -127,6 +129,44 @@ public class RuleJobServiceImpl implements RuleJobService {
         } catch (final Exception ex) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             response.put("message", "Error while submitting rule job:  " + ex.getMessage());
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Override
+    public ResponseEntity<Object> cancelRuleJobs(CancelJobRequest ruleJobRequest, int userId, int projectId) {
+        final Map<String, Object> response = new HashMap<>();
+        log.info("Invoking cancelRuleJobs  API for ruleIds {}", ruleJobRequest.toString());
+        try {
+            dbUtil.changeSchema("public");
+            final Projects project = projectService.getProject(projectId, userId);
+            if (project == null) {
+                response.put("code", HttpStatus.SC_BAD_REQUEST);
+                response.put("message", "Requested project with Id: " + projectId + " for User with Id: " + userId + " not found.");
+
+                return ResponseEntity.ok().body(response);
+            }
+            QsUserV2 userObj = userService.getUserById(userId);
+            if (userObj == null) {
+                response.put("code", HttpStatus.SC_BAD_REQUEST);
+                response.put("message", "Requested User with Id: " + userId + " not found.");
+                return ResponseEntity.ok().body(response);
+            }
+
+            dbUtil.changeSchema(project.getDbSchemaName());
+            List<QsRuleJob> ruleJobs = ruleJobRepository.findByJobIdInAndActiveIsTrue(ruleJobRequest.getJobIds());
+            for (QsRuleJob ruleJob : ruleJobs) {
+                    ruleJob.setUserId(userId);
+                    ruleJob.setActive(false);
+                    ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+                    ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                    ruleJobRepository.save(ruleJob);
+            }
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", "Rule Jobs Cancelled successfully");
+        } catch (final Exception ex) {
+            response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.put("message", "Error while Cancelling rule jobs:  " + ex.getMessage());
         }
         return ResponseEntity.ok().body(response);
     }
@@ -152,7 +192,7 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
-            List<QsRuleJob> ruleJobList = ruleJobRepository.findAll();
+            List<QsRuleJob> ruleJobList = ruleJobRepository.findAllByActiveTrue();
             if (CollectionUtils.isNotEmpty(ruleJobList)) {
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());

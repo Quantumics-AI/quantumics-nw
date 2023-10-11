@@ -980,6 +980,7 @@ BEGIN
         	modified_date timestamp without time zone,
         	created_date timestamp without time zone,
         	user_id integer NOT NULL,
+        	active boolean default true,
         	CONSTRAINT qsp_rule_job_pkey PRIMARY KEY (job_id)
             )';
 

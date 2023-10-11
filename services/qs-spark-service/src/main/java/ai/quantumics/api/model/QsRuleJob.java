@@ -27,6 +27,7 @@ public class QsRuleJob {
   @Column(columnDefinition = "TEXT")
   private String jobOutput;
   private int userId;
+  private boolean active;
   private Date createdDate;
   private Date modifiedDate;
   private String createdBy;
