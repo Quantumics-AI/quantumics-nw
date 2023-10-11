@@ -15,7 +15,12 @@ import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,12 +34,24 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ai.quantumics.api.constants.DatasourceConstants.*;
-import static ai.quantumics.api.util.RegexUtils.isDouble;
-import ai.quantumics.api.adapter.AwsAdapter;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
+import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
+import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
+import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
+import static ai.quantumics.api.constants.DatasourceConstants.Files;
+import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
