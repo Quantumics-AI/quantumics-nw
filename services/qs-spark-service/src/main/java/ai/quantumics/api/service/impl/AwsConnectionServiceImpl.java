@@ -27,9 +27,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -51,6 +54,8 @@ import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
+import static ai.quantumics.api.constants.QsConstants.DELIMITER;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -63,6 +68,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AmazonS3 amazonS3Client;
     @Autowired
     private AwsAdapter awsAdapter;
+
+    @Value("${qs.aws.use.config.buckets}")
+    private boolean isUseConfigBuckets;
+
+    @Value("${qs.aws.config.buckets}")
+    private String configBucketNames;
 
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
@@ -145,11 +156,26 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public List<String> getBuckets() {
-        List<Bucket> buckets = awsS3Client.listBuckets();
-        if(buckets.isEmpty()){
-            throw new BucketNotFoundException(EMPTY_BUCKET);
-        }else {
-            return getBucketsName(buckets);
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+            return buckets;
+        } else {
+            List<Bucket> buckets = awsS3Client.listBuckets();
+            if (buckets.isEmpty()) {
+                throw new BucketNotFoundException(EMPTY_BUCKET);
+            } else {
+                return getBucketsName(buckets);
+            }
         }
     }
 
@@ -162,8 +188,22 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String testConnection(String accessMethod) {
-        amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
-        amazonS3Client.listBuckets();
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+        } else {
+            amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+            amazonS3Client.listBuckets();
+        }
         return CONNECTION_SUCCESSFUL;
     }
 
