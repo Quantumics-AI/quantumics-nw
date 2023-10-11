@@ -15,26 +15,48 @@ import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ai.quantumics.api.constants.DatasourceConstants.*;
-import static ai.quantumics.api.util.RegexUtils.isDouble;
-import ai.quantumics.api.adapter.AwsAdapter;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
+import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
+import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
+import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
+import static ai.quantumics.api.constants.DatasourceConstants.Files;
+import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
+import static ai.quantumics.api.constants.QsConstants.DELIMITER;
+
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
@@ -47,10 +69,16 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
     private AwsAdapter awsAdapter;
 
+    @Value("${qs.aws.use.config.buckets}")
+    private boolean isUseConfigBuckets;
+
+    @Value("${qs.aws.config.buckets}")
+    private String configBucketNames;
+
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(awsDatasourceRequest.getConnectionName().trim(),true);
         if (dataSources.isPresent()) {
             throw new BadRequestException(DATA_SOURCE_EXIST);
         }
@@ -128,11 +156,26 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public List<String> getBuckets() {
-        List<Bucket> buckets = awsS3Client.listBuckets();
-        if(buckets.isEmpty()){
-            throw new BucketNotFoundException(EMPTY_BUCKET);
-        }else {
-            return getBucketsName(buckets);
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+            return buckets;
+        } else {
+            List<Bucket> buckets = awsS3Client.listBuckets();
+            if (buckets.isEmpty()) {
+                throw new BucketNotFoundException(EMPTY_BUCKET);
+            } else {
+                return getBucketsName(buckets);
+            }
         }
     }
 
@@ -145,8 +188,22 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String testConnection(String accessMethod) {
-        amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
-        amazonS3Client.listBuckets();
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+        } else {
+            amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+            amazonS3Client.listBuckets();
+        }
         return CONNECTION_SUCCESSFUL;
     }
 

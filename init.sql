@@ -1186,7 +1186,6 @@ ALTER PROCEDURE public.insert_eng_flow_job_result_rows(character varying, intege
 
 INSERT INTO public.qs_datasource_types (data_source_type,data_source_name,data_source_image,active,creation_date) VALUES
 	 ('LocalFile','Local File','folder.png',true,'2021-01-30 13:58:07.772487'),
-	 ('api','API','api.png',true,'2021-02-13 12:11:09'),
 	 ('DB','PgSQL','pgsql.png',true,'2021-02-13 12:11:09');
 
 
