@@ -62,8 +62,8 @@ if count_results_df.collect()[0]["record_count"] == 0 and count_results_df.colle
 else:
     # Calculate header-wise sums and comparisons
     for header in input_headers:
-        source_sum = dataframes[0].select(F.coalesce(col(header), F.lit(0))).collect()[0][0]
-        target_sum = dataframes[1].select(F.coalesce(col(header), F.lit(0))).collect()[0][0]
+        source_sum = dataframes[0].agg(F.sum(F.coalesce(col(header), F.lit(0)))).collect()[0][0]
+        target_sum = dataframes[1].agg(F.sum(F.coalesce(col(header), F.lit(0)))).collect()[0][0]
         max_sum = max(source_sum, target_sum)
         percentage_difference = (abs(source_sum - target_sum) / max_sum) * 100.0
         # Check if the percentage difference is higher than the input acceptance percentage
