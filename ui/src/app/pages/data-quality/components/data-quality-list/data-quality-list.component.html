@@ -76,12 +76,12 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr *ngIf="(dataQualityList)?.length > 10"
+                                        <tr *ngIf="paginationData?.totalPages > 1"
                                             style="background-color: white !important;" class="pg-tr">
                                             <td colspan="8" class="pg-pd">
                                                 <div class="text-center">
-                                                    <ngb-pagination [collectionSize]="dataQualityList?.length" [(page)]="page"
-                                                        [pageSize]="pageSize" [maxSize]="5" [rotate]="true"
+                                                    <ngb-pagination [collectionSize]="paginationData?.totalElements" [(page)]="page"
+                                                        [pageSize]="paginationData.size" [maxSize]="5" [rotate]="true"
                                                         aria-label="Custom pagination" (pageChange)="onPageChange($event)">
                                                         <ng-template ngbPaginationPrevious>
                                                             <span class="btn nextBtn">
