@@ -45,6 +45,11 @@ export class EditRuleComponent implements OnInit {
   public saveRulePayload: any;
   public ruleId: number;
   public fetchEditRule: any;
+  public ruleFilter = [
+    { label: 'Active', name: 'Active', selected: false },
+    { label: 'Inactive', name: 'Inactive', selected: false },
+    { label: 'Deleted', name: 'Deleted', selected: false }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -119,12 +124,14 @@ export class EditRuleComponent implements OnInit {
         //source1-
         this.fg.controls.sourceDataConnection.setValue(this.fetchEditRule?.sourceData.dataSourceId);
         this.fg.controls.sourceBucketOne.setValue(this.fetchEditRule?.sourceData.bucketName);
+        this.selectedBucketOne = this.fetchEditRule?.sourceData.bucketName;
         this.bucketSourceOne.push(this.fetchEditRule?.sourceData.bucketName);
         this.fg.controls.sourceFolderPath.setValue(this.fetchEditRule?.sourceData.filePath);
         //source-2
         this.selectedDataConnections2 = this.fetchEditRule?.targetData.dataSourceId;
         this.fg.controls.sourceDataConnectionTwo.setValue(this.fetchEditRule?.targetData.dataSourceId);
         this.fg.controls.sourceBucketTwo.setValue(this.fetchEditRule?.targetData.bucketName);
+        this.selectedBucketTwo = this.fetchEditRule?.targetData.bucketName;
         this.bucketSourceTwo.push(this.fetchEditRule?.targetData.bucketName);
         this.fg.controls.sourceFolderPathTwo.setValue(this.fetchEditRule?.targetData.filePath);
       } else {
@@ -296,7 +303,7 @@ export class EditRuleComponent implements OnInit {
   }
 
   public updateRuleFunction(): void {
-    if (!this.fg.controls.sourceAndTarget.value) {
+    if (this.fg.controls.sourceAndTarget.value) {
       this.saveRulePayload = {
         ruleId: this.ruleId,
         ruleName:this.fg.controls.ruleName.value,
@@ -305,8 +312,8 @@ export class EditRuleComponent implements OnInit {
         sourceData : {
             sourceDataType: this.fg.controls.sourceDataSource.value,
             subDataSourceType: this.fg.controls.subDataSourceOne.value,
-            dataSourceId: this.fg.controls.sourceDataConnection.value,
-            bucketName: +this.fg.controls.sourceBucketOne.value,
+            dataSourceId: +this.fg.controls.sourceDataConnection.value,
+            bucketName: this.fg.controls.sourceBucketOne.value,
             filePath : this.fg.controls.sourceFolderPath.value
         },
         targetData: {
@@ -322,7 +329,7 @@ export class EditRuleComponent implements OnInit {
               levelName: this.fg.controls.subLavelRadio.value,
               columnLevel: false,
               acceptance: this.fg.controls.percentage.value,
-              columns: []
+              columns: [this.fg.controls.selectColumnAttribute.value]
             }
     
         },
@@ -349,7 +356,7 @@ export class EditRuleComponent implements OnInit {
               levelName: this.fg.controls.subLavelRadio.value,
               columnLevel: false,
               acceptance: this.fg.controls.percentage.value,
-              columns: []
+              columns: [this.fg.controls.selectColumnAttribute.value]
             }
     
         },

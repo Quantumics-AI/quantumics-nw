@@ -382,22 +382,30 @@
                     <div>
                         <p class="p2 active-s">Active status*</p>
                         <div class="form-group">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" 
+                            <ng-container *ngFor="let item of ruleFilter">
+                                <div class="form-check form-check-inline" [ngClass]="{'dit': item.label == 'Deleted'}">
+                                
+                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" 
+                                    formControlName="status" [value]="item.name">
+                                    <label class="form-check-label p2" for="inlineRadio1">{{item.label}}</label>
+                                    <small *ngIf="item.label == 'Deleted'" id="workspaceNameHelp" class="form-text body-text-muted mute-text">Deleted rule can't be used again</small>
+                                
+                                <!-- <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" 
                                 formControlName="status" value="Active">
-                                <label class="form-check-label p2" for="inlineRadio1">Active</label>
-                              </div>
-                              <div class="form-check form-check-inline">
+                                <label class="form-check-label p2" for="inlineRadio1">Active</label> -->
+                                </div>
+                            </ng-container>
+                            <!-- <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" 
                                 formControlName="status" value="Inactive">
                                 <label class="form-check-label p2" for="inlineRadio2">Inactive</label>
-                              </div>
-                              <div class="form-check form-check-inline dit">
+                            </div>
+                            <div class="form-check form-check-inline dit">
                                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" 
                                 formControlName="status" value="Deleted">
                                 <label class="form-check-label p2" for="inlineRadio3">Delete</label>
                                 <small id="workspaceNameHelp" class="form-text body-text-muted mute-text">Deleted rule can't be used again</small>
-                            </div>
+                            </div> -->
                         </div>
                         
                     </div>

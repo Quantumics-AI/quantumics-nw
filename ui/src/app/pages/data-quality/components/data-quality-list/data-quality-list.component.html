@@ -8,7 +8,7 @@
     
     <div class="page-content pd-20" >
         <ng-container *ngIf="!loading">
-            <ng-container *ngIf="ruleCount?.length > 0; else noDataQualityRules">
+            <ng-container *ngIf="ruleCount?.length > 0 || ruleCountInactive?.length > 0 || ruleCountDeleted?.length > 0; else noDataQualityRules">
                 <div class="card card-d">
                     <div class="card-header ch pd-b-0">
                         <div class="di mr-t-6">
@@ -50,7 +50,7 @@
                                     <ng-container *ngIf="dataQualityList.length else noRules">
                                         <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
                                             <td class="pt-2"> <label>
-                                                <input type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
+                                                <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
                                             </label></td>
                                             <td class="fn text-over">
                                                 <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>
@@ -62,7 +62,7 @@
                                             <td class="cp">{{(dataQuality?.status)}}</td>
             
                                             <td class="float-right">
-                                                <div ngbDropdown container="body" *ngIf="ruleStatus != 'delete'">
+                                                <div ngbDropdown container="body" *ngIf="dataQuality?.status != 'Deleted'">
                                                     <a ngbDropdownToggle class="menu-icon">
                                                         <img src="assets/img/project-stats/menu.svg" class="default-img">
                                                         <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="btn-div text-center" *ngIf="ruleStatus == 'Active'">
+                <div class="btn-div text-center" *ngIf="ruleStatus == 'Active' && dataQualityList.length">
                     <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run Rule</button>
                 </div>
             </ng-container>

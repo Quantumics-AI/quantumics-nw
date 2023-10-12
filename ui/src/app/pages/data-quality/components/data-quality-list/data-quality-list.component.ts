@@ -30,6 +30,8 @@ export class DataQualityListComponent implements OnInit {
 
   public dataQualityList: any;
   public ruleCount: any;
+  public ruleCountInactive: any;
+  public ruleCountDeleted: any;
   public projectId: number;
   userId: number;
   selectAllChecked: boolean = false;
@@ -69,13 +71,15 @@ export class DataQualityListComponent implements OnInit {
 
   ngOnInit(): void {
     this.getRules();
+    this.getRulesInactive();
+    this.getRulesDelete();
     sessionStorage.clear();
   }
 
   public getRules(): void {
     this.loading = true;
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
-      console.log("rules list: ", response);
+    
       this.loading = false;
       this.dataQualityList = response?.result?.content;
       this.ruleCount =  response?.result?.content;
@@ -88,6 +92,29 @@ export class DataQualityListComponent implements OnInit {
           );
         });
       }
+      
+    }, (error) => {
+      this.loading = false;
+    });
+  }
+
+  public getRulesInactive(): void {
+    this.loading = true;
+    this.ruleCreationService.getRulesData(this.userId, this.projectId, 'Inactive', this.pageNumebr, this.pageLength).subscribe((response) => {
+    
+      this.ruleCountInactive =  response?.result?.content;
+      
+    }, (error) => {
+      this.loading = false;
+    });
+  }
+
+  public getRulesDelete(): void {
+    this.loading = true;
+    this.ruleCreationService.getRulesData(this.userId, this.projectId,'Deleted', this.pageNumebr, this.pageLength).subscribe((response) => {
+      
+      this.loading = false;
+      this.ruleCountDeleted =  response?.result?.content;
       
     }, (error) => {
       this.loading = false;
