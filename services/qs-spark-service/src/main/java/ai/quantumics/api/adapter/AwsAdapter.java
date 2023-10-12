@@ -2772,6 +2772,7 @@ public class AwsAdapter {
 		}catch(AmazonServiceException exception){
 			String region = getRegionFromMessage(exception.getErrorMessage());
 			if(region == null){
+				log.error("Error while creating s3 client {}", exception.getErrorMessage());
 				throw new BucketNotFoundException(BUCKET_NOT_EXIST);
 			}
 			s3Client = AmazonS3ClientBuilder
