@@ -1128,11 +1128,26 @@ public class LivyActions {
         final int batchJobId = fromJson.get("id").asInt();
         log.info(" Batch Job ID {}", batchJobId);
 
-        final JsonNode batchResponse = livyClient.getApacheLivyBatchState(batchJobId, mapper);
+        final JsonNode runningBatchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.running.toString());
+        if (runningBatchResponse != null) {
+            String batchJobState = runningBatchResponse.get("state").asText();
+            if (LivySessionState.running.toString().equals(batchJobState)) {
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.INPROCESS.getStatus(), null, modifiedBy, projectId);
+                log.info("Running the Rule Job...");
+            } else {
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+                log.info("Failed running the Rule Job...");
+            }
+        } else {
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+            log.info("Failed running the Rule Job...");
+        }
+
+        final JsonNode batchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.success.toString());
         if (batchResponse != null) {
             String batchJobState = batchResponse.get("state").asText();
 
-            if ("success".equals(batchJobState)) {
+            if (LivySessionState.success.toString().equals(batchJobState)) {
                 jobName = jobName.replace(".py", "");
                 S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
                 if(s3Object == null) { //Error in livy job

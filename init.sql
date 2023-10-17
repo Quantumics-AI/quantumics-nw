@@ -973,7 +973,7 @@ BEGIN
             CREATE TABLE '||schemaName||'.qsp_rule_job (
             job_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
     		rule_id integer NOT NULL,
-    		job_status varchar(10) NOT NULL,
+    		job_status varchar(15) NOT NULL,
             job_output text COLLATE pg_catalog."default",
     		created_by character varying(100) COLLATE pg_catalog."default",
     		modified_by character varying(100) COLLATE pg_catalog."default",

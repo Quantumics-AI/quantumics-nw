@@ -106,7 +106,7 @@ public class RuleJobServiceImpl implements RuleJobService {
                 if (ruleJob == null && ruleId > 0) {
                     ruleJob = new QsRuleJob();
                     ruleJob.setRuleId(ruleId);
-                    ruleJob.setJobStatus(RuleJobStatus.INPROCESS.getStatus());
+                    ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
                     ruleJob.setUserId(userId);
                     ruleJob.setActive(true);
                     ruleJob.setCreatedDate(QsConstants.getCurrentUtcDate());
@@ -114,7 +114,7 @@ public class RuleJobServiceImpl implements RuleJobService {
                     ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                     ruleJob.setModifiedBy(ruleJob.getCreatedBy());
                 } else {
-                    ruleJob.setJobStatus(RuleJobStatus.INPROCESS.getStatus());
+                    ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
                     ruleJob.setJobOutput(null);
                     ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
@@ -196,7 +196,7 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
-            List<QsRuleJob> ruleJobList = ruleJobRepository.findAllByActiveTrue();
+            List<QsRuleJob> ruleJobList = ruleJobRepository.findAllByActiveTrueOrderByModifiedDateDesc();
             if (CollectionUtils.isNotEmpty(ruleJobList)) {
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());

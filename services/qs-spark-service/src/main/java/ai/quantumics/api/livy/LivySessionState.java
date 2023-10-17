@@ -17,5 +17,6 @@ public enum LivySessionState {
   error,
   dead,
   killed,
-  success
+  success,
+  running
 }
