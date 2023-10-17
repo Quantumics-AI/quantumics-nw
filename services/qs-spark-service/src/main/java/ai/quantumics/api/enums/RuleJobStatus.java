@@ -1,7 +1,7 @@
 package ai.quantumics.api.enums;
 
 public enum RuleJobStatus {
-
+    NOT_STARTED("Not Started"),
     INPROCESS("Inprocess"),
     COMPLETE("Complete"),
     FAILED("Failed");

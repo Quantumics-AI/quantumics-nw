@@ -339,6 +339,47 @@ public class QsCustomLivyClient {
     }
     return null;
   }
+
+  public JsonNode getRuleJobApacheLivyBatchState(final int batchId, final ObjectMapper mapper, String status) {
+    final String url = livyBaseBatchesUrl + batchId;
+    String jsonStr = null;
+    HttpStatus statusCode;
+    ResponseEntity<String> postForEntity;
+    JsonNode node = null;
+    final String dead = LivySessionState.dead.toString();
+    String state = LivySessionState.starting.toString();
+    try {
+      Timer timer = new Timer();
+      SimpleTimerTask task = new SimpleTimerTask(batchJobMaxTimeoutPeriod);
+      timer.schedule(task, 0);
+
+      while (!(state.equals(status) || state.equals(dead))) {
+        postForEntity = restTemplate.getForEntity(url, String.class);
+        statusCode = postForEntity.getStatusCode();
+        if (statusCode.is2xxSuccessful()) {
+          jsonStr = postForEntity.getBody();
+          node = mapper.readValue(jsonStr, JsonNode.class);
+          state = node.get("state").asText();
+        }
+
+        sleep(2000);
+
+        if(task.isElapsed()) {
+          // Abort the Batch Job as it is in hanged state for more than 5mins..
+          log.info("Deleting the batch job as it is in hanged state for more than: {} msecs.", batchJobMaxTimeoutPeriod);
+          deleteLivyBatchJob(batchId);
+        }
+      }
+
+      // Stop the timer as the task is complete...
+      timer.cancel();
+
+      return node;
+    } catch (final Exception e) {
+      log.error("Exception: reading batch state {}", e.getMessage());
+    }
+    return null;
+  }
   
   public List<String> getApacheLivyBatchJobLog(final int batchId, final ObjectMapper mapper) {
     final String url = livyBaseBatchesUrl + batchId+"/log";
