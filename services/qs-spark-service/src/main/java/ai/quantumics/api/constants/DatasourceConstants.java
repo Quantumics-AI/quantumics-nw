@@ -25,6 +25,7 @@ public class DatasourceConstants {
   public static final String FILE_NAME_NOT_NULL = "File name can't be null";
   public static final String CSV_FILE = "Please provide only .csv file";
   public static final String EMPTY_FILE = "File has no content";
+  public static final String CORREPTED_FILE = "Please check, the selected file is corrupted";
   private DatasourceConstants() {}
 
 }
