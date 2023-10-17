@@ -14,4 +14,5 @@ public class BucketFileContent {
     private List<String> headers;
     private List<ColumnDataType> columnDatatype;
     private List<Map<String, String>> content;
+    private int rowCount;
 }

@@ -48,16 +48,17 @@ import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
+import static ai.quantumics.api.constants.DatasourceConstants.CORREPTED_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
-import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -251,7 +252,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                     dataTypes.add(columnDataType);
                 }
                 data.add(row);
-                dataTypes.add(columnDataType);
                 rowCount++;
             }
 
@@ -263,8 +263,11 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 data.add(row);
                 rowCount++;
             }
+            bucketFileContent.setRowCount(rowCount);
         } catch (IOException | CsvValidationException e) {
             e.printStackTrace();
+        }catch(Exception e){
+            throw new BadRequestException(CORREPTED_FILE);
         }
         bucketFileContent.setHeaders(headers);
         bucketFileContent.setContent(data);
