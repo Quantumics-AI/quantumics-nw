@@ -25,6 +25,8 @@ public interface AwsConnectionService {
 
     List<String> getBuckets();
 
+    List<String> getBucket();
+
     String getFoldersAndFilePath(String bucketName) throws IOException;
 
     String testConnection(String accessMethod);

@@ -170,12 +170,23 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
-//            S3Client s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
-//            if(s3Client == null) {
-//                throw new BadRequestException(CONNECTION_FAILED);
-//            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
             return buckets;
         } else {
+            List<Bucket> buckets = awsS3Client.listBuckets();
+            if (buckets.isEmpty()) {
+                throw new BucketNotFoundException(EMPTY_BUCKET);
+            } else {
+                return getBucketsName(buckets);
+            }
+        }
+    }
+
+    @Override
+    public List<String> getBucket() {
             List<software.amazon.awssdk.services.s3.model.Bucket> buckets = s3Client.listBuckets().buckets();
             if (buckets.isEmpty()) {
                 throw new BucketNotFoundException(EMPTY_BUCKET);
@@ -183,7 +194,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 return getBucketName(buckets);
             }
         }
-    }
 
     @Override
     public String getFoldersAndFilePath(String bucketName) throws IOException {

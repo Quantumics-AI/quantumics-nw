@@ -135,6 +135,18 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
     }
 
+    @GetMapping("/bucket/{userId}/{projectId}")
+    public ResponseEntity<List<String>> getBucket(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        List<String> bucketsName = awsConnectionService.getBucket();
+        return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
+    }
+
     @GetMapping("/buckets/{userId}/{projectId}")
     public ResponseEntity<List<String>> getBuckets(@PathVariable(value = "userId") final int userId,
                                                    @PathVariable(value = "projectId") final int projectId) {
