@@ -216,7 +216,7 @@ public class AwsCustomConfiguration {
   }
 
   public S3Client createProfileS3() {
-    return S3Client.builder().region(Region.EU_WEST_2).build();
+    return S3Client.builder().region(Region.EU_WEST_1).build();
   }
 
 }

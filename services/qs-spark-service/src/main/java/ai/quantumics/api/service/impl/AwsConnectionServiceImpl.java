@@ -242,6 +242,26 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return CONNECTION_SUCCESSFUL;
     }
 
+    public String testConnectionV2(String accessMethod) {
+        if(isUseConfigBuckets) {
+            if(StringUtils.isEmpty(configBucketNames)) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
+            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
+                throw new BadRequestException(EMPTY_BUCKET);
+            }
+            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+            if(s3Client == null) {
+                throw new BadRequestException(CONNECTION_FAILED);
+            }
+        } else {
+            amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+            amazonS3Client.listBuckets();
+        }
+        return CONNECTION_SUCCESSFUL;
+    }
+
     @Override
     public BucketFileContent getContent(String bucketName, String file) {
         if(file == null){

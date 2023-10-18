@@ -11,6 +11,7 @@ import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.BucketFileContent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
 
 @RestController
 @RequestMapping("/api/v1/aws")
+@Slf4j
 public class AwsConnectionController {
     private final AwsConnectionService awsConnectionService;
     private final DbSessionUtil dbUtil;
@@ -186,12 +188,16 @@ public class AwsConnectionController {
     @PostMapping("/testConnection/{userId}/{projectId}")
     public ResponseEntity<Object> testConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest,
                                                  @PathVariable(value = "userId") final int userId,
-                                                 @PathVariable(value = "projectId") final int projectId) {
+                                                 @PathVariable(value = "projectId") final int projectId) throws IOException {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
+        log.info("Calling testConnection");
+            List<String> objectPath = awsConnectionService.getFoldersAndFilePaths("qsai-destination");
+            log.info("Object paths {}", objectPath);
+
         return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType().trim()));
     }
 
