@@ -11,7 +11,11 @@ package ai.quantumics.api;
 import ai.quantumics.api.enums.AwsAccessType;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.*;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.services.athena.AmazonAthena;
 import com.amazonaws.services.athena.AmazonAthenaClient;
 import com.amazonaws.services.athena.AmazonAthenaClientBuilder;
@@ -26,6 +30,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 
@@ -194,6 +200,23 @@ public class AwsCustomConfiguration {
     final CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
     multipartResolver.setMaxUploadSize(maxFileSize);
     return multipartResolver;
+  }
+
+  @Bean
+  public S3Client s3Client() {
+    return s3Client(accessMethod);
+  }
+
+  public S3Client s3Client(String accessMethod) {
+    if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
+      return createProfileS3();
+    } else {
+      throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
+    }
+  }
+
+  public S3Client createProfileS3() {
+    return S3Client.builder().region(Region.US_EAST_1).build();
   }
 
 }

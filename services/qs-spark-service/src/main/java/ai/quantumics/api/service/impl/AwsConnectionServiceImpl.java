@@ -35,6 +35,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -71,6 +72,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AmazonS3 amazonS3Client;
     @Autowired
     private AwsAdapter awsAdapter;
+    @Autowired
+    private S3Client s3Client;
 
     @Value("${qs.aws.use.config.buckets}")
     private boolean isUseConfigBuckets;
@@ -167,17 +170,17 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
-            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
-            if(s3Client == null) {
-                throw new BadRequestException(CONNECTION_FAILED);
-            }
+//            S3Client s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
+//            if(s3Client == null) {
+//                throw new BadRequestException(CONNECTION_FAILED);
+//            }
             return buckets;
         } else {
-            List<Bucket> buckets = awsS3Client.listBuckets();
+            List<software.amazon.awssdk.services.s3.model.Bucket> buckets = s3Client.listBuckets().buckets();
             if (buckets.isEmpty()) {
                 throw new BucketNotFoundException(EMPTY_BUCKET);
             } else {
-                return getBucketsName(buckets);
+                return getBucketName(buckets);
             }
         }
     }
@@ -300,6 +303,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     private List<String> getBucketsName(final List<Bucket> buckets) {
         return buckets.stream().map(Bucket::getName).collect(Collectors.toList());
+    }
+
+    private List<String> getBucketName(final List<software.amazon.awssdk.services.s3.model.Bucket> buckets) {
+        return buckets.stream().map(software.amazon.awssdk.services.s3.model.Bucket::name).collect(Collectors.toList());
     }
 
     private AWSDatasource awsDatasourceMapper(AwsDatasourceRequest awsDatasourceRequest, String userName) {
