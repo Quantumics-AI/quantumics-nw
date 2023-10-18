@@ -17,6 +17,9 @@ import { ViewRunningRulesComponent } from './components/view-running-rules/view-
 import { ViewResultComponent } from './components/view-result/view-result.component';
 import { BrowseFileComponent } from './components/browse-file/browse-file.component';
 import { ShowFileComponent } from './components/show-file/show-file.component';
+import { StatusDeleteConfirmationComponent } from './components/status-delete-confirmation/status-delete-confirmation.component';
+import { FilterPipeModule } from 'ngx-filter-pipe';
+import { FilterPipe, FilterDatabasePipe } from './pipes/filter.pipe';
 
 @NgModule({
     declarations: [
@@ -31,7 +34,10 @@ import { ShowFileComponent } from './components/show-file/show-file.component';
         ViewRunningRulesComponent,
         ViewResultComponent,
         BrowseFileComponent,
-        ShowFileComponent
+        ShowFileComponent,
+        StatusDeleteConfirmationComponent,
+        FilterPipe,
+        FilterDatabasePipe
     ],
     imports: [
         CommonModule,
@@ -43,7 +49,8 @@ import { ShowFileComponent } from './components/show-file/show-file.component';
         FormsModule,
         NgSelectModule,
         NgbDropdownModule,
-        NgbModule
+        NgbModule,
+        FilterPipeModule,
     ],
     // schemas: [NO_ERRORS_SCHEMA]
 })

@@ -5,7 +5,12 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'ingest', 'select-source-type' ]">Dataset</a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Data Source</li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <span style="position: relative;">
+                            <img src="../../../../../assets/img/arrow.svg" alt="Arrow" style="width: 16px; vertical-align: middle;">
+                            Data Source
+                        </span>
+                    </li>
                 </ol>
             </li>
         </ol>
@@ -75,6 +80,10 @@
                                             <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
                                             Entered Connection name is already used. Please enter a different name.
                                         </div>
+                                        <!-- <div class="text-error" *ngIf="!invalidPattern || !invalidCapitalPattern && fg.get('dataSourceName').hasError('dataSourceName') && selectedConnectionName.length > 0">
+                                            <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp;
+                                            Minimum length is 10 characters.
+                                        </div> -->
                                     </div>
 
                                     <ng-template #popFolderContent>

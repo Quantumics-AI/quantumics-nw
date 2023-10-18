@@ -32,7 +32,7 @@
                                 <label for="inputName" class="p2">Rule name*</label>
                                 <input type="text" class="form-control input-design" formControlName="ruleName" #rulename
                                     autocomplete="off" minlength="3" maxlength="50" (ngModelChange)="modelChangeRuleName($event)"
-                                    (focus)="f.open()" (input)="rulename.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
+                                    (focus)="f.open()" (input)="checkIfNameExists(); rulename.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
                                     triggers="manual" #f="ngbPopover" [ngbPopover]="popRuleNameContent"
                                     popoverClass="folder-pophover" placement="bottom">
                                 <small id="workspaceNameHelp" class="form-text body-text-muted">Rule name must be
@@ -50,6 +50,10 @@
                                 <div class="text-error" *ngIf="invalidCapitalPattern">
                                     <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
                                     Rule name must start with capital letter.
+                                </div>
+                                <div class="text-error" *ngIf="alreadyExist">
+                                    <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                    Entered rule name is already used. Please enter a different name.
                                 </div>
                             </div>
                             <ng-template #popRuleNameContent>
@@ -384,35 +388,20 @@
                         <div class="form-group">
                             <ng-container *ngFor="let item of ruleFilter">
                                 <div class="form-check form-check-inline" [ngClass]="{'dit': item.label == 'Deleted'}">
-                                
                                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" 
-                                    formControlName="status" [value]="item.name">
+                                    (change)="selectedStatus(item.name)" formControlName="status" [value]="item.name">
                                     <label class="form-check-label p2" for="inlineRadio1">{{item.label}}</label>
                                     <small *ngIf="item.label == 'Deleted'" id="workspaceNameHelp" class="form-text body-text-muted mute-text">Deleted rule can't be used again</small>
-                                
-                                <!-- <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" 
-                                formControlName="status" value="Active">
-                                <label class="form-check-label p2" for="inlineRadio1">Active</label> -->
                                 </div>
                             </ng-container>
-                            <!-- <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" 
-                                formControlName="status" value="Inactive">
-                                <label class="form-check-label p2" for="inlineRadio2">Inactive</label>
-                            </div>
-                            <div class="form-check form-check-inline dit">
-                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" 
-                                formControlName="status" value="Deleted">
-                                <label class="form-check-label p2" for="inlineRadio3">Delete</label>
-                                <small id="workspaceNameHelp" class="form-text body-text-muted mute-text">Deleted rule can't be used again</small>
-                            </div> -->
                         </div>
                         
                     </div>
                     <div class="mt-2">
                         <div class="text-center">
                             <button type="button" class="btn btn-outline-success connectionBtns"
-                                (click)="updateRuleFunction();" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid">Save</button>
+                                (click)="updateRuleFunction();" [ngClass]="{'validBtn': !fg.invalid}" 
+                                [disabled]="fg.invalid || alreadyExist">Save</button>
                         </div>
                     </div>
                 </div>

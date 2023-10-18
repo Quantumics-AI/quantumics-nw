@@ -1147,3 +1147,20 @@ label {
   text-overflow: ellipsis;
   max-width: 180px;
 }
+
+/* Status color */
+
+.greenStatus {
+  color: #00977C;
+  font-weight: 500;
+}
+
+.orangeStatus {
+  color: #ffc107;
+  font-weight: 500;
+}
+
+.redStatus {
+  color: #dc3545;
+  font-weight: 500;
+}

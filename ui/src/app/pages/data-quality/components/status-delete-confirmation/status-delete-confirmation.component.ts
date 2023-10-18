@@ -3,11 +3,12 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
 
 @Component({
-  selector: 'app-confirmation',
-  templateUrl: './confirmation.component.html',
-  styleUrls: ['./confirmation.component.scss']
+  selector: 'app-status-delete-confirmation',
+  templateUrl: './status-delete-confirmation.component.html',
+  styleUrls: ['./status-delete-confirmation.component.scss']
 })
-export class ConfirmationComponent {
+export class StatusDeleteConfirmationComponent {
+
   constructor(
     public modal: NgbActiveModal,
     private snakbar: SnackbarService,
@@ -16,7 +17,7 @@ export class ConfirmationComponent {
   ngOnInit(): void {
   }
 
-  public deleteSource(): void {
+  public deleteRule(): void {
     this.modal.close();
   }
 }

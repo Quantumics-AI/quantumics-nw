@@ -1,14 +1,13 @@
-<!-- <div class="page-header1 pd-l-20">
-    <ol class="breadcrumb breadcrumb-top">
-        <li class="breadcrumb-item">Rule</li>
-        <li class="breadcrumb-item active" aria-current="page">Tables</li>
-    </ol>
-</div> -->
 <ol class="breadcrumb">
   <li class="breadcrumb-item breadcrumb-top pd-l-20">
       <ol class="breadcrumb">
-          <li class="breadcrumb-item" aria-current="page">Rule</li>
-          <li class="breadcrumb-item active" aria-current="page">Folders</li>
+          <li class="breadcrumb-item" aria-current="page"><a [routerLink]="['/projects', projectId, 'data-quality']">Rules</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <span style="position: relative;">
+              <img src="../../../../../assets/img/arrow.svg" alt="Arrow" style="width: 16px; vertical-align: middle;">
+              Folders
+            </span>
+          </li>
       </ol>
   </li>
 </ol>
@@ -46,7 +45,7 @@
                     <tbody>
                         <ng-template #recursiveList let-node let-indentLevel="indentLevel">
                           <tr class="td-text">
-                            <td [ngClass]="{'child-node': indentLevel > 0}">
+                            <td [ngClass]="{'child-node': indentLevel > 0}" [style.padding-left.px]="indentLevel > 0 ? indentLevel * 35 : 20">
                               <span (click)="toggleNode(node.key, indentLevel)" class="cp">
                                 <img class="pd-r-12" src="assets/img/pipline/r-arrow.svg">
                               </span>
@@ -68,10 +67,10 @@
                               </ng-container>
                               <ng-container *ngIf="isArray(node.value[key])">
                                 <tr *ngFor="let file of node.value[key]; let i = index" class="td-text">
-                                  <!-- [style.padding-left.px]="indentLevel * 55" -->
-                                  <td class="child-node pipe-n cp pd-l-55" (click)="showTable(file)">
-                                    <span title="{{file}}" class="pd-r-12"><img src="assets/img/pipline/file.svg"></span>
-                                    {{ file.fileName }}
+                                  <!-- [style.padding-left.px]="indentLevel * 55" pd-l-55-->
+                                  <td class="child-node pipe-n cp " [style.padding-left.px]="indentLevel > 0 ? indentLevel * 65 : 50" (click)="showTable(file)">
+                                    <span class="pd-r-12"><img src="assets/img/pipline/file.svg"></span>
+                                    <span title="{{file.fileName}}" >{{ file.fileName }}</span>
                                   </td>
                                   <td class="child-node">{{file?.fileLastModified | date: 'dd-MM-yy, hh:mm a'}}</td> <!-- Empty cell for createdDateTime for child nodes -->
                                   <td class="child-node">File</td>
@@ -93,7 +92,7 @@
 
 <div *ngIf="isShowTable"
     style="position: absolute; bottom: 0px; border: 1px solid rgba(0, 0, 0, 0.125);width: 100%;height: 400px;background: #fff; z-index: 999;">
-    <app-show-file (close)="isShowTable = !isShowTable" [file]="selectedFile" 
+    <app-show-file (close)="isShowTable = !isShowTable" [file]="selectedFile" [rowCount]="rowCount" 
     [filePath]="filePath" [fileContent]="fileContent" [headers]="headers" [columnType]="columnType"></app-show-file>
 </div>
 

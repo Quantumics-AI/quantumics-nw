@@ -71,7 +71,7 @@ export class DataQualityCreateComponent implements OnInit {
   public loading: boolean
   public ruleStatus: string = 'Active';
   public pageNumebr: number = 1;
-  public pageLength: number = 10;
+  public pageLength: number = 100;
   public alreadyExist: boolean = false;
 
   constructor(
@@ -192,10 +192,10 @@ export class DataQualityCreateComponent implements OnInit {
   checkIfNameExists() {
     if (this.getRuleList.length > 0) {
       const value = this.fg.get('ruleName').value;
-      // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 
       // const enteredName = this.fg.get('dataSourceName').value;
-      const nameExists = this.getRuleList.some(item => item.ruleName === value);
+      const nameExists = this.getRuleList.some(item => item.ruleName === titleCaseValue);
       
       if (nameExists) {
         this.alreadyExist = true;
@@ -380,10 +380,13 @@ export class DataQualityCreateComponent implements OnInit {
 
   public onSelectDataConnections1(id: string): void {
     this.bucketSourceOne = [];
+    this.columnData = [];
+    this.columnDataType = [];
     // this.fg.controls.sourceBucketOne.setValue('');
     this.fg.controls.sourceFolderPath.setValue('');
     const connectionBucket = this.dataConnectionList.find(e => e.id == +id);
     this.bucketSourceOne.push(connectionBucket.bucketName);
+    this.fg.controls.sourceBucketOne.setValue(connectionBucket.bucketName);
   }
 
   public onSelectDataConnections2(id: string): void {
@@ -393,6 +396,7 @@ export class DataQualityCreateComponent implements OnInit {
     
     const connectionBucket = this.dataConnectionList.find(e => e.id == id);
     this.bucketSourceTwo.push(connectionBucket.bucketName);
+    this.fg.controls.sourceBucketTwo.setValue(connectionBucket.bucketName);
   }
 
   public onSelectBucketOne(d: string): void {
@@ -404,6 +408,9 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   public saveRuleFunction(): void {
+    const value = this.fg.get('ruleName').value;
+    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    this.fg.get('ruleName').setValue(titleCaseValue);
     if (this.fg.controls.sourceAndTarget.value) {
       this.saveRulePayload = {
         ruleName:this.fg.controls.ruleName.value,

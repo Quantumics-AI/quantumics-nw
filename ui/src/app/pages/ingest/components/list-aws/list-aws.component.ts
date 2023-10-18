@@ -42,6 +42,7 @@ export class ListAwsComponent {
 
   public sourceListData: any;
   public isDescending: boolean;
+  public timezone: any;
 
   constructor(
     private router: Router,
@@ -212,6 +213,31 @@ export class ListAwsComponent {
   public onPageChange(currentPage: number): void {
     this.startIndex = (currentPage - 1) * this.pageSize;
     this.endIndex = this.startIndex + this.pageSize;
+  }
+
+  convertToUKTime(createdDate: number): string {
+    // Convert createdDate from IST to UK time
+    const date = new Date(createdDate);
+    
+    const ukTimeZone = 'Europe/London'; // Timezone for the United Kingdom
+    
+    // Format the date in the desired format
+    this.timezone = {
+      timeZone: ukTimeZone,
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    };
+
+    // Use a custom format for the day without leading zero
+    const ukDate = new Intl.DateTimeFormat('en-GB', this.timezone).format(date);
+    const parts = ukDate.split('/');
+    const formattedDate = parts.map((part, index) => (index === 0 ? part.slice(1) : part)).join('-');
+
+    return formattedDate;
   }
 
 }

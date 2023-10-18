@@ -39,7 +39,7 @@ export class DataQualityListComponent implements OnInit {
 
   // pagination
   public startIndex: number = 0;
-  public pageSize: number = 10;
+  public pageSize: number = 100;
   public endIndex: number = this.pageSize;
   public page = 1;
   public rulesData: any;
@@ -47,9 +47,16 @@ export class DataQualityListComponent implements OnInit {
 
   public ruleStatus: string = 'Active';
   public pageNumebr: number = 1;
-  public pageLength: number = 10;
+  public pageLength: number = 100;
 
   public ruleId: any = [];
+  public covertTime: any;
+  public isDescending: boolean;
+  public dateOption: any;
+  public searchDiv: boolean = false;
+  public searchString: string;
+  searchTerm: any = { ruleName: '' };
+  public timezone: any;
 
   constructor(
     private readonly router: Router,
@@ -85,7 +92,8 @@ export class DataQualityListComponent implements OnInit {
       this.dataQualityList = response?.result?.content;
       this.ruleCount =  response?.result?.content;
       this.paginationData = response?.result;
-
+      // this.pageSize = this.paginationData.size;
+      // this.endIndex = this.pageSize;
       if (this.dataQualityList.length > 1) {
         this.dataQualityList.sort((val1, val2) => {
           return (
@@ -173,7 +181,43 @@ export class DataQualityListComponent implements OnInit {
       dataQuality.selected = isChecked;
     });
   }
+
+  // Sort data 
+
+  public sortRuleType(): void {
+    this.isDescending = !this.isDescending;
+    if (this.isDescending) {
+      this.dataQualityList = this.dataQualityList.sort((a, b) => {
+        var rule_name_order = a.ruleDetails?.ruleTypeName.localeCompare(b.ruleDetails?.ruleTypeName);
+        return rule_name_order;
+      });
+    } else {
+      this.dataQualityList = this.dataQualityList.sort((a, b) => {
+        var rule_name_order = b.ruleDetails?.ruleTypeName.localeCompare(a.ruleDetails?.ruleTypeName);
+        return rule_name_order;
+      });
+    }
+  }
   
+  public sortCreatedDate(): void {
+    this.isDescending = !this.isDescending;
+    if (this.isDescending) {
+      this.dataQualityList.sort((a, b) => a.createdDate - b.createdDate);
+    } else {
+      this.dataQualityList.sort((a, b) => b.createdDate - a.createdDate);
+    }
+    
+  }
+
+  public sortModifiedDate(): void {
+    this.isDescending = !this.isDescending;
+    if (this.isDescending) {
+      this.dataQualityList.sort((a, b) => a.modifiedDate - b.modifiedDate);
+    } else {
+      this.dataQualityList.sort((a, b) => b.modifiedDate - a.modifiedDate);
+    }
+    
+  }
 
   selectRule(evt: Event, dataQuality: DataQuailtyListResponse): void {
     dataQuality.selected = (evt.target as HTMLInputElement).checked;
@@ -257,5 +301,44 @@ export class DataQualityListComponent implements OnInit {
     // this.pageNumebr = 
     this.startIndex = (currentPage - 1) * this.pageSize;
     this.endIndex = this.startIndex + this.pageSize;
+  }
+
+  searchInput(str) {
+    this.searchString = str;
+    if (str.length == 0) {
+      this.searchDiv = false;
+    } else {
+      this.searchDiv = true;
+    }
+  }
+
+  convertToUKTime(createdDate: number): string {
+    // Convert createdDate from IST to UK time
+    const date = new Date(createdDate);
+    
+    const ukTimeZone = 'Europe/London'; // Timezone for the United Kingdom
+    
+    // Format the date in the desired format
+    this.timezone = {
+      timeZone: ukTimeZone,
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    };
+
+    // Use a custom format for the day without leading zero
+    const ukDate = new Intl.DateTimeFormat('en-GB', this.timezone).format(date);
+    const parts = ukDate.split('/');
+    const formattedDate = parts.map((part, index) => (index === 0 ? part.slice(1) : part)).join('-');
+
+    return formattedDate;
+  }
+
+  clearSearhInput() {
+    this.searchTerm = { ruleName: '' };
+    this.searchDiv = false;
   }
 }

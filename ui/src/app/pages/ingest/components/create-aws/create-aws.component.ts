@@ -73,7 +73,7 @@ export class CreateAwsComponent {
 
   ngOnInit(): void {
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
-
+      //End space allowed    /^([A-Z]).*([A-Za-z0-9_:-]+\s*)*[A-Za-z0-9_:-]+\s*$/
     this.fg = this.fb.group({
       dataSourceName: ['', [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
       connectionType: [{ value: 'PROFILE', disabled: true }],

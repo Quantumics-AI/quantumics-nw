@@ -10,7 +10,7 @@ import { Quantumfacade } from 'src/app/state/quantum.facade';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ViewResultComponent } from '../view-result/view-result.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
-
+import { ConfirmationComponent } from '../confirmation/confirmation.component';
 
 @Component({
   selector: 'app-view-running-rules',
@@ -31,6 +31,10 @@ export class ViewRunningRulesComponent implements OnInit {
   public runningList: any;
   public cancelBtn: boolean;
   public outputData: any;
+  public startIndex: number = 0;
+  public pageSize: number = 10;
+  public endIndex: number = this.pageSize;
+  public page = 1;
 
   constructor(
     // public modal: NgbActiveModal,
@@ -58,7 +62,10 @@ export class ViewRunningRulesComponent implements OnInit {
   }
 
   public getRulJobs(): void {
-    this.loading = true;
+    // this.loading = true;
+    const refreshPage = () => {
+        this.autoRefresh();
+    };
     this.ruleCreationService.getRuleJobs(this.userId, this.projectId).subscribe((response) => {
       console.log("Rule data:", response);
       this.runningList = response?.result;
@@ -72,9 +79,10 @@ export class ViewRunningRulesComponent implements OnInit {
         });
       }
       // Check if there is at least one object with jobStatus "Inprocess"
-      const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess');
+      const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
       // If there is an in-process job, show the button; otherwise, hide it
       if (hasInprocessJob) {
+        setTimeout(refreshPage, 5000);
         this.cancelBtn = true;
       } else {
         this.cancelBtn = false;
@@ -82,6 +90,16 @@ export class ViewRunningRulesComponent implements OnInit {
     }, (error) => {
       this.loading = false;
     });
+  }
+
+  public autoRefresh(): void {
+    // const autoRefreshInterval = 5000; // 5 seconds
+
+    // const refreshPage = () => {
+    //   location.reload();
+    // };
+
+    this.getRulJobs();
   }
 
   public viewResult(r: any): void {
@@ -100,7 +118,7 @@ export class ViewRunningRulesComponent implements OnInit {
       // You can add your conditional logic for JSON objects here
     }
 
-    const modalRef = this.modalService.open(ViewResultComponent, { size: 'sm modal-dialog-centered', windowClass: 'modal-size', scrollable: false });
+    const modalRef = this.modalService.open(ViewResultComponent, { size: 'md modal-dialog-centered', windowClass: 'modal-size', scrollable: false });
     modalRef.componentInstance.userId = this.userId;
     modalRef.componentInstance.projectId = this.projectId;
     modalRef.componentInstance.output = this.outputData;
@@ -112,32 +130,38 @@ export class ViewRunningRulesComponent implements OnInit {
   }
 
   public cancelInprocess(): void {
-    this.loading = true;
-    // Initialize an empty array to store jobIds
-    const jobIds: number[] = [];
-
-    // Iterate through the runningList to find objects with jobStatus "Inprocess"
-    for (const item of this.runningList) {
-        if (item.jobStatus === 'Inprocess') {
-            // Push the jobIds into the array
-            jobIds.push(item.jobId);
-        }
-    }
-
-    const req = {
-      jobIds : jobIds
-    };
-
-    this.ruleCreationService.cancelRunningRule(this.userId, this.projectId, req).subscribe((res) => {
-      this.loading = false;
-      this.snakbar.open(res.message);
-      this.getRulJobs();
+    const modalRef = this.modalService.open(ConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
+    modalRef.result.then((result) => {
+      this.loading = true;
+      // Initialize an empty array to store jobIds
+      const jobIds: number[] = [];
+  
+      // Iterate through the runningList to find objects with jobStatus "Inprocess"
+      for (const item of this.runningList) {
+          if (item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started' ) {
+              // Push the jobIds into the array
+              jobIds.push(item.jobId);
+          }
+      }
+  
+      const req = {
+        jobIds : jobIds
+      };
+  
+      this.ruleCreationService.cancelRunningRule(this.userId, this.projectId, req).subscribe((res) => {
+        this.loading = false;
+        this.snakbar.open(res.message);
+        this.getRulJobs();
+      }, (error) => {
+        this.loading = false;
+      });
+  
+      // Now, 'jobIds' contains all the jobIds for objects with jobStatus "Inprocess"
+      console.log(jobIds); // You can use the 'jobIds' array as needed
     }, (error) => {
-      this.loading = false;
-    });
 
-    // Now, 'jobIds' contains all the jobIds for objects with jobStatus "Inprocess"
-    console.log(jobIds); // You can use the 'jobIds' array as needed
+    });
+    
   }
 
   public refresh(): void {
@@ -168,5 +192,10 @@ export class ViewRunningRulesComponent implements OnInit {
       // Handle the case where JSON parsing fails
       return 'MisMatch';
     }
+  }
+
+  public onPageChange(currentPage: number): void {
+    this.startIndex = (currentPage - 1) * this.pageSize;
+    this.endIndex = this.startIndex + this.pageSize;
   }
 }

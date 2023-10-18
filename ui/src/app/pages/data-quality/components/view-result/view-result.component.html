@@ -12,7 +12,7 @@
             </div>
             <div class="text-center">
                 <p class="p2 fs-16">Source</p>
-                <p class="p1 fs-16">{{output?.source}}</p>
+                <p class="p1 fs-16">{{output?.source | number: '1.2-2'}}</p>
             </div>
         </ng-container>
         <ng-template #other>
@@ -23,12 +23,12 @@
             
             <div class="row">
                 <div class="col-md-6 text-center">
-                    <p class="p2 fs-16">Source</p>
-                    <p class="p1 fs-16">{{output?.source}}</p>
+                    <p class="p2 fs-16">Source 1</p>
+                    <p class="p1 fs-16">{{output?.source?.toFixed(2)}}</p>
                 </div>
                 <div class="col-md-6 text-center">
-                    <p class="p2 fs-16">Target</p>
-                    <p class="p1 fs-16">{{output?.target}}</p>
+                    <p class="p2 fs-16">Source 2</p>
+                    <p class="p1 fs-16">{{output?.target | number: '1.2-2'}}</p>
                 </div>
             </div>
         </ng-template>

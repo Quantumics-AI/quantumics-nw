@@ -59,6 +59,7 @@ export class BrowseFileComponent implements OnInit {
   public headers: any;
   public fileContent: any;
   public columnType: any;
+  public rowCount: number;
 
   public childData: any;
   public isShowTable: boolean = false;
@@ -189,10 +190,15 @@ export class BrowseFileComponent implements OnInit {
       this.headers = res.headers;
       this.fileContent = res.content;
       this.columnType = res.columnDatatype;
+      this.rowCount = res?.rowCount;
       
       this.isShowTable = !this.isShowTable;
       // this.filePath = "";
       this.openNodes = [];
+    }, (error) => {
+      this.snakbar.open(error);
+      this.filePath = "";
+      this.openNodes.pop();
     })
   }
 

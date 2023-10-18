@@ -234,3 +234,60 @@
 .mr-b-20 {
     margin-bottom: 20px;
 }
+
+.tr-height{
+    max-height: 300px;
+    overflow: auto;
+}
+
+.h-12 {
+    height: 12px;
+}
+
+.h-16 {
+    height: 16px;
+}
+
+.mr-b-12 {
+    margin-bottom: 12px;
+}
+
+.filterCheck {
+    float: right;
+    clear: right;
+}
+
+.s-div {
+    padding-top: 35px;
+    padding-bottom: 54px;
+}
+    
+.btn:focus{
+    outline: none;
+    box-shadow: none;
+}
+
+.no-term {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    color: #101828;
+    margin-top: 16px;
+    margin-bottom: 4px;
+}
+
+.term-2 {
+    width: 352px;
+    margin: auto;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    color: #475467;
+    margin-bottom: 24px;
+}

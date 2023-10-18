@@ -3,7 +3,12 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb breadcrumb-top pd-l-0">
                 <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'data-quality']">Rules</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Rule Status</li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <span style="position: relative;">
+                        <img src="../../../../../assets/img/arrow.svg" alt="Arrow" style="width: 16px; vertical-align: middle;">
+                        Rule Status
+                    </span>
+                </li>
             </ol>
         </nav>
     </div>
@@ -41,14 +46,33 @@
                                     <td>
                                         {{view?.ruleName}}
                                     </td>
-                                    <td>
+                                    <td [ngClass]="{
+                                        'green': view?.jobStatus === 'Active',
+                                        'orange': view?.jobStatus === 'Inactive'
+                                      }">
                                         {{view?.jobStatus}}
                                     </td>
-                                    <td>
+                                    <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'MisMatch'}">
                                         {{ view?.jobOutput ? parseJobOutput(view?.jobOutput) : '' }}
                                     </td>
                                     <td>
                                         <span *ngIf="view?.jobOutput" class="cp vr" (click)="viewResult(view)">View result</span>
+                                    </td>
+                                </tr>
+                                <tr  *ngIf="(runningList).length > 10" style="background-color: white !important;" class="pg-tr">
+                                    <td colspan="6" class="pg-pd">
+                                        <div class="text-center">
+                                            <ngb-pagination [collectionSize]="runningList.length" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
+                                            [rotate]="true" aria-label="Custom pagination" (pageChange)="onPageChange($event)">
+                                                <ng-template ngbPaginationPrevious>
+                                                    <span class="btn nextBtn">
+                                                    <img src="assets/img/govern/arrow-left.svg">Previous
+                                                </span></ng-template>
+                                                <ng-template ngbPaginationNext><span class="btn nextBtn">
+                                                    Next <img src="assets/img/govern/arrow-right.svg">
+                                                </span></ng-template>
+                                            </ngb-pagination>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

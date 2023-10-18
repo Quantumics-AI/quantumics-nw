@@ -7,7 +7,9 @@ import { SnackbarService } from 'src/app/core/services/snackbar.service';
 import { Certificate } from 'src/app/models/certificate';
 import { Quantumfacade } from 'src/app/state/quantum.facade';
 import { Location } from '@angular/common';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { RuleCreationService } from '../../services/rule-creation.service';
+import { StatusDeleteConfirmationComponent } from '../status-delete-confirmation/status-delete-confirmation.component';
 
 @Component({
   selector: 'app-edit-rule',
@@ -50,6 +52,12 @@ export class EditRuleComponent implements OnInit {
     { label: 'Inactive', name: 'Inactive', selected: false },
     { label: 'Deleted', name: 'Deleted', selected: false }
   ];
+  public loading: boolean
+  public ruleStatus: string = 'Active';
+  public pageNumebr: number = 1;
+  public pageLength: number = 100;
+  public alreadyExist: boolean = false;
+  public getRuleList: any;
 
   constructor(
     private fb: FormBuilder,
@@ -58,7 +66,8 @@ export class EditRuleComponent implements OnInit {
     private quantumFacade: Quantumfacade,
     private router: Router,
     private location: Location,
-    private ruleCreationService: RuleCreationService) {
+    private ruleCreationService: RuleCreationService,
+    private modalService: NgbModal,) {
       this.certificate$ = this.quantumFacade.certificate$;
       this.certificate$
         .pipe(takeUntil(this.unsubscribe))
@@ -75,7 +84,7 @@ export class EditRuleComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const ruleDescriptionPattern = /^[A-Za-z\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
+    const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
       // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$'
@@ -107,6 +116,7 @@ export class EditRuleComponent implements OnInit {
 
     this.getDataConnection();
     this.getBucketData();
+    this.getRules();
   }
 
   ngAfterViewInit(): void {
@@ -143,7 +153,7 @@ export class EditRuleComponent implements OnInit {
       }
       this.getRuleTypeList();
       // status
-      this.fg.controls.status.setValue(this.fetchEditRule?.status)
+      this.fg.controls.status.setValue(this.fetchEditRule?.status);
       this.fg.controls.percentage.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.acceptance);
       
       // this.fg.controls.status.setValue(result?.status)
@@ -190,12 +200,55 @@ export class EditRuleComponent implements OnInit {
     });
   }
 
+  public getRules(): void {
+    this.loading = true;
+    this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
+      
+      this.loading = false;
+      this.getRuleList = response?.result?.content;
+      
+    }, (error) => {
+      this.loading = false;
+    });
+  }
+
+  checkIfNameExists() {
+    if (this.getRuleList.length > 0) {
+      const value = this.fg.get('ruleName').value;
+      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+      // const enteredName = this.fg.get('dataSourceName').value;
+      const nameExists = this.getRuleList.some(item => item.ruleName === titleCaseValue);
+      
+      if (nameExists) {
+        this.alreadyExist = true;
+      } else {
+        this.alreadyExist = false;
+      }
+    }
+    
+  }
+
   public selectedType(type: boolean): void {
     // if (type) {
       
     // } else {
 
     // }
+  }
+
+  public selectedStatus(s: any): void {
+    if (s == 'Deleted') {
+      const modalRef = this.modalService.open(StatusDeleteConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
+      modalRef.result.then((result) => {
+        // this.fg.controls.status.setValue(s);
+      }, (error) => {
+        this.fg.controls.status.setValue(this.fetchEditRule?.status);
+      });
+
+    } else {
+
+    }
   }
 
   public continue(): void {
@@ -264,7 +317,7 @@ export class EditRuleComponent implements OnInit {
     if(this.fg.controls.ruleDescription.value != ""){
       const validPattern = String(str)
       .match(
-        /^[A-Za-z\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/
+        /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/
       );
 
       if (validPattern == null) {
@@ -303,6 +356,9 @@ export class EditRuleComponent implements OnInit {
   }
 
   public updateRuleFunction(): void {
+    const value = this.fg.get('ruleName').value;
+    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    this.fg.get('ruleName').setValue(titleCaseValue);
     if (this.fg.controls.sourceAndTarget.value) {
       this.saveRulePayload = {
         ruleId: this.ruleId,
