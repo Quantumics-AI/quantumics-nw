@@ -36,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -201,6 +203,22 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         List<S3ObjectSummary> objectSummaries = new ArrayList<>();
         listObjects(bucketName, "", objectNames,objectSummaries);
         return getFoldersAndFilePathHierarchy(objectNames,objectSummaries);
+    }
+
+    @Override
+    public List<String> getFoldersAndFilePaths(String bucketName) throws IOException {
+        List<String> objects = new ArrayList<>();
+        ListObjectsRequest listObjectsRequest = ListObjectsRequest.builder()
+                .bucket(bucketName)
+                .build();
+        ListObjectsResponse listObjectsResponse = s3Client.listObjects(listObjectsRequest);
+
+        List<software.amazon.awssdk.services.s3.model.S3Object> contents = listObjectsResponse.contents();
+        for (software.amazon.awssdk.services.s3.model.S3Object s3Object : contents) {
+
+            objects.add(s3Object.key());
+        }
+      return objects;
     }
 
     @Override
