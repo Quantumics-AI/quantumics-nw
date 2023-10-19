@@ -175,7 +175,8 @@ public class AwsConnectionController {
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
       try {
-          awsConnectionService.getFoldersAndFilePath("qsai-source");
+          String foldersAndFilePath = awsConnectionService.getFoldersAndFilePath("qsai-source");
+     log.info("folder file path details {}",foldersAndFilePath);
       }catch(Exception ex){
           log.info("Exception occurs while accessing bucket content {}",ex.getMessage());
       }
