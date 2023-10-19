@@ -41,26 +41,26 @@ public class AwsConnectionServiceImplV2 implements AwsConnectionServiceV2 {
 
     @Override
     public String testConnection(String accessMethod) {
-        log.debug("Inside AwsConnectionServiceImplV2.testConnection method with access method {}", accessMethod);
+        log.info("Inside AwsConnectionServiceImplV2.testConnection method with access method {}", accessMethod);
         if(isUseConfigBuckets) {
-            log.debug("Inside if block {}",isUseConfigBuckets);
+            log.info("Inside if block {}",isUseConfigBuckets);
             if(StringUtils.isEmpty(configBucketNames)) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
             List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
-            log.debug("List of buckets {}", buckets);
+            log.info("List of buckets {}", buckets);
             if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
                 throw new BadRequestException(EMPTY_BUCKET);
             }
             S3Client s3Client = awsUtils.createS3BucketClientV2(buckets.get(0));
-            log.debug("Returned/Newly created s3Client {}",s3Client);
+            log.info("Returned/Newly created s3Client {}",s3Client);
             if(s3Client == null) {
                 throw new BadRequestException(CONNECTION_FAILED);
             }
         } else {
-            log.debug("Inside else block {}",isUseConfigBuckets);
+            log.info("Inside else block {}",isUseConfigBuckets);
             ListBucketsResponse listBucketsResponse = s3ClientV2.listBuckets();
-            log.debug("Buckets response {}",listBucketsResponse);
+            log.info("Buckets response {}",listBucketsResponse);
         }
         return CONNECTION_SUCCESSFUL;
     }
