@@ -23,19 +23,19 @@ public class AwsUtils {
 	private S3Client s3ClientV2;
 
 	public S3Client createS3BucketClientV2(String bucketName){
-		log.debug("Inside AwsUtils.createS3BucketClientV2 method with abucket name {}", bucketName);
+		log.info("Inside AwsUtils.createS3BucketClientV2 method with abucket name {}", bucketName);
 
 		S3Client s3Client = s3ClientV2;
 		try {
 			GetBucketLocationRequest bucketLocationRequest = GetBucketLocationRequest.builder().bucket(bucketName).build();
 			GetBucketLocationResponse bucketLocation = s3Client.getBucketLocation(bucketLocationRequest);
-			log.debug("Bucket location(s) {}",bucketLocation);
+			log.info("Bucket location(s) {}",bucketLocation);
 		}catch(AwsServiceException exception){
-			log.debug("AwsServiceException occurs {}",exception.getStackTrace().toString());
+			log.info("AwsServiceException occurs {}",exception.getStackTrace().toString());
 			String errorMessage = exception.awsErrorDetails().errorMessage();
-			log.debug("Error message {}",errorMessage);
+			log.info("Error message {}",errorMessage);
 			String region = getRegionFromMessage(errorMessage);
-			log.debug("Region is {}",region);
+			log.info("Region is {}",region);
 			if(region == null){
 				log.error("Error while creating s3 client {}", errorMessage);
 				throw new BucketNotFoundException(BUCKET_NOT_EXIST);
@@ -44,18 +44,18 @@ public class AwsUtils {
 					.builder()
 					.region(Region.of(region))
 					.build();
-			log.debug("New s3client {}",s3Client);
+			log.info("New s3client {}",s3Client);
 			return s3Client;
 		}catch(Exception e){
-			log.debug("Exception occurs while creating client");
+			log.info("Exception occurs while creating client");
 			log.info(e.getMessage());
 		}
-		log.debug("Returning client {}",s3Client);
+		log.info("Returning client {}",s3Client);
 		return s3Client;
 	}
 
 	private String getRegionFromMessage(String errorMessage) {
-		log.debug("Inside AwsUtils.getRegionFromMessage {}",errorMessage);
+		log.info("Inside AwsUtils.getRegionFromMessage {}",errorMessage);
 		String expectedRegion = null;
 		// Define a regular expression pattern to match the expected region
 		Pattern pattern = Pattern.compile(REGION_PATTERN);
@@ -64,9 +64,9 @@ public class AwsUtils {
 		// Find the expected region
 		if (matcher.find()) {
 			expectedRegion = matcher.group(1);
-			log.debug("Expected region if match found {}",expectedRegion);
+			log.info("Expected region if match found {}",expectedRegion);
 		}
-		log.debug("Expected region {}",expectedRegion);
+		log.info("Expected region {}",expectedRegion);
 		return expectedRegion;
 	}
 }
