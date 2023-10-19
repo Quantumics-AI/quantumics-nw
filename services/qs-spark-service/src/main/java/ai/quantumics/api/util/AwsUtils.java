@@ -44,7 +44,7 @@ public class AwsUtils {
 		return s3Client;
 	}
 
-	public static String getRegionFromMessage(String errorMessage) {
+	private String getRegionFromMessage(String errorMessage) {
 		String expectedRegion = null;
 		// Define a regular expression pattern to match the expected region
 		Pattern pattern = Pattern.compile(REGION_PATTERN);
