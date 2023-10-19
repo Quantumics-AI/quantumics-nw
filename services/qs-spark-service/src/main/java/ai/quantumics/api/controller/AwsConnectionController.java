@@ -13,6 +13,7 @@ import ai.quantumics.api.service.impl.AwsConnectionServiceImplV2;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.BucketFileContent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import java.util.Map;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_DELETED;
 import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/aws")
 public class AwsConnectionController {
@@ -172,6 +174,11 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
+      try {
+          awsConnectionService.getFoldersAndFilePath("qsai-source");
+      }catch(Exception ex){
+          log.info("Exception occurs while accessing bucket content {}",ex.getMessage());
+      }
         return returnResInstance(HttpStatus.OK, awsConnectionServiceV2.testConnection(awsDatasourceRequest.getAccessType().trim()));
     }
 

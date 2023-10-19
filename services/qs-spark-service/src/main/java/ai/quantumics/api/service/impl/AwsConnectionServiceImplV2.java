@@ -5,6 +5,7 @@ import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.service.AwsConnectionServiceV2;
 import ai.quantumics.api.util.AwsUtils;
+import com.amazonaws.services.s3.AmazonS3;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -32,6 +33,9 @@ public class AwsConnectionServiceImplV2 implements AwsConnectionServiceV2 {
     private S3Client s3ClientV2;
     @Autowired
     private AwsUtils awsUtils;
+
+    @Autowired
+    private AmazonS3 awsS3Client;
 
     @Value("${qs.aws.use.config.buckets}")
     private boolean isUseConfigBuckets;
@@ -64,4 +68,5 @@ public class AwsConnectionServiceImplV2 implements AwsConnectionServiceV2 {
         }
         return CONNECTION_SUCCESSFUL;
     }
+
 }
