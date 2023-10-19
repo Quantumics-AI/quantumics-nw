@@ -147,7 +147,7 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        List<String> bucketsName = awsConnectionService.getBuckets();
+        List<String> bucketsName = awsConnectionServiceV2.getBuckets();
         return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
     }
 
