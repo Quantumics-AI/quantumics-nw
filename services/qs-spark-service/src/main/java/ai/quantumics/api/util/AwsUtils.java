@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetBucketLocationRequest;
-import software.amazon.awssdk.services.s3.model.GetBucketLocationResponse;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketResponse;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,9 +27,11 @@ public class AwsUtils {
 
 		S3Client s3Client = s3ClientV2;
 		try {
-			GetBucketLocationRequest bucketLocationRequest = GetBucketLocationRequest.builder().bucket(bucketName).build();
-			GetBucketLocationResponse bucketLocation = s3Client.getBucketLocation(bucketLocationRequest);
-			log.info("Bucket location(s) {}",bucketLocation);
+			HeadBucketRequest bucketLocationRequest =  HeadBucketRequest.builder().bucket(bucketName).build();
+			//GetBucketLocationRequest bucketLocationRequest = GetBucketLocationRequest.builder().bucket(bucketName).build();
+			HeadBucketResponse headBucketResponse = s3Client.headBucket(bucketLocationRequest);
+			//GetBucketLocationResponse bucketLocation = s3Client.getBucketLocation(bucketLocationRequest);
+			log.info("Bucket location(s) {}",headBucketResponse);
 		}catch(AwsServiceException exception){
 			log.info("AwsServiceException occurs {}",exception.getStackTrace().toString());
 			String errorMessage = exception.awsErrorDetails().errorMessage();
