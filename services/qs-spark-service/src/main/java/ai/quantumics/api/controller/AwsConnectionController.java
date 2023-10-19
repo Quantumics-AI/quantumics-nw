@@ -149,7 +149,7 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        List<String> bucketsName = awsConnectionService.getBuckets();
+        List<String> bucketsName = awsConnectionServiceV2.getBuckets();
         return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
     }
 
@@ -174,13 +174,7 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-      try {
-          String foldersAndFilePath = awsConnectionService.getFoldersAndFilePath("qsai-source");
-     log.info("folder file path details {}",foldersAndFilePath);
-      }catch(Exception ex){
-          log.info("Exception occurs while accessing bucket content {}",ex.getMessage());
-      }
-        return returnResInstance(HttpStatus.OK, awsConnectionServiceV2.testConnection(awsDatasourceRequest.getAccessType().trim()));
+       return returnResInstance(HttpStatus.OK, awsConnectionServiceV2.testConnection(awsDatasourceRequest.getAccessType().trim()));
     }
 
     @GetMapping("/content/{userId}/{projectId}")
