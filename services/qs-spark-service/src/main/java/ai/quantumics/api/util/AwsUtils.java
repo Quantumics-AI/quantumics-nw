@@ -24,14 +24,14 @@ public class AwsUtils {
 
 	public S3Client createS3BucketClientV2(String bucketName){
 		log.info("Inside AwsUtils.createS3BucketClientV2 method with abucket name {}", bucketName);
-
+		HeadBucketResponse headBucketResponse = null;
 		S3Client s3Client = s3ClientV2;
 		try {
 			HeadBucketRequest bucketLocationRequest =  HeadBucketRequest.builder().bucket(bucketName).build();
 			//GetBucketLocationRequest bucketLocationRequest = GetBucketLocationRequest.builder().bucket(bucketName).build();
-			HeadBucketResponse headBucketResponse = s3Client.headBucket(bucketLocationRequest);
+			headBucketResponse = s3Client.headBucket(bucketLocationRequest);
 			//GetBucketLocationResponse bucketLocation = s3Client.getBucketLocation(bucketLocationRequest);
-			log.info("Bucket location(s) {}",headBucketResponse);
+			log.info("Bucket location(s) {}",headBucketResponse.sdkHttpResponse().isSuccessful());
 		}catch(AwsServiceException exception){
 			log.info("AwsServiceException occurs {}",exception.getStackTrace().toString());
 			String errorMessage = exception.awsErrorDetails().errorMessage();
