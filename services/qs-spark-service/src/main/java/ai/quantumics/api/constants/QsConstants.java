@@ -110,6 +110,8 @@ public class QsConstants {
   public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Row_Count_Template.py";
   public static final String DQ_COLUMN_SUM_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Sum_Of_Column_Template.py";
   public static final String DQ_NULL_VALUE_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Null_Value_Template.py";
+  public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Row_Template.py";
+  public static final String DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Column_Template.py";
 
   public static final String RULE_OUTPUT_FOLDER = "ruleoutput";
   public static final String SOURCE_BUCKET = "$SOURCE_BUCKET";
@@ -128,7 +130,11 @@ public class QsConstants {
   public static final String TABLE_LEVEL = "Table Level";
   public static final String COLUMN_LEVEL = "Column level";
   public static final String NULL_VALUE = "Null Value";
-  
+  public static final String DUPLICATE_VALUE = "Duplicate Value";
+  public static final String DUPLICATE_ROW = "Duplicate Row";
+  public static final String DUPLICATE_COLUMN_VALUE = "Column";
+  public static final String DUPLICATE_MULTI_COLUMN_VALUE = "Multiple Column";
+
   // Email Template Actions
   public static final String USER_NAME_PLACE_HOLDER = "{USER_NAME}";
   public static final String REST_PWD_LINK_PLACE_HOLDER = "{RESET_PASSWORD_LINK}";
