@@ -149,7 +149,7 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        List<String> bucketsName = awsConnectionServiceV2.getBuckets();
+        List<String> bucketsName = awsConnectionService.getBuckets();
         return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
     }
 
@@ -174,7 +174,13 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-       return returnResInstance(HttpStatus.OK, awsConnectionServiceV2.testConnection(awsDatasourceRequest.getAccessType().trim()));
+        try {
+            String foldersAndFilePath = awsConnectionService.getFoldersAndFilePath("qsai-nw-src");
+            log.info("Buckets file folder content {}",foldersAndFilePath);
+        }catch(Exception ex){
+            log.info("Exception occurs here {}",ex);
+        }
+        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType().trim()));
     }
 
     @GetMapping("/content/{userId}/{projectId}")

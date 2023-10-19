@@ -77,7 +77,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
-import com.amazonaws.services.s3.model.GetBucketLocationRequest;
+import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -2768,7 +2768,10 @@ public class AwsAdapter {
 	public AmazonS3 createS3BucketClient(String bucketName){
 		AmazonS3 s3Client = awsS3Client;
 		try {
-			s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+			//s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+			HeadBucketRequest bucketLocationRequest =  new HeadBucketRequest(bucketName);
+			s3Client.headBucket(bucketLocationRequest);
+			log.info("Connection established success");
 		}catch(AmazonServiceException exception){
 			String region = getRegionFromMessage(exception.getErrorMessage());
 			if(region == null){
