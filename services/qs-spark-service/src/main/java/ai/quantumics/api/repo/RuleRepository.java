@@ -14,9 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RuleRepository extends JpaRepository<QsRule, Integer> {
     Page<QsRule> findAllByStatus(String status, Pageable pageable);
 
     QsRule findByRuleId(int ruleId);
+
+    List<QsRule> findByStatusInAndSourceDatasourceIdOrStatusInAndTargetDatasourceId(List<String> sources, int source,List<String> targets, int target);
 }

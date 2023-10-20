@@ -3,13 +3,16 @@ package ai.quantumics.api.service.impl;
 import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.enums.AwsAccessType;
+import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.BucketNotFoundException;
 import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.model.AWSDatasource;
 import ai.quantumics.api.model.ObjectMetadata;
+import ai.quantumics.api.model.QsRule;
 import ai.quantumics.api.repo.AwsConnectionRepo;
+import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
@@ -58,6 +61,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
 
 @Service
@@ -71,6 +75,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AmazonS3 amazonS3Client;
     @Autowired
     private AwsAdapter awsAdapter;
+    @Autowired
+    private RuleRepository ruleRepository;
 
     @Value("${qs.aws.use.config.buckets}")
     private boolean isUseConfigBuckets;
@@ -151,6 +157,13 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException {
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
+        List<String> status = Arrays.asList(RuleStatus.ACTIVE.getStatus(),RuleStatus.INACTIVE.getStatus());
+        List<QsRule> rules = ruleRepository.findByStatusInAndSourceDatasourceIdOrStatusInAndTargetDatasourceId(status,id,status,id);
+
+        if(!CollectionUtils.isEmpty(rules)) {
+            throw new BadRequestException(String.format(RULE_ATTACHED, rules.size()));
+        }
+
         dataSource.setActive(false);
         dataSource.setModifiedBy(userName);
         dataSource.setModifiedDate(DateTime.now().toDate());
