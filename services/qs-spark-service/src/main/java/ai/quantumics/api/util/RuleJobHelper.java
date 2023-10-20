@@ -110,7 +110,7 @@ public class RuleJobHelper {
                 break;
         }
 
-        final URL s3ContentUpload = awsAdapter.s3ContentUpload(qsEtlScriptBucket, jobName, scriptStr);
+        final URL s3ContentUpload = awsAdapter.s3ContentUploadV2(qsEtlScriptBucket, jobName, scriptStr);
         final String scriptFilePath = String.format("%s%s", qsEtlScriptBucket, jobName);
 
         log.info("uploaded to - s3 Full Path - {} and to path {}", s3ContentUpload, scriptFilePath);
