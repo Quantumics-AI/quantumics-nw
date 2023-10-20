@@ -30,8 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 
@@ -202,19 +200,4 @@ public class AwsCustomConfiguration {
     return multipartResolver;
   }
 
-  @Bean
-  public S3Client s3ClientV2() {
-    return profileS3Client(accessMethod);
-  }
-
-  public S3Client profileS3Client(String accessMethod) {
-    if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
-      return createProfileS3();
-    } else {
-      throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
-    }
-  }
-  public S3Client createProfileS3() {
-    return S3Client.builder().region(Region.of(cloudRegion)).build();
-  }
 }

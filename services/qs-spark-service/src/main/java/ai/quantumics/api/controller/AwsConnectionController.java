@@ -8,8 +8,6 @@ import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.service.AwsConnectionService;
-import ai.quantumics.api.service.AwsConnectionServiceV2;
-import ai.quantumics.api.service.impl.AwsConnectionServiceImplV2;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.BucketFileContent;
@@ -43,14 +41,12 @@ public class AwsConnectionController {
     private final AwsConnectionService awsConnectionService;
     private final DbSessionUtil dbUtil;
     private final ValidatorUtils validatorUtils;
-    private final AwsConnectionServiceV2 awsConnectionServiceV2;
 
     public AwsConnectionController(AwsConnectionService awsConnectionService, DbSessionUtil dbUtil,
-                                   ValidatorUtils validatorUtils, AwsConnectionServiceImplV2 awsConnectionServiceV2) {
+                                   ValidatorUtils validatorUtils) {
         this.awsConnectionService = awsConnectionService;
         this.dbUtil = dbUtil;
         this.validatorUtils = validatorUtils;
-        this.awsConnectionServiceV2 = awsConnectionServiceV2;
     }
 
     @PostMapping("/save")
@@ -174,12 +170,6 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        try {
-            String foldersAndFilePath = awsConnectionService.getFoldersAndFilePath("qsai-nw-src");
-            log.info("Buckets file folder content {}",foldersAndFilePath);
-        }catch(Exception ex){
-            log.info("Exception occurs here {}",ex);
-        }
         return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType().trim()));
     }
 
