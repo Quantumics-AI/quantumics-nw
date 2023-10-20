@@ -3,6 +3,7 @@ package ai.quantumics.api.service.impl;
 import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.enums.AwsAccessType;
+import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.BucketNotFoundException;
 import ai.quantumics.api.exceptions.DatasourceNotFoundException;
@@ -156,7 +157,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Override
     public void deleteConnection(Integer id, String userName) throws DatasourceNotFoundException {
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
-        List<String> status = Arrays.asList("Active","Inactive");
+        List<String> status = Arrays.asList(RuleStatus.ACTIVE.getStatus(),RuleStatus.INACTIVE.getStatus());
         List<QsRule> rules = ruleRepository.findByStatusInAndSourceDatasourceIdOrStatusInAndTargetDatasourceId(status,id,status,id);
 
         if(!CollectionUtils.isEmpty(rules)) {
