@@ -971,6 +971,36 @@ public class AwsAdapter {
 		return amazonS3Client.getUrl(targetBucketName, fileName);
 	}
 
+
+	public URL s3ContentUploadV2(String targetBucketName, final String fileName, final String content) {
+		try {
+			targetBucketName = targetBucketName.substring(5, targetBucketName.length() - 1);
+
+			log.info("Bucket Name: {} and File Name: {}", targetBucketName, fileName);
+
+			String tmpdir = System.getProperty("java.io.tmpdir");
+			File scriptFile = new File(tmpdir + File.separator + fileName);
+			log.info("Python Script File: {}", scriptFile.getAbsolutePath());
+
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(scriptFile));) {
+				bw.write(content);
+			}
+
+			try(InputStream is = new FileInputStream(scriptFile);) {
+				final ObjectMetadata objectMetadata = new ObjectMetadata();
+				objectMetadata.setContentType("text/plain");
+				objectMetadata.setContentLength(scriptFile.length());
+
+				amazonS3Client.putObject(targetBucketName, fileName, is, objectMetadata);
+				log.info("Uploaded file to destination :  {}/{}", targetBucketName, fileName);
+			}
+
+		} catch (final Exception exception) {
+			throw new RuntimeException("Error while uploading contents to s3." + exception.getMessage());
+		}
+		return amazonS3Client.getUrl(targetBucketName, fileName);
+	}
+
 	/**
 	 * @param bucket
 	 * @param folder
