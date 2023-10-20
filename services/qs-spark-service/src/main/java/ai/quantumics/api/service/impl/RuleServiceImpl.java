@@ -23,7 +23,6 @@ import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
 import ai.quantumics.api.vo.RuleTypeDetails;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -94,6 +93,7 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setSourceData(gson.toJson(ruleDetails.getSourceData()));
 			if(ruleDetails.isSourceAndTarget()) {
 				qsRule.setTargetData(gson.toJson(ruleDetails.getTargetData()));
+				qsRule.setTargetDatasourceId(ruleDetails.getTargetData().getDataSourceId());
 			}
 			qsRule.setRuleDetails(gson.toJson(ruleDetails.getRuleDetails()));
 			qsRule.setUserId(ruleDetails.getUserId());
@@ -102,6 +102,7 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setModifiedDate(QsConstants.getCurrentUtcDate());
 			qsRule.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+			qsRule.setSourceDatasourceId(ruleDetails.getSourceData().getDataSourceId());
 			ruleRepository.save(qsRule);
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Data saved successfully");

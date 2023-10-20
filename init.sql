@@ -955,6 +955,8 @@ BEGIN
     		created_date timestamp without time zone,
     		user_id integer NOT NULL,
     		status varchar(10) NOT NULL,
+			source_datasource_id int4 NULL,
+			target_datasource_id int4 NULL,
     		CONSTRAINT qsp_rule_pkey PRIMARY KEY (rule_id)
             )';
 

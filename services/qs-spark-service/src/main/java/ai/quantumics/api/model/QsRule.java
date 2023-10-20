@@ -35,4 +35,6 @@ public class QsRule {
   private Date ModifiedDate;
   private String createdBy;
   private String modifiedBy;
+  private int sourceDatasourceId;
+  private int targetDatasourceId;
 }

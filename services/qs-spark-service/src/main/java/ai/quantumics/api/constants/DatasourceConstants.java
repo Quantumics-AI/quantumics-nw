@@ -26,6 +26,7 @@ public class DatasourceConstants {
   public static final String CSV_FILE = "Please provide only .csv file";
   public static final String EMPTY_FILE = "File has no content";
   public static final String CORREPTED_FILE = "Please check, the selected file is corrupted";
+  public static final String RULE_ATTACHED = "This connection has %d rules mapped. Deletion of Connection is not possible till all the mapped rules are Deleted";
   private DatasourceConstants() {}
 
 }
