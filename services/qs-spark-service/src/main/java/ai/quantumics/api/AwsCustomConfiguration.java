@@ -25,6 +25,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 
+@Slf4j
 @Configuration
 public class AwsCustomConfiguration {
 
@@ -150,7 +152,8 @@ public class AwsCustomConfiguration {
   public AmazonS3 createAmazonProfileS3() {
     // Create an S3 client using the default AWS credentials provider chain.
     // The credentials provider chain will automatically use the IAM role attached to the EC2 instance.
-    return AmazonS3ClientBuilder.defaultClient();
+    log.info("Default Region {} ",AmazonS3ClientBuilder.defaultClient().getRegionName());
+    return AmazonS3ClientBuilder.standard().withRegion(cloudRegion).build();
   }
 
   @Bean
