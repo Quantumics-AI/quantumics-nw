@@ -40,16 +40,19 @@ else:
         # Check if the percentage is within the acceptance criteria
         pass_status = percentage_null_empty <= input_acceptance_percentage_float
 
+        source_s3_path = f"s3a://{s3_bucket_name}/{s3_file_path}"
+
         header_results.append({
             "source": null_count,
             "header": header,
             "match": pass_status,
             "pass": pass_status,
-            "ruleTypeName": rule_type_name
+            "ruleTypeName": rule_type_name,
+            "SourceFile": source_s3_path
         })
 
     # Prepare response in the specified format
-    response = [{"source": r["source"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"]} for r in header_results]
+    response = [{"source": r["source"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"], "SourceFile": r["SourceFile"]} for r in header_results]
 
     # Prepare job_output as a JSON string
     job_output = json.dumps(response)
