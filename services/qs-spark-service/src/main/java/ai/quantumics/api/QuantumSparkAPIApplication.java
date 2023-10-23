@@ -16,6 +16,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import javax.annotation.PostConstruct;
+import java.time.ZoneId;
+import java.util.TimeZone;
+
+import static ai.quantumics.api.constants.QsConstants.europe_london_timezone;
+
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
@@ -30,4 +36,11 @@ public class QuantumSparkAPIApplication extends SpringBootServletInitializer {
   protected SpringApplicationBuilder configure(final SpringApplicationBuilder builder) {
     return builder.sources(QuantumSparkAPIApplication.class);
   }
+
+  @PostConstruct
+  public void init() {
+    ZoneId zoneId = ZoneId.of(europe_london_timezone);
+    TimeZone.setDefault(TimeZone.getTimeZone(zoneId));
+  }
+
 }
