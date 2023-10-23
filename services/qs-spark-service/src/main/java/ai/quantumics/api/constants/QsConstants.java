@@ -229,7 +229,7 @@ public class QsConstants {
   public static final String STANDARD_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
   public static final TimeZone utc = TimeZone.getTimeZone("UTC");
   public static final SimpleDateFormat formatter = new SimpleDateFormat(STANDARD_DATE_FORMAT);
-  
+  public static final String europe_london_timezone = "Europe/London";
   public static final String[] NEW_COL_GENERATING_RULES = {"countMatch", "mergeRule", "manageColumns", "extractColumnValues", "split"};
   
   // Cleansing Rule Types
