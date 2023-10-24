@@ -75,7 +75,6 @@ public class RuleController {
             @PathVariable(value = "ruleId") final int ruleId) {
         return ruleService.getRule(userId, projectId, ruleId);
     }
-
     @ApiOperation(value = "Rule", response = Json.class)
     @GetMapping("/searchRule/{userId}/{projectId}/{ruleName}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Name")})
