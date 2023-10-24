@@ -186,6 +186,21 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(content);
     }
 
+    @GetMapping("/searchConnection/{userId}/{projectId}/{datasourceName}")
+    public ResponseEntity<List<AwsDatasourceResponse>> searchConnection(
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "datasourceName") final String datasourceName)
+            throws Exception {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.searchConnection(datasourceName.trim()));
+
+    }
+
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
         HashMap<String, Object> genericResponse = new HashMap<>();
         genericResponse.put("code", code.value());

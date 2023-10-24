@@ -288,6 +288,18 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return bucketFileContent;
     }
 
+    @Override
+    public List<AwsDatasourceResponse> searchConnection(String datasourceName) {
+        List<AwsDatasourceResponse> response = new ArrayList<>();
+        List<AWSDatasource> awsDatasource = awsConnectionRepo.findByActiveAndConnectionNameStartingWithIgnoreCaseOrActiveAndConnectionNameEndingWithIgnoreCase(true, datasourceName,true, datasourceName);
+        if(CollectionUtils.isEmpty(awsDatasource)){
+            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
+        }
+        awsDatasource.forEach(datasource -> {
+            response.add(createResponse(datasource));
+        });
+        return response;
+    }
     private String getFoldersAndFilePathHierarchy(List<String> objectNames, List<S3ObjectSummary> objectSummaries) throws IOException {
         ObjectNode rootNode = createFolderHierarchy(objectNames, objectSummaries);
         ObjectMapper objectMapper = new ObjectMapper();

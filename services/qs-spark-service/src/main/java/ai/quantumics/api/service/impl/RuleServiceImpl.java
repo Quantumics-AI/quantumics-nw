@@ -31,8 +31,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -247,7 +249,43 @@ public class RuleServiceImpl implements RuleService {
 		}
 		return ResponseEntity.ok().body(response);
 	}
+	@Override
+	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, String status) {
+		final Map<String, Object> response = new HashMap<>();
+		try {
+			dbUtil.changeSchema("public");
+			final Projects project = projectService.getProject(projectId, userId);
+			if(project == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested project with Id: "+ projectId +" for User with Id: " + userId +" not found.");
 
+				return ResponseEntity.ok().body(response);
+			}
+			QsUserV2 userObj = userService.getUserById(userId);
+			if(userObj == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested User with Id: "+ userId  +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+			dbUtil.changeSchema(project.getDbSchemaName());
+			List<QsRule> qsRule = ruleRepository.findByStatusAndRuleNameStartingWithIgnoreCaseOrStatusAndRuleNameEndingWithIgnoreCase(status, ruleName,status, ruleName);
+			if(CollectionUtils.isEmpty(qsRule)){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "No Rule found with Id: "+ ruleName);
+
+				return ResponseEntity.ok().body(response);
+			}
+			response.put("code", HttpStatus.SC_OK);
+			response.put("message", "Rules Fetched Successfully");
+			response.put("projectName", project.getProjectDisplayName());
+			response.put("result", qsRule.stream().map(this::convertToRuleDetails));
+		} catch (final Exception ex) {
+			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			response.put("message", "Error while Fetching rule :  " + ex.getMessage());
+		}
+		return ResponseEntity.ok().body(response);
+	}
 	public RuleDetails convertToRuleDetails(QsRule qsRule) {
 		Gson gson = new Gson();
 		RuleDetails ruleDetails = new RuleDetails();
