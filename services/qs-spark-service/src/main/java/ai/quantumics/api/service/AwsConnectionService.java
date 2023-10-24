@@ -30,4 +30,5 @@ public interface AwsConnectionService {
     String testConnection(String accessMethod);
 
     BucketFileContent getContent(String bucketName, String file);
+    List<AwsDatasourceResponse> searchConnection(String datasourceName);
 }

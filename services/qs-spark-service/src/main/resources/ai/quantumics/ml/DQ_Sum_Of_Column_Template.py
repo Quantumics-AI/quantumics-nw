@@ -69,6 +69,8 @@ else:
         # Check if the percentage difference is higher than the input acceptance percentage
         pass_status = percentage_difference <= input_acceptance_percentage_float
         match = source_sum == target_sum
+        source_s3_path = f"s3a://{bucket1}/{filepath1}"
+        target_s3_path = f"s3a://{bucket2}/{filepath2}"
         header_results.append({
             "source": source_sum,
             "target": target_sum,
@@ -76,11 +78,13 @@ else:
             "match": match,
             "pass": pass_status,
             "ruleTypeName": rule_type_name,
-            "levelName": level_name
+            "levelName": level_name,
+            "source1File": source_s3_path,
+            "source2File": target_s3_path
         })
 
     # Prepare response in the specified format
-    response = [{"source": r["source"], "target": r["target"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"], "levelName": r["levelName"]} for r in header_results]
+    response = [{"source": r["source"], "target": r["target"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"], "levelName": r["levelName"], "source1File": r["source1File"], "source2File": r["source2File"]} for r in header_results]
 
     # Prepare job_output as a JSON string
     job_output = json.dumps(response)

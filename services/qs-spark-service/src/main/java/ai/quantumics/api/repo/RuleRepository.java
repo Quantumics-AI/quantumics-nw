@@ -23,4 +23,5 @@ public interface RuleRepository extends JpaRepository<QsRule, Integer> {
     QsRule findByRuleId(int ruleId);
 
     List<QsRule> findByStatusInAndSourceDatasourceIdOrStatusInAndTargetDatasourceId(List<String> sources, int source,List<String> targets, int target);
+    List<QsRule> findByStatusAndRuleNameStartingWithIgnoreCaseOrStatusAndRuleNameEndingWithIgnoreCase(String status, String startRuleName, String status1, String endRuleName);
 }

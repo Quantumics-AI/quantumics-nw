@@ -57,6 +57,8 @@ else:
     pass_status = percentage_difference <= input_acceptance_percentage_float
     # Calculate whether the counts match or not
     match = count_results_df.collect()[0]["record_count"] == count_results_df.collect()[1]["record_count"]
+    source_s3_path = f"s3a://{bucket1}/{filepath1}"
+    target_s3_path = f"s3a://{bucket2}/{filepath2}"
 
     # Prepare job_output as a JSON string
     job_output = json.dumps({
@@ -65,7 +67,9 @@ else:
         "match": match,
         "ruleTypeName": rule_type_name,
         "levelName": level_name,
-        "pass": pass_status
+        "pass": pass_status,
+        "source1File": source_s3_path,
+        "source2File": target_s3_path
     })
 
     # Print the counts and job_output
