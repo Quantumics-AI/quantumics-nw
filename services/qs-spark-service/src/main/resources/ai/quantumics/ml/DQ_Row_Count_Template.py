@@ -3,6 +3,7 @@ from pyspark.sql import functions as F
 from datetime import datetime
 from pyspark.sql.types import StructType, StructField, IntegerType, BooleanType, StringType
 import json
+import os
 
 # Initialize a Spark session
 spark = SparkSession.builder.appName("Quantumics").getOrCreate()
@@ -59,6 +60,8 @@ else:
     match = count_results_df.collect()[0]["record_count"] == count_results_df.collect()[1]["record_count"]
     source_s3_path = f"s3a://{bucket1}/{filepath1}"
     target_s3_path = f"s3a://{bucket2}/{filepath2}"
+    source_file_name = os.path.basename(s3_file_path)
+    target_file_name = os.path.basename(target_s3_path)
 
     # Prepare job_output as a JSON string
     job_output = json.dumps({
@@ -68,8 +71,10 @@ else:
         "ruleTypeName": rule_type_name,
         "levelName": level_name,
         "pass": pass_status,
-        "source1File": source_s3_path,
-        "source2File": target_s3_path
+        "SourceFile": source_s3_path,
+        "TargetFile": target_s3_path,
+        "SourceFileName": source_file_name,
+        "TargetFileName": target_file_name
     })
 
     # Print the counts and job_output

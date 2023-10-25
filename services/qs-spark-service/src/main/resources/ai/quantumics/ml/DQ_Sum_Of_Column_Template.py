@@ -4,6 +4,7 @@ from datetime import datetime
 from pyspark.sql.functions import when, col
 from pyspark.sql.types import StructType, StructField, IntegerType, BooleanType, StringType
 import json
+import os
 
 # Initialize a Spark session
 spark = SparkSession.builder.appName("Quantumics").getOrCreate()
@@ -71,6 +72,8 @@ else:
         match = source_sum == target_sum
         source_s3_path = f"s3a://{bucket1}/{filepath1}"
         target_s3_path = f"s3a://{bucket2}/{filepath2}"
+        source_file_name = os.path.basename(s3_file_path)
+        target_file_name = os.path.basename(target_s3_path)
         header_results.append({
             "source": source_sum,
             "target": target_sum,
@@ -79,12 +82,14 @@ else:
             "pass": pass_status,
             "ruleTypeName": rule_type_name,
             "levelName": level_name,
-            "source1File": source_s3_path,
-            "source2File": target_s3_path
+            "SourceFile": source_s3_path,
+            "TargetFile": target_s3_path,
+            "SourceFileName": source_file_name,
+            "TargetFileName": target_file_name
         })
 
     # Prepare response in the specified format
-    response = [{"source": r["source"], "target": r["target"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"], "levelName": r["levelName"], "source1File": r["source1File"], "source2File": r["source2File"]} for r in header_results]
+    response = [{"source": r["source"], "target": r["target"], "header": r["header"], "match": r["match"], "pass": r["pass"], "ruleTypeName": r["ruleTypeName"], "levelName": r["levelName"], "SourceFile": r["SourceFile"], "TargetFile": r["TargetFile"], "SourceFileName": r["SourceFileName"], "TargetFileName": r["TargetFileName"]} for r in header_results]
 
     # Prepare job_output as a JSON string
     job_output = json.dumps(response)
