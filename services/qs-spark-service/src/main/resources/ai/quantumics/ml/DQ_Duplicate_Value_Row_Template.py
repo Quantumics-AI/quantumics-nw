@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import json
+import os
 
 # Initialize a Spark session
 spark = SparkSession.builder.appName("Quantumics").getOrCreate()
@@ -44,6 +45,7 @@ else:
     pass_status = duplicate_percentage <= input_acceptance_percentage_float
 
     source_s3_path = f"s3a://{s3_bucket_name}/{s3_file_path}"
+    source_file_name = os.path.basename(s3_file_path)
 
     # Prepare response in the specified format
     response = {
@@ -52,7 +54,8 @@ else:
         "ruleTypeName": rule_type_name,
         "levelName": level_name,
         "pass": pass_status,
-        "SourceFile": source_s3_path
+        "SourceFile": source_s3_path,
+        "SourceFileName": source_file_name
     }
 
     # Prepare job_output as a JSON string
