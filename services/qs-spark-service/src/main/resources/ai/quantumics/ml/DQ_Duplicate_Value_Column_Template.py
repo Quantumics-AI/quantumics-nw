@@ -55,7 +55,6 @@ else:
 
     source_s3_path = f"s3a://{s3_bucket_name}/{s3_file_path}"
     source_file_name = os.path.basename(s3_file_path)
-
     # Prepare response in the specified format
     response = {
         "source": duplicate_count,
