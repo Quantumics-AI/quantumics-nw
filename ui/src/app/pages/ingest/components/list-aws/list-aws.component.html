@@ -73,9 +73,13 @@
                                     <!-- <td >{{d.accessType}}</td> -->
                                     <!-- <td>{{ parseConnectionData(d.connectionData)?.iam }}</td> -->
                                     <td >
-                                        {{convertToUKTime(d?.createdDate)}}
+                                        {{convertToUKTimeZone(d?.createdDate)}}
+                                        <!-- {{d?.createdDate | date: 'dd-MM-yy, hh:mm a'}} -->
                                     </td>
-                                    <td >{{convertToUKTime(d?.modifiedDate)}}</td>
+                                    <td >
+                                        {{convertToUKTimeZone(d?.modifiedDate)}}
+                                        <!-- {{d?.modifiedDate | date: 'dd-MM-yy, hh:mm a'}} -->
+                                    </td>
                                     <td class="text-center">
                                         <div ngbDropdown container="body">
                                             <a ngbDropdownToggle class="menu-icon">

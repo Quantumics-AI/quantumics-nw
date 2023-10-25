@@ -6,16 +6,17 @@
 
 <div class="modal-body">
     <!-- <div class="container"> -->
-        <ng-container *ngIf="output.ruleTypeName == nullRule; else other">
+        <ng-container *ngIf="output.ruleTypeName == nullRule">
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}} Check</p>
             </div>
             <div class="text-center">
-                <p class="p2 fs-16">Source</p>
-                <p class="p1 fs-16">{{output?.source | number: '1.2-2'}}</p>
+                <p class="p2 fs-16 mr-b-0">Source</p>
+                <!-- <small class="form-text body-text-muted">({{sourceFileName}})</small> -->
+                <p class="p1 fs-16">{{output?.source % 1 === 0 ? output.source : output.source.toFixed(2)}}</p>
             </div>
         </ng-container>
-        <ng-template #other>
+        <ng-container *ngIf="output.ruleTypeName == dataComplete">
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
                 <p class="p2 text-center fsw">{{output?.levelName}}</p>
@@ -24,14 +25,129 @@
             <div class="row">
                 <div class="col-md-6 text-center">
                     <p class="p2 fs-16">Source 1</p>
-                    <p class="p1 fs-16">{{output?.source?.toFixed(2)}}</p>
+                    <!-- <small class="form-text body-text-muted">({{sourceFileName}})</small> -->
+                    <p class="p1 fs-16 ">{{output?.source % 1 === 0 ? output.source : output.source.toFixed(2)}}</p>
                 </div>
                 <div class="col-md-6 text-center">
                     <p class="p2 fs-16">Source 2</p>
-                    <p class="p1 fs-16">{{output?.target | number: '1.2-2'}}</p>
+                    <p class="p1 fs-16">{{output?.target % 1 === 0 ? output.source : output.source.toFixed(2)}}</p>
                 </div>
             </div>
-        </ng-template>
+        </ng-container>
+        <ng-container *ngIf="output.ruleTypeName == duplicateRule">
+            <div class="rd">
+                <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
+                <p class="p2 text-center fsw">
+                    <span *ngIf="output?.levelName == 'Multiple Column'">
+                       Duplicate Data-Combined Column Check
+                    </span>
+                    <span *ngIf="output?.levelName == 'Duplicate Row'">
+                        Duplicate Row Check
+                    </span>
+                    <span *ngIf="output?.levelName == 'Column'">
+                        Duplicate Data-Column Check
+                    </span>
+                </p>
+            </div>
+            <div class="text-center">
+                <p class="p2 fs-16 mr-b-0">Source</p>
+                <small class="form-text body-text-muted">({{sourceFileName}})</small>
+                <p class="p1 fs-16 mt-3">{{output?.source % 1 === 0 ? output.source : output.source.toFixed(2)}}</p>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="output.ruleTypeName == dataProfiler">
+            <div>
+                <p class="p2 fsw text-center">Data Profiler ({{output?.levelName}}) Check</p>
+                <div class="table-responsive br mr-b-20 t-height">
+                    <ng-container *ngIf="output?.levelName == 'Table Level'; else other">
+                        <table class="table m-0 table-fixed table-striped">
+                            <thead class="thead-light">
+                                <tr class="fixed-th">
+                                    <th class="pd-l-24">Dataset Summary</th>
+                                    <th class="pd-l-24">
+                                        Source 1
+                                    </th>
+                                    <th class="pd-l-24">Source 2</th>
+                                    <th class="pd-l-24">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let d of output?.data; let i = index">
+                                    <tr class="td-text">
+                                        <td>{{d.dataset}}&nbsp;
+                                            <span class="toggle-icon cp" *ngIf="d.dataset == 'Matching Data Type Columns'" (click)="toggleColumns(i)">
+                                                {{ d.showColumns ? '(-)' : '(+)' }}
+                                            </span>
+                                        </td>
+                                        <td>{{d.source}}</td>
+                                        <td>{{d.target}}</td>
+                                        <td>
+                                            <!-- {{d.match}} -->
+                                            <span class="greenStatus" *ngIf="d.match">Match</span>
+                                            <span class="redStatus" *ngIf="!d.match">Mismatch</span>
+                                        </td>
+                                    </tr>
+                                    <ng-container *ngIf="d.showColumns">
+                                        <tr *ngFor="let column of d.columns" class="td-text">
+                                            <td>{{column.columnName}}</td>
+                                            <td>{{column.source}}</td>
+                                            <td>{{column.target}}</td>
+                                            <td>
+                                                <span class="greenStatus" *ngIf="column.match">Match</span>
+                                                <span class="redStatus" *ngIf="!column.match">Mismatch</span>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </ng-container>
+                    <ng-template #other>
+                        <table class="table m-0 table-fixed table-striped">
+                            <thead class="thead-light">
+                                <tr class="fixed-th">
+                                    <th class="pd-l-24"></th>
+                                    <th class="pd-l-24">
+                                        Source 1
+                                    </th>
+                                    <th class="pd-l-24">Source 2</th>
+                                    <th class="pd-l-24">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let d of output?.data; let i = index">
+                                    <tr class="td-text">
+                                        <td>{{d.dataset}}</td>
+                                        <td>
+                                            <span *ngIf="d.dataset == 'Missing %' || d.dataset == 'Unique %'">
+                                                {{d?.source % 1 === 0 ? d.source : d.source.toFixed(2)}} %
+                                            </span>
+                                            <span *ngIf="d.dataset != 'Missing %' && d.dataset != 'Unique %'">
+                                                {{d.source}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span *ngIf="d.dataset == 'Missing %' || d.dataset == 'Unique %'">
+                                                {{d?.target % 1 === 0 ? d.target : d.target.toFixed(2)}} %
+                                            </span>
+                                            <span *ngIf="d.dataset != 'Missing %' && d.dataset != 'Unique %'">
+                                                {{d.target}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <!-- {{d.match}} -->
+                                            <span class="greenStatus" *ngIf="d.match">Match</span>
+                                            <span class="redStatus" *ngIf="!d.match">Mismatch</span>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </ng-template>
+                    
+                </div>
+            </div>
+        </ng-container>
         
         <p class="p2 text-center fsw">
             <span *ngIf="output.match" class="pass">Passed</span>

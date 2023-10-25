@@ -218,7 +218,7 @@ export class CreateAwsComponent {
       this.snakbar.open(response.message);
       this.connection = true;
     }, (error) => {
-
+      this.snakbar.open(error);
     });
     
   }

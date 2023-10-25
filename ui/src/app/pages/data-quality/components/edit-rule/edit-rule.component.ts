@@ -37,7 +37,7 @@ export class EditRuleComponent implements OnInit {
   public selectedDataConnections1: string;
   public selectedDataConnections2: string;
   public selectedAttributeName: string;
-  public selectedMultipleAttributeName: string;
+  public selectedMultipleAttributeName: any =[];
   public bucketList: any;
   public selectedBucketOne: string;
   public selectedBucketTwo: string;
@@ -163,9 +163,26 @@ export class EditRuleComponent implements OnInit {
         this.fg.controls.ruleType.setValue(this.fetchEditRule?.ruleDetails.ruleTypeName);
         this.fg.controls.subLavelRadio.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.levelName);
         this.selectedSubLevel = this.fetchEditRule?.ruleDetails.ruleLevel.levelName;
-        this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
-        this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
-        this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns[0];
+        if(this.fetchEditRule?.ruleDetails.ruleLevel.levelName != 'Multiple Column') {
+          this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
+          this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
+          this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns[0];
+        }
+        if(this.fetchEditRule?.ruleDetails.ruleLevel.levelName == 'Multiple Column') {
+          
+          this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns);
+          this.fetchEditRule?.ruleDetails.ruleLevel.columns.forEach(c => {
+            this.completenessData.push(c); 
+          })
+          this.fetchEditRule?.ruleDetails.ruleLevel.columns.forEach(c => {
+            this.selectedMultipleAttributeName.push(c); 
+          })
+        }
+        
+        // this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
+        //   this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
+        //   this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns[0];
+        // this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns;
       }, 5000); // 5000 milliseconds (5 seconds)
       
     }, (error) => {
@@ -238,17 +255,17 @@ export class EditRuleComponent implements OnInit {
   }
 
   public selectedStatus(s: any): void {
-    if (s == 'Deleted') {
-      const modalRef = this.modalService.open(StatusDeleteConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
-      modalRef.result.then((result) => {
-        // this.fg.controls.status.setValue(s);
-      }, (error) => {
-        this.fg.controls.status.setValue(this.fetchEditRule?.status);
-      });
+    // if (s == 'Deleted') {
+    //   const modalRef = this.modalService.open(StatusDeleteConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
+    //   modalRef.result.then((result) => {
+    //     // this.fg.controls.status.setValue(s);
+    //   }, (error) => {
+    //     this.fg.controls.status.setValue(this.fetchEditRule?.status);
+    //   });
 
-    } else {
+    // } else {
 
-    }
+    // }
   }
 
   public continue(): void {
@@ -356,6 +373,23 @@ export class EditRuleComponent implements OnInit {
   }
 
   public updateRuleFunction(): void {
+    if (this.fg.controls.status.value == 'Deleted') {
+      const modalRef = this.modalService.open(StatusDeleteConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
+      modalRef.result.then((result) => {
+        // this.fg.controls.status.setValue(s);
+        this.updateData();
+      }, (error) => {
+        this.fg.controls.status.setValue(this.fetchEditRule?.status);
+      });
+
+    } else {
+      this.updateData();
+    }
+    
+    // this.router.navigate([`projects/${this.projectId}/data-quality`]);
+  }
+
+  public updateData(): void {
     const value = this.fg.get('ruleName').value;
     const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
     this.fg.get('ruleName').setValue(titleCaseValue);
@@ -394,31 +428,60 @@ export class EditRuleComponent implements OnInit {
       }
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
-      this.saveRulePayload = {
-        ruleId: this.ruleId,
-        ruleName:this.fg.controls.ruleName.value,
-        ruleDescription:this.fg.controls.ruleDescription.value,
-        sourceAndTarget:this.fg.controls.sourceAndTarget.value,
-        sourceData : {
-            sourceDataType: this.fg.controls.sourceDataSource.value,
-            subDataSourceType: this.fg.controls.subDataSourceOne.value,
-            dataSourceId: +this.fg.controls.sourceDataConnection.value,
-            bucketName: this.fg.controls.sourceBucketOne.value,
-            filePath : this.fg.controls.sourceFolderPath.value
-        },
-        ruleDetails:{
-            ruleTypeName : this.fg.controls.ruleType.value,
-            ruleLevel :{
-              levelName: this.fg.controls.subLavelRadio.value,
-              columnLevel: false,
-              acceptance: this.fg.controls.percentage.value,
-              columns: [this.fg.controls.selectColumnAttribute.value]
-            }
-    
-        },
-        userId : this.userId,
-        status: this.fg.controls.status.value   
+      if (this.fg.controls.subLavelRadio.value == 'Multiple Column'){
+        this.saveRulePayload = {
+          ruleId: this.ruleId,
+          ruleName:this.fg.controls.ruleName.value,
+          ruleDescription:this.fg.controls.ruleDescription.value,
+          sourceAndTarget:this.fg.controls.sourceAndTarget.value,
+          sourceData : {
+              sourceDataType: this.fg.controls.sourceDataSource.value,
+              subDataSourceType: this.fg.controls.subDataSourceOne.value,
+              dataSourceId: +this.fg.controls.sourceDataConnection.value,
+              bucketName: this.fg.controls.sourceBucketOne.value,
+              filePath : this.fg.controls.sourceFolderPath.value
+          },
+          ruleDetails:{
+              ruleTypeName : this.fg.controls.ruleType.value,
+              ruleLevel :{
+                levelName: this.fg.controls.subLavelRadio.value,
+                columnLevel: false,
+                acceptance: this.fg.controls.percentage.value,
+                columns: this.fg.controls.selectColumnAttribute.value
+              }
+      
+          },
+          userId : this.userId,
+          status: this.fg.controls.status.value   
+        }
+      } else {
+        this.saveRulePayload = {
+          ruleId: this.ruleId,
+          ruleName:this.fg.controls.ruleName.value,
+          ruleDescription:this.fg.controls.ruleDescription.value,
+          sourceAndTarget:this.fg.controls.sourceAndTarget.value,
+          sourceData : {
+              sourceDataType: this.fg.controls.sourceDataSource.value,
+              subDataSourceType: this.fg.controls.subDataSourceOne.value,
+              dataSourceId: +this.fg.controls.sourceDataConnection.value,
+              bucketName: this.fg.controls.sourceBucketOne.value,
+              filePath : this.fg.controls.sourceFolderPath.value
+          },
+          ruleDetails:{
+              ruleTypeName : this.fg.controls.ruleType.value,
+              ruleLevel :{
+                levelName: this.fg.controls.subLavelRadio.value,
+                columnLevel: false,
+                acceptance: this.fg.controls.percentage.value,
+                columns: [this.fg.controls.selectColumnAttribute.value]
+              }
+      
+          },
+          userId : this.userId,
+          status: this.fg.controls.status.value   
+        }
       }
+      
 
       // console.log("FALSE -- Rule save payload:", JSON.stringify(req));
     }
@@ -433,6 +496,5 @@ export class EditRuleComponent implements OnInit {
     }, (error) => {
       this.snakbar.open(error);
     });
-    // this.router.navigate([`projects/${this.projectId}/data-quality`]);
   }
 }

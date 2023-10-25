@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -49,8 +49,8 @@ export class DataQualityCreateComponent implements OnInit {
   public dataConnectionList: any;
   public selectedDataConnections1: string;
   public selectedDataConnections2: string;
-  public selectedAttributeName: string;
-  public selectedMultipleAttributeName: string;
+  public selectedAttributeName: any;
+  public selectedMultipleAttributeName: any;
   public bucketList: any;
   public selectedBucketOne: string;
   public selectedBucketTwo: string;
@@ -125,7 +125,7 @@ export class DataQualityCreateComponent implements OnInit {
       //types
       ruleType: new FormControl('', Validators.required),
       subLavelRadio: new FormControl(''),
-      selectColumnAttribute: new FormControl(''),
+      selectColumnAttribute: [''],
       selectMultipleAttribute: new FormControl(''),
       acceptancePercentage: new FormControl('', [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
       //
@@ -206,6 +206,17 @@ export class DataQualityCreateComponent implements OnInit {
     
   }
 
+  // check max 5 column 
+  validateMaxSelection(maxSelection: number): ValidatorFn {
+    return (control) => {
+      const selectedOptions = control.value;
+      if (selectedOptions && selectedOptions.length > maxSelection) {
+        return { maxSelectionExceeded: true };
+      }
+      return null;
+    };
+  }
+
   public getDataConnection(): void {
     this.ruleCreationService.getDataConnection(this.projectId, this.userId).subscribe((response) => {
       this.dataConnectionList = response;
@@ -279,13 +290,26 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   public onChangeRuleTypes(value: string): void {
+    this.fg.controls.selectColumnAttribute.setValue('');
+    this.fg.controls.acceptancePercentage.setValue('');
+    this.fg.get('selectColumnAttribute')?.clearValidators();
+    this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
     this.selectedSubLevel = null;
     this.selectedMainRuleType = value;
     
   }
 
   public onChangeSubLevel(value: string): void {
+    this.fg.controls.selectColumnAttribute.setValue('');
+    this.fg.controls.acceptancePercentage.setValue('');
     this.selectedSubLevel = value;
+    if (value == "Multiple Column"){
+      this.fg.get('selectColumnAttribute').setValidators([Validators.maxLength(5)]);
+    } else {
+      this.fg.get('selectColumnAttribute')?.clearValidators();
+    }
+    this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
+
     if (value == "Sum of column value") {
       if (this.columnDataType) {
         this.columnDataType = this.columnDataType.filter(item => item.dataType === "int" || item.dataType === "float");
@@ -444,30 +468,55 @@ export class DataQualityCreateComponent implements OnInit {
       }
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
-      this.saveRulePayload = {
-        ruleName:this.fg.controls.ruleName.value,
-        ruleDescription:this.fg.controls.ruleDescription.value,
-        sourceAndTarget:this.fg.controls.sourceAndTarget.value,
-        sourceData : {
-            dataSourceType: this.fg.controls.sourceDataSource.value,
-            subDataSourceType: this.fg.controls.subDataSourceOne.value,
-            dataSourceId: +this.fg.controls.sourceDataConnection.value,
-            bucketName: this.fg.controls.sourceBucketOne.value,
-            filePath : this.fg.controls.sourceFolderPath.value
-        },
-        ruleDetails:{
-            ruleTypeName : this.fg.controls.ruleType.value,
-            ruleLevel :{
-              levelName: this.fg.controls.subLavelRadio.value,
-              columnLevel: false,
-              acceptance: this.fg.controls.acceptancePercentage.value,
-              columns: [this.fg.controls.selectColumnAttribute.value]
-            }
-    
-        },
-        userId : this.userId    
+      if (this.fg.controls.subLavelRadio.value == 'Multiple Column') {
+        this.saveRulePayload = {
+          ruleName:this.fg.controls.ruleName.value,
+          ruleDescription:this.fg.controls.ruleDescription.value,
+          sourceAndTarget:this.fg.controls.sourceAndTarget.value,
+          sourceData : {
+              dataSourceType: this.fg.controls.sourceDataSource.value,
+              subDataSourceType: this.fg.controls.subDataSourceOne.value,
+              dataSourceId: +this.fg.controls.sourceDataConnection.value,
+              bucketName: this.fg.controls.sourceBucketOne.value,
+              filePath : this.fg.controls.sourceFolderPath.value
+          },
+          ruleDetails:{
+              ruleTypeName : this.fg.controls.ruleType.value,
+              ruleLevel :{
+                levelName: this.fg.controls.subLavelRadio.value,
+                columnLevel: false,
+                acceptance: this.fg.controls.acceptancePercentage.value,
+                columns: this.fg.controls.selectColumnAttribute.value
+              }
+      
+          },
+          userId : this.userId    
+        }
+      } else {
+        this.saveRulePayload = {
+          ruleName:this.fg.controls.ruleName.value,
+          ruleDescription:this.fg.controls.ruleDescription.value,
+          sourceAndTarget:this.fg.controls.sourceAndTarget.value,
+          sourceData : {
+              dataSourceType: this.fg.controls.sourceDataSource.value,
+              subDataSourceType: this.fg.controls.subDataSourceOne.value,
+              dataSourceId: +this.fg.controls.sourceDataConnection.value,
+              bucketName: this.fg.controls.sourceBucketOne.value,
+              filePath : this.fg.controls.sourceFolderPath.value
+          },
+          ruleDetails:{
+              ruleTypeName : this.fg.controls.ruleType.value,
+              ruleLevel :{
+                levelName: this.fg.controls.subLavelRadio.value,
+                columnLevel: false,
+                acceptance: this.fg.controls.acceptancePercentage.value,
+                columns: [this.fg.controls.selectColumnAttribute.value]
+              }
+      
+          },
+          userId : this.userId    
+        }
       }
-
       // console.log("FALSE -- Rule save payload:", JSON.stringify(req));
     }
 
@@ -475,7 +524,7 @@ export class DataQualityCreateComponent implements OnInit {
       this.snakbar.open(response.message);
       this.router.navigate([`projects/${this.projectId}/data-quality`]);
     }, (error) => {
-
+      this.snakbar.open(error);
     });
   }
 

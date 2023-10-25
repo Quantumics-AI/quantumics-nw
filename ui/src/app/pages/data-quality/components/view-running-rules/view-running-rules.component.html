@@ -46,10 +46,7 @@
                                     <td>
                                         {{view?.ruleName}}
                                     </td>
-                                    <td [ngClass]="{
-                                        'green': view?.jobStatus === 'Active',
-                                        'orange': view?.jobStatus === 'Inactive'
-                                      }">
+                                    <td [ngClass]="{'redStatus': view?.jobStatus === 'Failed'}">
                                         {{view?.jobStatus}}
                                     </td>
                                     <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'MisMatch'}">

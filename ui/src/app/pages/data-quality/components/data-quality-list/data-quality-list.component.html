@@ -85,9 +85,15 @@
                                             </td>
                                             <td>{{dataQuality?.ruleDetails?.ruleTypeName}}</td>
                                             <td>{{dataQuality?.createdBy}}</td>
-                                            <td>{{ convertToUKTime(dataQuality?.createdDate)  }}</td>
+                                            <td>
+                                                <!-- {{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}} -->
+                                                {{convertToUKTimeZone(dataQuality?.createdDate)  }}
+                                            </td>
                                             <!-- <td class="cp">{{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}}</td> -->
-                                            <td>{{convertToUKTime(dataQuality?.modifiedDate)}}</td>
+                                            <td>
+                                                {{convertToUKTimeZone(dataQuality?.modifiedDate)}}
+                                                <!-- {{convertToUKTime(dataQuality?.modifiedDate)}} -->
+                                            </td>
                                             <td  [ngClass]="{
                                                 'greenStatus': dataQuality?.status === 'Active',
                                                 'orangeStatus': dataQuality?.status === 'Inactive',

@@ -20,6 +20,10 @@ export class ViewResultComponent implements OnInit {
   @Input() output: any;
 
   public nullRule: string = "Null Value";
+  public duplicateRule: string = "Duplicate Value";
+  public dataComplete: string = 'Data Completeness';
+  public dataProfiler: string = 'Data Profiler';
+  public sourceFileName: string;
   constructor(
     public modal: NgbActiveModal,
   ){
@@ -28,6 +32,19 @@ export class ViewResultComponent implements OnInit {
 
   ngOnInit(): void {
       console.log(this.output);
+      if(this.output.SourceFile){
+        const sourceFileParts = this.output.SourceFile.split('/'); // Split the string by '/'
+        const fileNameWithQuotes = sourceFileParts[sourceFileParts.length - 1]; // Get the last part
+  
+        // Remove the surrounding double quotes
+        this.sourceFileName = fileNameWithQuotes.replace(/"/g, '');
+  
+        console.log(this.sourceFileName);
+      }
       
+  }
+
+  toggleColumns(index: number) {
+    this.output.data[index].showColumns = !this.output.data[index].showColumns;
   }
 }

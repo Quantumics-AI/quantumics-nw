@@ -239,3 +239,28 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+.wid {
+    width: -webkit-fill-available;
+}
+
+.err-div {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: max-content;
+}
+
+.err-div-acc {
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+
+.fs-12 {
+    font-size: 12px;
+}
+
+.mt-40 {
+    margin-top: 40px;
+}

@@ -336,42 +336,70 @@
                                         <!-- Conditionally display input and select elements based on columnLevel -->
                                         <ng-container *ngIf="selectedSubLevel === level.levelName">
                                             <div *ngIf="!level.columnLevel">
-                                                <div class="dif">
-                                                    <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                    formControlName="acceptancePercentage" autocomplete="off">
-                                                    <span class="pr">%</span>
-                                                </div>
-                                                <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error">
-                                                    Please enter a number between 0 and 20.
-                                                </div>
+                                                <ng-container *ngIf="selectedSubLevel != 'Table Level'">
+                                                    <div class="dif">
+                                                        <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                        formControlName="acceptancePercentage" autocomplete="off">
+                                                        <span class="pr">%</span>
+                                                    </div>
+                                                    <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12">
+                                                        Please enter a number between 0 and 20.
+                                                    </div>
+                                                </ng-container>
+                                                
                                             </div>
                                             
                                             <div *ngIf="level.columnLevel" class="dif">
                                                 <!-- for single column -->
-                                                <select *ngIf="selectedSubLevel != 'Multiple Column'" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute"
-                                                    [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                <select *ngIf="selectedSubLevel != 'Multiple Column'" class="form-control input-design in-text mr-r-20" 
+                                                formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
                                                     <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                    <option *ngFor="let i of columnDataType" [value]="i.columnName">
-                                                        {{i.columnName}}
+                                                    <option *ngFor="let i of columnData" [value]="i">
+                                                        {{i}}
                                                     </option>
                                                 </select>
 
                                                 <!-- for multi column  -->
-                                                <ng-select *ngIf="selectedSubLevel === 'Multiple Column'" id="dpt" class="custom mr-r-20"
-                                                    formControlName="selectMultipleAttribute" [multiple]="true"
-                                                    placeholder="Select Attributes" 
-                                                    bindLabel="name" groupBy="item" [selectableGroup]="true"
-                                                    bindValue="id" [(ngModel)]="selectedMultipleAttributeName"
-                                                    [closeOnSelect]="false" [items]="columnData">
+                                                <ng-container *ngIf="selectedSubLevel === 'Multiple Column'" >
+                                                    <div class="dif">
+                                                        <div style="position: relative; display: flex;">
+                                                            <ng-select id="dpt" class="custom mr-r-20 wid" formControlName="selectColumnAttribute" 
+                                                                [multiple]="true" placeholder="Select Attributes" bindLabel="name" groupBy="item" 
+                                                                [selectableGroup]="true" bindValue="id" [(ngModel)]="selectedAttributeName"
+                                                                [closeOnSelect]="false" [items]="columnData">
 
-                                                    <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-                                                        <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
-                                                    </ng-template>
-                                                </ng-select>
-                                
-                                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                                                    <input id="item-{{index}}" type="checkbox" [(ngModel)]="item$.selected" [ngModelOptions]="{ standalone : true }"/> 
+                                                                    <span [title]="item" class="mr-l-8">{{item}}</span>
+                                                                </ng-template>
+                                                            </ng-select>
+                                                            <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">
+                                                                Please select up to 5 columns for comparison.
+                                                            </small> -->
+                                                            <div *ngIf="fg.get('selectColumnAttribute').hasError('maxlength')" class="text-error fs-12 err-div">
+                                                                Please select up to 5 columns for comparison.
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    </div>
+                                                    
+                                                </ng-container>
+                                                <!-- <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
                                                     formControlName="acceptancePercentage" autocomplete="off">
-                                                <span class="pr">%</span>
+                                                <span class="pr">%</span> -->
+                                                <div class="dif">
+                                                    <div style="position: relative; display: flex;">
+                                                        <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                        formControlName="acceptancePercentage" autocomplete="off">
+                                                        <span class="pr">%</span>
+                                                    
+                                                    
+                                                        <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
+                                                            Please enter a number between 0 and 20.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
                                             </div>
                                         </ng-container>
                                     </div>
@@ -386,15 +414,25 @@
                                             {{i.columnName}}
                                         </option>
                                     </select>
-                                    <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                    formControlName="acceptancePercentage" autocomplete="off">
+                                    <div class="dif">
+                                        <div style="position: relative; display: flex;">
+                                            <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                            formControlName="acceptancePercentage" autocomplete="off">
+                                            <span class="pr">%</span>
+                                        
+                                        
+                                            <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div">
+                                                Please enter a number between 0 and 20.
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </ng-template>
                             
                           </div>
                         </div>
                       </ng-container>
-                    <div class="mt-2">
+                    <div class="mt-40">
                         <div class="text-center">
                             <button type="button" class="btn btn-outline-success connectionBtns"
                                 (click)="saveRuleFunction();" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid || alreadyExist">Save</button>

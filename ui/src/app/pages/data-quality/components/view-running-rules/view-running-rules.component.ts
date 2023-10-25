@@ -35,6 +35,77 @@ export class ViewRunningRulesComponent implements OnInit {
   public pageSize: number = 10;
   public endIndex: number = this.pageSize;
   public page = 1;
+  // public dataProfiler = {
+  //   "match" : false,
+  //   "pass" : false,
+  //   "ruleTypeName" : "Data Profiler",
+  //   "levelName" : "Column level",
+  //   "SourceFile" : "s3a://qsai-nw-src/DuplicateValues/Duplicate_Value_Data_Null.csv",
+  //   "TargetFile" : "s3a://qsai-nw-src/DuplicateValues/Duplicate_Value_Data_Null.csv",
+  //   "data" : [
+  //     {
+  //       "dataset" : "Date Type",
+  //       "source" : "Number",
+  //       "target" : "Number",
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Column",
+  //       "source" : "Salary",
+  //       "target" : "Salary",
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Missing",
+  //       "source" : 0,
+  //       "target" : 0,
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Missing %",
+  //       "source" : 0.00,
+  //       "target" : 0.00,
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Unique",
+  //       "source" : 900,
+  //       "target" : 800,
+  //       "match" : false
+  //     },
+  //     {
+  //       "dataset" : "Unique %",
+  //       "source" : 90.00,
+  //       "target" : 80.00,
+  //       "match" : false
+  //     },
+  //     {
+  //       "dataset" : "Minimum",
+  //       "source" : 100000,
+  //       "target" : 100000,
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Maximum",
+  //       "source" : 250000,
+  //       "target" : 250000,
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Median",
+  //       "source" : 150000,
+  //       "target" : 150000,
+  //       "match" : true
+  //     },
+  //     {
+  //       "dataset" : "Mean",
+  //       "source" : 125000,
+  //       "target" : 125000,
+  //       "match" : true
+  //     }
+  //   ]
+    
+  //   }
 
   constructor(
     // public modal: NgbActiveModal,
@@ -118,7 +189,7 @@ export class ViewRunningRulesComponent implements OnInit {
       // You can add your conditional logic for JSON objects here
     }
 
-    const modalRef = this.modalService.open(ViewResultComponent, { size: 'md modal-dialog-centered', windowClass: 'modal-size', scrollable: false });
+    const modalRef = this.modalService.open(ViewResultComponent, { size: 'md', windowClass: 'modal-size', scrollable: false });
     modalRef.componentInstance.userId = this.userId;
     modalRef.componentInstance.projectId = this.projectId;
     modalRef.componentInstance.output = this.outputData;
