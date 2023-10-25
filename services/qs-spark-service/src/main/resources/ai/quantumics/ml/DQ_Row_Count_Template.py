@@ -17,7 +17,6 @@ level_name = $LEVEL_NAME
 s3Path= $S3_OUTPUT_PATH
 input_acceptance_percentage = $ACCEPTANCE_PER
 input_acceptance_percentage_float = float(input_acceptance_percentage)
-source_s3_path = f"s3a://{s3_bucket_name}/{s3_file_path}"
 
 file_paths = [
     (filepath1, bucket1),
