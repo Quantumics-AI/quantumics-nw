@@ -87,7 +87,7 @@
                                 </div>
                                 <div class="text-error" *ngIf="invalidDesPattern">
                                     <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
-                                    Rule description should have Alphabates and Special characters.
+                                    Rule description should have Alphabets, Numbers and special characters.
                                 </div>
                                 <div class="text-error" *ngIf="fg.get('ruleDescription').hasError('minlength')">
                                     <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
@@ -351,13 +351,16 @@
                                             
                                             <div *ngIf="level.columnLevel" class="dif">
                                                 <!-- for single column -->
-                                                <select *ngIf="selectedSubLevel != 'Multiple Column'" class="form-control input-design in-text mr-r-20" 
-                                                formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                                    <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                    <option *ngFor="let i of columnData" [value]="i">
-                                                        {{i}}
-                                                    </option>
-                                                </select>
+                                                <ng-container  *ngIf="selectedSubLevel != 'Multiple Column'">
+                                                    <select id="ab" class="form-control input-design in-text mr-r-20" 
+                                                    formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                        <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                        <option *ngFor="let i of columnDataType" [value]="i.columnName">
+                                                            {{i.columnName}}
+                                                        </option>
+                                                    </select>
+                                                </ng-container>
+                                                
 
                                                 <!-- for multi column  -->
                                                 <ng-container *ngIf="selectedSubLevel === 'Multiple Column'" >
@@ -387,18 +390,21 @@
                                                 <!-- <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
                                                     formControlName="acceptancePercentage" autocomplete="off">
                                                 <span class="pr">%</span> -->
-                                                <div class="dif">
-                                                    <div style="position: relative; display: flex;">
-                                                        <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                        formControlName="acceptancePercentage" autocomplete="off">
-                                                        <span class="pr">%</span>
-                                                    
-                                                    
-                                                        <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
-                                                            Please enter a number between 0 and 20.
+                                                <ng-container *ngIf="selectedSubLevel != 'Column level'">
+                                                    <div class="dif">
+                                                        <div style="position: relative; display: flex;">
+                                                            <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                            formControlName="acceptancePercentage" autocomplete="off">
+                                                            <span class="pr">%</span>
+                                                        
+                                                        
+                                                            <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
+                                                                Please enter a number between 0 and 20.
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </ng-container>
+                                                
                                                 
                                             </div>
                                         </ng-container>
@@ -408,7 +414,8 @@
                             <ng-template #nullValue>
                                 <div class="form-group mr-b-0 dif">
                                 
-                                    <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" [(ngModel)]="selectedNullName" placeholder="Select Attributes">
+                                    <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
+                                    [(ngModel)]="selectedNullName" placeholder="Select Attributes">
                                         <option [value]="undefined" disabled selected> Select Attributes </option>
                                         <option *ngFor="let i of columnDataType" [value]="i.columnName">
                                             {{i.columnName}}

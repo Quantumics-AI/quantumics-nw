@@ -291,7 +291,6 @@ export class DataQualityListComponent implements OnInit {
 
   // pagination 
   public onPageChange(currentPage: number): void {
-    debugger
     if(this.pageNumebr < currentPage){
       this.pageNumebr = currentPage;
     } else {

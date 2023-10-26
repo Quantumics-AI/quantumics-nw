@@ -102,7 +102,7 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
+    const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/~`\\]*$/;
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
       // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$' ---- Validators.minLength(10), Validators.maxLength(150),
@@ -310,7 +310,7 @@ export class DataQualityCreateComponent implements OnInit {
     }
     this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
 
-    if (value == "Sum of column value") {
+    if (value == "Sum of column value" || value === "Column level") {
       if (this.columnDataType) {
         this.columnDataType = this.columnDataType.filter(item => item.dataType === "int" || item.dataType === "float");
       } 
@@ -388,7 +388,7 @@ export class DataQualityCreateComponent implements OnInit {
     if(this.fg.controls.ruleDescription.value != ""){
       const validPattern = String(str)
       .match(
-        /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/
+        /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/~`\\]*$/
       );
 
       if (validPattern == null) {

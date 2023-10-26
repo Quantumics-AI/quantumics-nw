@@ -24,6 +24,7 @@ export class ViewResultComponent implements OnInit {
   public dataComplete: string = 'Data Completeness';
   public dataProfiler: string = 'Data Profiler';
   public sourceFileName: string;
+  public targetFileName: string;
   constructor(
     public modal: NgbActiveModal,
   ){
@@ -32,14 +33,36 @@ export class ViewResultComponent implements OnInit {
 
   ngOnInit(): void {
       console.log(this.output);
-      if(this.output.SourceFile){
+      if(this.output?.sourceFile){
+        const sourceFileParts = this.output.sourceFile.split('/'); // Split the string by '/'
+        const fileNameWithQuotes = sourceFileParts[sourceFileParts.length - 1]; // Get the last part
+  
+        // Remove the surrounding double quotes
+        this.sourceFileName = fileNameWithQuotes.replace(/"/g, '');
+      }
+
+      if(this.output?.targetFile){
+        const targetFileParts = this.output.targetFile.split('/'); // Split the string by '/'
+        const fileNameWithQuotes = targetFileParts[targetFileParts.length - 1]; // Get the last part
+  
+        // Remove the surrounding double quotes
+        this.targetFileName = fileNameWithQuotes.replace(/"/g, '');
+      }
+
+      if(this.output?.SourceFile){
         const sourceFileParts = this.output.SourceFile.split('/'); // Split the string by '/'
         const fileNameWithQuotes = sourceFileParts[sourceFileParts.length - 1]; // Get the last part
   
         // Remove the surrounding double quotes
         this.sourceFileName = fileNameWithQuotes.replace(/"/g, '');
+      }
+
+      if(this.output?.TargetFile){
+        const targetFileParts = this.output.TargetFile.split('/'); // Split the string by '/'
+        const fileNameWithQuotes = targetFileParts[targetFileParts.length - 1]; // Get the last part
   
-        console.log(this.sourceFileName);
+        // Remove the surrounding double quotes
+        this.targetFileName = fileNameWithQuotes.replace(/"/g, '');
       }
       
   }

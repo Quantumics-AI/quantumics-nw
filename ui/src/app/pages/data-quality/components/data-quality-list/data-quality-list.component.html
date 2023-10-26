@@ -83,7 +83,11 @@
                                             <td class="fn text-over">
                                                 <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>
                                             </td>
-                                            <td>{{dataQuality?.ruleDetails?.ruleTypeName}}</td>
+                                            <td class="text-over">
+                                                <span title="{{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}">
+                                                    {{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}
+                                                </span>  
+                                            </td>
                                             <td>{{dataQuality?.createdBy}}</td>
                                             <td>
                                                 <!-- {{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}} -->

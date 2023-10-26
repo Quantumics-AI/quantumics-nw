@@ -156,7 +156,7 @@ export class EditDataSourceComponent implements OnInit {
     this.sourceDataService.updateSourceData(this.awsId, request).subscribe((response) => {
       // if (response.code === 200) {
         this.modal.close(response);
-        this.snakbar.open("Data source updated successfully!");
+        this.snakbar.open("Connection updated successfully");
       // }
     }, (error) => {
       this.snakbar.open(error);

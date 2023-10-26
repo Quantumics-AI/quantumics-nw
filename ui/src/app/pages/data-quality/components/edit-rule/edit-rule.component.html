@@ -77,8 +77,8 @@
                                     triggers="manual" #d="ngbPopover" [ngbPopover]="popRuleDesContent"
                                     popoverClass="folder-pophover" placement="bottom">
                                 </textarea>
-                                <small id="workspaceNameHelp" class="form-text body-text-muted">Rule description must be
-                                    between 10 and 150 characters long.</small>
+                                <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">Rule description must be
+                                    between 10 and 150 characters long.</small> -->
                                 <div *ngIf="fg.get('ruleDescription').invalid && fg.get('ruleDescription').dirty || fg.get('ruleDescription').touched">
                                     <div class="text-error" *ngIf="fg.get('ruleDescription').hasError('required')">
                                         <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
@@ -87,7 +87,11 @@
                                 </div>
                                 <div class="text-error" *ngIf="invalidDesPattern">
                                     <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
-                                    Rule description should have Alphabates and Special characters.
+                                    Rule description should have Alphabets, Numbers and special characters.
+                                </div>
+                                <div class="text-error" *ngIf="fg.get('ruleDescription').hasError('minlength')">
+                                    <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                    Rule description must be between 10 and 150 characters long.
                                 </div>
                             </div>
                             <ng-template #popRuleDesContent>
@@ -95,7 +99,7 @@
                                     <ul>
                                         <li>Rule description is mandatory.</li>
                                         <li>Rule description must be between 10 and 150 characters long.</li>
-                                        <li>Rule description should have Alphabets, and Special characters.</li>
+                                        <li>Rule description should have Alphabets, Numbers and Special characters.</li>
                                     </ul>
                                 </div>
                             </ng-template>
@@ -330,9 +334,11 @@
                                         <!-- Conditionally display input and select elements based on columnLevel -->
                                         <ng-container *ngIf="selectedSubLevel === level.levelName">
                                             <div *ngIf="!level.columnLevel" class="dif">
-                                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                formControlName="percentage" autocomplete="off">
-                                                <span class="pr">%</span>
+                                                <ng-container *ngIf="selectedSubLevel != 'Table Level'">
+                                                    <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                    formControlName="percentage" autocomplete="off">
+                                                    <span class="pr">%</span>
+                                                </ng-container>
                                             </div>
                                             <div *ngIf="level.columnLevel" class="dif">
                                                 <!-- for single column -->
@@ -356,10 +362,14 @@
                                                         <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
                                                     </ng-template>
                                                 </ng-select>
-                                
-                                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+
+                                                <ng-container *ngIf="selectedSubLevel != 'Column level'">
+                                                    <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
                                                     formControlName="percentage" autocomplete="off">
-                                                <span class="pr">%</span>
+                                                    <span class="pr">%</span>
+                                                </ng-container>
+                                
+                                                
                                             </div>
                                         </ng-container>
                                     </div>

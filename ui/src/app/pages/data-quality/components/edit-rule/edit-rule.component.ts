@@ -84,7 +84,7 @@ export class EditRuleComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/;
+    const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/~`\\]*$/;
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
       // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$'
@@ -334,7 +334,7 @@ export class EditRuleComponent implements OnInit {
     if(this.fg.controls.ruleDescription.value != ""){
       const validPattern = String(str)
       .match(
-        /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/]*$/
+        /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/~`\\]*$/
       );
 
       if (validPattern == null) {
