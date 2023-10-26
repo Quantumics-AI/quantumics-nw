@@ -74,9 +74,12 @@ else:
         target_s3_path = f"s3a://{bucket2}/{filepath2}"
         source_file_name = os.path.basename(s3_file_path)
         target_file_name = os.path.basename(target_s3_path)
+        # Format the value to have exactly two decimal places
+        source_sum_2decimal = "{:.2f}".format(source_sum)
+        target_sum_2decimal = "{:.2f}".format(target_sum)
         header_results.append({
-            "source": source_sum,
-            "target": target_sum,
+            "source": source_sum_2decimal,
+            "target": target_sum_2decimal,
             "header": header,
             "match": match,
             "pass": pass_status,
