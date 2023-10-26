@@ -161,14 +161,14 @@ public class RuleJobHelper {
         String temp;
         jobName = jobName.replace(".py", "");
 
-        final String targetBucketName =
+        final String outputBucketName =
                 String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
 
         temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", ruleDetails.getSourceData().getBucketName()));
         temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
         temp = temp.replace(TARGET_BUCKET, String.format("'%s'", ruleDetails.getTargetData().getBucketName()));
         temp = temp.replace(TARGET_PATH, String.format("'%s'", ruleDetails.getTargetData().getFilePath()));
-        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", targetBucketName));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
         temp = temp.replace(ACCEPTANCE_PER, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getAcceptance()));
@@ -184,12 +184,12 @@ public class RuleJobHelper {
         String temp;
         jobName = jobName.replace(".py", "");
 
-        final String targetBucketName =
+        final String outputBucketName =
                 String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
 
         temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", ruleDetails.getSourceData().getBucketName()));
         temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
-        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", targetBucketName));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(ACCEPTANCE_PER, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getAcceptance()));
         temp = temp.replace(COLUMNS_DETAILS, String.format("'%s'", String.join(",", ruleDetails.getRuleDetails().getRuleLevel().getColumns())));
@@ -200,12 +200,12 @@ public class RuleJobHelper {
         String temp;
         jobName = jobName.replace(".py", "");
 
-        final String targetBucketName =
+        final String outputBucketName =
                 String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
 
         temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", ruleDetails.getSourceData().getBucketName()));
         temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
-        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", targetBucketName));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
         temp = temp.replace(ACCEPTANCE_PER, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getAcceptance()));
@@ -227,14 +227,14 @@ public class RuleJobHelper {
         String temp;
         jobName = jobName.replace(".py", "");
 
-        final String targetBucketName =
+        final String outputBucketName =
                 String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
 
         temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", ruleDetails.getSourceData().getBucketName()));
         temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
         temp = temp.replace(TARGET_BUCKET, String.format("'%s'", ruleDetails.getTargetData().getBucketName()));
         temp = temp.replace(TARGET_PATH, String.format("'%s'", ruleDetails.getTargetData().getFilePath()));
-        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", targetBucketName));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
         return temp;
