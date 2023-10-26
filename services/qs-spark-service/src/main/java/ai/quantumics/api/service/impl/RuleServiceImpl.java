@@ -33,9 +33,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ai.quantumics.api.constants.DatasourceConstants.ERROR_FETCHING_RULE;
+import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
 
 @Slf4j
 @Service
@@ -283,6 +288,43 @@ public class RuleServiceImpl implements RuleService {
 		} catch (final Exception ex) {
 			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			response.put("message", "Error while Fetching rule :  " + ex.getMessage());
+		}
+		return ResponseEntity.ok().body(response);
+	}
+
+	@Override
+	public ResponseEntity<Object> getRuleByName(int userId, int projectId, String ruleName) {
+		final Map<String, Object> response = new HashMap<>();
+		try {
+			dbUtil.changeSchema("public");
+			final Projects project = projectService.getProject(projectId, userId);
+			if(project == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested project with Id: "+ projectId +" for User with Id: " + userId +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+			QsUserV2 userObj = userService.getUserById(userId);
+			if(userObj == null) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Requested User with Id: "+ userId  +" not found.");
+
+				return ResponseEntity.ok().body(response);
+			}
+			dbUtil.changeSchema(project.getDbSchemaName());
+			List<String> status = Arrays.asList(RuleStatus.ACTIVE.getStatus(), RuleStatus.INACTIVE.getStatus());
+			List<QsRule> qsRule = ruleRepository.findByRuleNameIgnoreCaseAndStatusIn(ruleName,status);
+			if(CollectionUtils.isEmpty(qsRule)){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", RULE_NAME_NOT_EXIST);
+
+				return ResponseEntity.ok().body(response);
+			}
+			response.put("code", HttpStatus.SC_OK);
+			response.put("message", RULE_NAME_EXIST);
+		} catch (final Exception ex) {
+			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			response.put("message", ERROR_FETCHING_RULE + ex.getMessage());
 		}
 		return ResponseEntity.ok().body(response);
 	}

@@ -27,6 +27,9 @@ public class DatasourceConstants {
   public static final String EMPTY_FILE = "File has no content";
   public static final String CORREPTED_FILE = "Please check, the selected file is corrupted";
   public static final String RULE_ATTACHED = "This connection has %d rules mapped. Deletion of Connection is not possible till all the mapped rules are Deleted";
+  public static final String RULE_NAME_EXIST = "Entered rule name is already used.Please enter a different name.";
+  public static final String RULE_NAME_NOT_EXIST = "No Rule found";
+  public static final String ERROR_FETCHING_RULE = "Error while Fetching rule :  ";
   private DatasourceConstants() {}
 
 }
