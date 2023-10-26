@@ -76,4 +76,8 @@ export class RuleCreationService {
   public cancelRunningRule(userId:number, projectId:number, data: any): Observable<any> {
     return this.http.put(`/QuantumSparkServiceAPI/api/v1/rulejob/${userId}/${projectId}`, data);
   }
+
+  public existRuleName(userId:number, projectId:number,rulename: string): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/getRuleByName/${userId}/${projectId}/${rulename}`);
+  }
 }

@@ -189,20 +189,40 @@ export class DataQualityCreateComponent implements OnInit {
     });
   }
 
-  checkIfNameExists() {
-    if (this.getRuleList.length > 0) {
-      const value = this.fg.get('ruleName').value;
-      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-
-      // const enteredName = this.fg.get('dataSourceName').value;
-      const nameExists = this.getRuleList.some(item => item.ruleName === titleCaseValue);
-      
-      if (nameExists) {
+  public checkExistName(): void {
+    const ruleName = this.fg.get('ruleName').value;
+    this.ruleCreationService.existRuleName(this.userId, this.projectId, ruleName).subscribe((response) => {
+      console.log("......", response);
+      if (response.isExist) {
         this.alreadyExist = true;
       } else {
         this.alreadyExist = false;
       }
+      
+    }, (error) => {
+
+    });
+  }
+
+  checkIfNameExists() {
+    if(this.fg.get('ruleName').value.length <= 0){
+      this.alreadyExist = false;
     }
+    // console.log("+++++");
+    
+    // if (this.getRuleList.length > 0) {
+    //   const value = this.fg.get('ruleName').value;
+    //   const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+    //   // const enteredName = this.fg.get('dataSourceName').value;
+    //   const nameExists = this.getRuleList.some(item => item.ruleName === titleCaseValue);
+      
+    //   if (nameExists) {
+    //     this.alreadyExist = true;
+    //   } else {
+    //     this.alreadyExist = false;
+    //   }
+    // }
     
   }
 

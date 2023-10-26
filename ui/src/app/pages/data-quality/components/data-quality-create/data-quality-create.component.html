@@ -32,8 +32,8 @@
                                 <label for="inputName" class="p2">Rule Name*</label>
                                 <input type="text" class="form-control input-design" formControlName="ruleName" #rulename
                                     autocomplete="off" minlength="3" maxlength="50" (ngModelChange)="modelChangeRuleName($event)"
-                                    (focus)="f.open()" (input)="checkIfNameExists(); rulename.value.length > 0 ? f.close() : f.open()" (blur)="f.close()"
-                                    triggers="manual" #f="ngbPopover" [ngbPopover]="popRuleNameContent"
+                                    (focus)="f.open()" (input)="checkIfNameExists();rulename.value.length > 0 ? f.close() : f.open()" 
+                                    (blur)="checkExistName(); f.close()" triggers="manual" #f="ngbPopover" [ngbPopover]="popRuleNameContent"
                                     popoverClass="folder-pophover" placement="bottom">
                                 <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">Rule name must be
                                         between 3 and 50 characters long.</small> -->
