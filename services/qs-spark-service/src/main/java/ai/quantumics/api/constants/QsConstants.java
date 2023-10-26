@@ -113,6 +113,7 @@ public class QsConstants {
   public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Row_Template.py";
   public static final String DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Column_Template.py";
   public static final String DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Data_Profile_Table_Level_Template.py";
+  public static final String DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Data_Profile_Column_Level_Template.py";
 
   public static final String RULE_OUTPUT_FOLDER = "ruleoutput";
   public static final String SOURCE_BUCKET = "$SOURCE_BUCKET";
