@@ -46,9 +46,11 @@ schema = StructType([
 count_results_df = spark.createDataFrame(file_counts, schema)
 
 # Check if neither file has records based on the record counts in the DataFrame
-if count_results_df.collect()[0]["record_count"] == 0 and count_results_df.collect()[1]["record_count"] == 0:
-    # If neither file has records, print a statement and exit
-    print("Neither file has records.")
+if count_results_df.collect()[0]["record_count"] == 0 or count_results_df.collect()[1]["record_count"] == 0:
+    if count_results_df.collect()[0]["record_count"] == 0:
+        print("Source file does not have records.")
+    if count_results_df.collect()[1]["record_count"] == 0:
+        print("Target file does not have records.")
 else:
     source_count = count_results_df.collect()[0]["record_count"]
     target_count = count_results_df.collect()[1]["record_count"]
