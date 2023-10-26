@@ -17,4 +17,5 @@ public interface RuleService {
     ResponseEntity<Object> getRule(int userId, int projectId, int ruleId);
     ResponseEntity<Object> editRule(RuleDetails ruleDetails, int userId, int projectId);
     ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, String status);
+    ResponseEntity<Object> getRuleByName(int userId, int projectId, String ruleName);
 }
