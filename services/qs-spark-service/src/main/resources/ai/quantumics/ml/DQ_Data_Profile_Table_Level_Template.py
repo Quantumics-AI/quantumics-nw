@@ -21,8 +21,12 @@ s3Path = $S3_OUTPUT_PATH
 source_df = spark.read.csv(f"s3a://{bucket1}/{filepath1}", header=True, inferSchema=True)
 target_df = spark.read.csv(f"s3a://{bucket2}/{filepath2}", header=True, inferSchema=True)
 
-if source_df.count() == 0 and target_df.count() == 0:
-    print("Neither file has records.")
+# Check if either source_df or target_df has no records
+if source_df.count() == 0 or target_df.count() == 0:
+    if source_df.count() == 0:
+        print("Source file does not have records.")
+    if target_df.count() == 0:
+        print("Target file does not have records.")
 else:
     date_format_regex = r"^\d{1,2}/\d{1,2}/\d{4}"
 

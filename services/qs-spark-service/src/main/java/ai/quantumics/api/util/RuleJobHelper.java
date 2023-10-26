@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Date;
 
+import static ai.quantumics.api.constants.QsConstants.DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME;
@@ -93,7 +94,8 @@ public class RuleJobHelper {
                         scriptStr = prepareDataProfileTableLevelEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                         break;
                     case COLUMN_LEVEL:
-                        //TODO: Implement
+                        readLinesFromTemplate(fileContents, DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME);
+                        scriptStr = prepareDataProfileColumnLevelEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                         break;
                 }
                 break;
@@ -237,6 +239,17 @@ public class RuleJobHelper {
         temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
+        return temp;
+    }
+
+    private String prepareDataProfileColumnLevelEtlScriptVarsInit(
+            StringBuilder fileContents,
+            QsRuleJob ruleJob,
+            RuleDetails ruleDetails,
+            String jobName) {
+
+        String temp = prepareDataProfileTableLevelEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
+        temp = temp.replace(COLUMNS_DETAILS, String.format("'%s'", String.join(",", ruleDetails.getRuleDetails().getRuleLevel().getColumns())));
         return temp;
     }
 
