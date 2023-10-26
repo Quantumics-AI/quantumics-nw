@@ -317,11 +317,13 @@ public class RuleServiceImpl implements RuleService {
 			if(CollectionUtils.isEmpty(qsRule)){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", RULE_NAME_NOT_EXIST);
+				response.put("isExist",false);
 
 				return ResponseEntity.ok().body(response);
 			}
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", RULE_NAME_EXIST);
+			response.put("isExist",true);
 		} catch (final Exception ex) {
 			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			response.put("message", ERROR_FETCHING_RULE + ex.getMessage());
