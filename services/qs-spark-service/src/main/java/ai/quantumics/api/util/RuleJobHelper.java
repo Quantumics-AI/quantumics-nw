@@ -252,4 +252,5 @@ public class RuleJobHelper {
         temp = temp.replace(COLUMNS_DETAILS, String.format("'%s'", String.join(",", ruleDetails.getRuleDetails().getRuleLevel().getColumns())));
         return temp;
     }
+
 }
