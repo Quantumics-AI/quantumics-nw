@@ -215,6 +215,44 @@ public class RuleJobServiceImpl implements RuleJobService {
         return ResponseEntity.ok().body(response);
     }
 
+    @Override
+    public ResponseEntity<Object> searchByStatus(int userId, int projectId,String status) {
+        final Map<String, Object> response = new HashMap<>();
+        try {
+            dbUtil.changeSchema("public");
+            final Projects project = projectService.getProject(projectId);
+            if (project == null) {
+                response.put("code", HttpStatus.SC_BAD_REQUEST);
+                response.put("message", "Requested project with Id: " + projectId + " for User with Id: " + userId + " not found.");
+
+                return ResponseEntity.ok().body(response);
+            }
+            QsUserV2 userObj = userService.getUserById(userId);
+            if (userObj == null) {
+                response.put("code", HttpStatus.SC_BAD_REQUEST);
+                response.put("message", "Requested User with Id: " + userId + " not found.");
+
+                return ResponseEntity.ok().body(response);
+            }
+
+            dbUtil.changeSchema(project.getDbSchemaName());
+            List<QsRuleJob> ruleJobList = ruleJobRepository.findAllByJobStatus(status);
+            if (CollectionUtils.isNotEmpty(ruleJobList)) {
+                ruleJobList.forEach(ruleJob -> {
+                    QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());
+                    ruleJob.setRuleName(rule.getRuleName());
+                });
+            }
+
+            response.put("code", HttpStatus.SC_OK);
+            response.put("result", ruleJobList);
+        } catch (Exception exception) {
+            response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.put("message", "Error -" + exception.getMessage());
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
 
     public RuleDetails convertToRuleDetails(QsRule qsRule) {
         Gson gson = new Gson();

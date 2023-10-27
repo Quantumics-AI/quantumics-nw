@@ -73,5 +73,13 @@ public class RuleJobController {
     return ruleJobService.fetchRuleJobList(userId, projectId);
   }
 
-
+  @ApiOperation(value = "RuleJobStatus", response = Json.class)
+  @GetMapping("/{userId}/{projectId}/{status}")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "List All Rule jobs by status")})
+  public ResponseEntity<Object> searchByStatus(
+          @PathVariable(value = "projectId") final int projectId,
+          @PathVariable(value = "userId") final int userId,
+          @PathVariable(value = "status") final String status) {
+    return ruleJobService.searchByStatus(userId, projectId,status);
+  }
 }
