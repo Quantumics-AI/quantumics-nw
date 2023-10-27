@@ -18,11 +18,12 @@ import java.util.List;
 
 @Repository
 public interface RuleRepository extends JpaRepository<QsRule, Integer> {
-    Page<QsRule> findAllByStatus(String status, Pageable pageable);
+    Page<QsRule> findAllByStatusOrderByCreatedDateDesc(String status, Pageable pageable);
 
     QsRule findByRuleId(int ruleId);
     List<QsRule> findByRuleNameIgnoreCaseAndStatusIn(String ruleName,List<String> status);
 
     List<QsRule> findByStatusInAndSourceDatasourceIdOrStatusInAndTargetDatasourceId(List<String> sources, int source,List<String> targets, int target);
-    List<QsRule> findByStatusAndRuleNameStartingWithIgnoreCaseOrStatusAndRuleNameEndingWithIgnoreCase(String status, String startRuleName, String status1, String endRuleName);
+    List<QsRule> findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(String startRuleName, String endRuleName);
+    List<QsRule> findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCaseAndStatusIn(String startRuleName, String endRuleName, List<String> status);
 }

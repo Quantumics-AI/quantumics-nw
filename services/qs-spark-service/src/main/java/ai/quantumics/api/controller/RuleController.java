@@ -8,8 +8,17 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.spring.web.json.Json;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -79,21 +88,22 @@ public class RuleController {
     @GetMapping("/searchRule/{userId}/{projectId}/{ruleName}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Name")})
     public ResponseEntity<Object> searchRule(
+            @RequestBody final List<String> status,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
-            @PathVariable(value = "ruleName") final String ruleName,
-            @RequestParam(value = "status") final String status) {
-        return ruleService.searchRule(userId, projectId, ruleName, status);
+            @PathVariable(value = "ruleName") final String ruleName) {
+        return ruleService.searchRule(userId, projectId, ruleName,status);
     }
 
     @ApiOperation(value = "Rule", response = Json.class)
     @GetMapping("/getRuleByName/{userId}/{projectId}/{ruleName}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Name")})
     public ResponseEntity<Object> getRuleByName(
+            @RequestBody final List<String> status,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "ruleName") final String ruleName) {
-        return ruleService.getRuleByName(userId, projectId, ruleName);
+        return ruleService.getRuleByName(userId, projectId, ruleName,status);
     }
 
 }

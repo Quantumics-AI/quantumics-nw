@@ -33,7 +33,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,7 +200,7 @@ public class RuleServiceImpl implements RuleService {
 
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Pageable paging = PageRequest.of(page-1, pageSize);
-			Page<QsRule> rulesPage = ruleRepository.findAllByStatus(status, paging);
+			Page<QsRule> rulesPage = ruleRepository.findAllByStatusOrderByCreatedDateDesc(status, paging);
 
 			Page<RuleDetails> ruleDetailsPage = rulesPage.map(this::convertToRuleDetails);
 
@@ -255,8 +254,9 @@ public class RuleServiceImpl implements RuleService {
 		return ResponseEntity.ok().body(response);
 	}
 	@Override
-	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, String status) {
+	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, List<String> status) {
 		final Map<String, Object> response = new HashMap<>();
+		List<QsRule> qsRule;
 		try {
 			dbUtil.changeSchema("public");
 			final Projects project = projectService.getProject(projectId, userId);
@@ -274,7 +274,12 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 			dbUtil.changeSchema(project.getDbSchemaName());
-			List<QsRule> qsRule = ruleRepository.findByStatusAndRuleNameStartingWithIgnoreCaseOrStatusAndRuleNameEndingWithIgnoreCase(status, ruleName,status, ruleName);
+			if(CollectionUtils.isEmpty(status)) {
+				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(ruleName, ruleName);
+			}else{
+				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCaseAndStatusIn(ruleName, ruleName,status);
+			}
+
 			if(CollectionUtils.isEmpty(qsRule)){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "No Rule found with Id: "+ ruleName);
@@ -293,8 +298,9 @@ public class RuleServiceImpl implements RuleService {
 	}
 
 	@Override
-	public ResponseEntity<Object> getRuleByName(int userId, int projectId, String ruleName) {
+	public ResponseEntity<Object> getRuleByName(int userId, int projectId, String ruleName, List<String> status) {
 		final Map<String, Object> response = new HashMap<>();
+		List<QsRule> qsRule;
 		try {
 			dbUtil.changeSchema("public");
 			final Projects project = projectService.getProject(projectId, userId);
@@ -312,8 +318,7 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 			dbUtil.changeSchema(project.getDbSchemaName());
-			List<String> status = Arrays.asList(RuleStatus.ACTIVE.getStatus(), RuleStatus.INACTIVE.getStatus());
-			List<QsRule> qsRule = ruleRepository.findByRuleNameIgnoreCaseAndStatusIn(ruleName,status);
+			qsRule = ruleRepository.findByRuleNameIgnoreCaseAndStatusIn(ruleName,status);
 			if(CollectionUtils.isEmpty(qsRule)){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", RULE_NAME_NOT_EXIST);
