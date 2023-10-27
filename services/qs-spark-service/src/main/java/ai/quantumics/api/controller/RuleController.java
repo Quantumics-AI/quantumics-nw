@@ -81,9 +81,8 @@ public class RuleController {
     public ResponseEntity<Object> searchRule(
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
-            @PathVariable(value = "ruleName") final String ruleName,
-            @RequestParam(value = "status") final String status) {
-        return ruleService.searchRule(userId, projectId, ruleName, status);
+            @PathVariable(value = "ruleName") final String ruleName) {
+        return ruleService.searchRule(userId, projectId, ruleName);
     }
 
     @ApiOperation(value = "Rule", response = Json.class)

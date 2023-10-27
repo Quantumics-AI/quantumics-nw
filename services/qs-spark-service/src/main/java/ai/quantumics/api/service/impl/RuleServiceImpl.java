@@ -201,7 +201,7 @@ public class RuleServiceImpl implements RuleService {
 
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Pageable paging = PageRequest.of(page-1, pageSize);
-			Page<QsRule> rulesPage = ruleRepository.findAllByStatus(status, paging);
+			Page<QsRule> rulesPage = ruleRepository.findAllByStatusOrderByCreatedDateDesc(status, paging);
 
 			Page<RuleDetails> ruleDetailsPage = rulesPage.map(this::convertToRuleDetails);
 
@@ -255,7 +255,7 @@ public class RuleServiceImpl implements RuleService {
 		return ResponseEntity.ok().body(response);
 	}
 	@Override
-	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, String status) {
+	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName) {
 		final Map<String, Object> response = new HashMap<>();
 		try {
 			dbUtil.changeSchema("public");
@@ -274,7 +274,7 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 			dbUtil.changeSchema(project.getDbSchemaName());
-			List<QsRule> qsRule = ruleRepository.findByStatusAndRuleNameStartingWithIgnoreCaseOrStatusAndRuleNameEndingWithIgnoreCase(status, ruleName,status, ruleName);
+			List<QsRule> qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(ruleName, ruleName);
 			if(CollectionUtils.isEmpty(qsRule)){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "No Rule found with Id: "+ ruleName);
