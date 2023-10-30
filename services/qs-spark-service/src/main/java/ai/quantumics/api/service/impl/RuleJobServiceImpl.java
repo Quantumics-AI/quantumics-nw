@@ -200,7 +200,7 @@ public class RuleJobServiceImpl implements RuleJobService {
             if(CollectionUtils.isEmpty(status)) {
                 ruleJobList = ruleJobRepository.findAllByActiveTrueOrderByModifiedDateDesc();
             }else{
-                ruleJobList = ruleJobRepository.findAllByJobStatusIn(status);
+                ruleJobList = ruleJobRepository.findAllByJobStatusInOrderByModifiedDateDesc(status);
             }
             if (CollectionUtils.isNotEmpty(ruleJobList)) {
                 ruleJobList.forEach(ruleJob -> {
