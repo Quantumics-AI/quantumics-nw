@@ -18,8 +18,16 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.spring.web.json.Json;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -68,9 +76,10 @@ public class RuleJobController {
   @GetMapping("/{userId}/{projectId}")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "List All Rule jobs for Project ID")})
   public ResponseEntity<Object> getRuleJobs(
+          @RequestBody final List<String> status,
           @PathVariable(value = "projectId") final int projectId,
           @PathVariable(value = "userId") final int userId) {
-    return ruleJobService.fetchRuleJobList(userId, projectId);
+    return ruleJobService.fetchRuleJobList(userId, projectId,status);
   }
 
 

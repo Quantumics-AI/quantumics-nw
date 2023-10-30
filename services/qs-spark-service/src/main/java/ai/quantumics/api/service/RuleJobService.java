@@ -12,10 +12,12 @@ import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.RuleJobRequest;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface RuleJobService {
     ResponseEntity<Object> runRuleJob(RuleJobRequest ruleJobRequest, int userId, int projectId);
     ResponseEntity<Object> cancelRuleJobs(CancelJobRequest ruleJobRequest, int userId, int projectId);
 
-    ResponseEntity<Object> fetchRuleJobList(int userId, int projectId);
+    ResponseEntity<Object> fetchRuleJobList(int userId, int projectId, List<String> status);
 
 }

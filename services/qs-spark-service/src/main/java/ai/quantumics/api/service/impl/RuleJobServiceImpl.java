@@ -176,8 +176,9 @@ public class RuleJobServiceImpl implements RuleJobService {
     }
 
     @Override
-    public ResponseEntity<Object> fetchRuleJobList(int userId, int projectId) {
+    public ResponseEntity<Object> fetchRuleJobList(int userId, int projectId, List<String> status) {
         final Map<String, Object> response = new HashMap<>();
+        List<QsRuleJob> ruleJobList;
         try {
             dbUtil.changeSchema("public");
             final Projects project = projectService.getProject(projectId);
@@ -196,7 +197,11 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
-            List<QsRuleJob> ruleJobList = ruleJobRepository.findAllByActiveTrueOrderByModifiedDateDesc();
+            if(CollectionUtils.isEmpty(status)) {
+                ruleJobList = ruleJobRepository.findAllByActiveTrueOrderByModifiedDateDesc();
+            }else{
+                ruleJobList = ruleJobRepository.findAllByJobStatusIn(status);
+            }
             if (CollectionUtils.isNotEmpty(ruleJobList)) {
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());
