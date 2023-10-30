@@ -1142,7 +1142,7 @@ public class LivyActions {
                 log.info("Failed running the Rule Job...");
             }
         } else {
-            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, "Batch job aborted, as the job execution time exceeded the threshold. Couldn't capture the batch job log");
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, THRESHOLD_ERROR);
             log.info("Failed running the Rule Job...");
         }
 
@@ -1182,7 +1182,7 @@ public class LivyActions {
                 log.info("Failed running the Rule Job...");
             }
         } else {
-            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, "Batch job aborted, as the job execution time exceeded the threshold. Couldn't capture the batch job log");
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, THRESHOLD_ERROR);
             log.info("Failed running the Rule Job...");
         }
 
