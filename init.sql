@@ -983,6 +983,9 @@ BEGIN
         	created_date timestamp without time zone,
         	user_id integer NOT NULL,
         	active boolean default true,
+        	batch_job_log text COLLATE pg_catalog."default",
+        	job_submitted_date timestamp without time zone,
+        	job_finished_date timestamp without time zone,
         	CONSTRAINT qsp_rule_job_pkey PRIMARY KEY (job_id)
             )';
 
