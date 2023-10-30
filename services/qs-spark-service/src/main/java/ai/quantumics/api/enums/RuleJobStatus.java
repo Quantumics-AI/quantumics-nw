@@ -1,5 +1,9 @@
 package ai.quantumics.api.enums;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public enum RuleJobStatus {
     NOT_STARTED("Not Started"),
     INPROCESS("Inprocess"),
@@ -14,5 +18,11 @@ public enum RuleJobStatus {
 
     public String getStatus() {
         return ruleJobStatus;
+    }
+
+    public static List<String> getStatusList(){
+        return Arrays.stream(RuleJobStatus.values())
+                .map(RuleJobStatus::getStatus)
+                .collect(Collectors.toList());
     }
 }

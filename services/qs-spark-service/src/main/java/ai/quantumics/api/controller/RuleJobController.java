@@ -9,6 +9,7 @@
 
 package ai.quantumics.api.controller;
 
+import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.RuleJobRequest;
 import ai.quantumics.api.service.RuleJobService;
@@ -17,9 +18,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.spring.web.json.Json;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -73,5 +77,8 @@ public class RuleJobController {
     return ruleJobService.fetchRuleJobList(userId, projectId);
   }
 
-
+  @GetMapping("/getRuleJobStatus")
+  public ResponseEntity<List<String>> getRuleJobStatus() {
+    return ResponseEntity.status(HttpStatus.OK).body(RuleJobStatus.getStatusList());
+  }
 }
