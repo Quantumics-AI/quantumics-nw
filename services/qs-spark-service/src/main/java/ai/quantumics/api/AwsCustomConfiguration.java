@@ -15,6 +15,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.services.athena.AmazonAthena;
 import com.amazonaws.services.athena.AmazonAthenaClient;
@@ -153,7 +154,10 @@ public class AwsCustomConfiguration {
     // Create an S3 client using the default AWS credentials provider chain.
     // The credentials provider chain will automatically use the IAM role attached to the EC2 instance.
     log.info("Default Region {} ",AmazonS3ClientBuilder.defaultClient().getRegionName());
-    return AmazonS3ClientBuilder.standard().withRegion(cloudRegion).build();
+    return AmazonS3ClientBuilder
+            .standard()
+            .withRegion(cloudRegion)
+            .withCredentials(DefaultAWSCredentialsProviderChain.getInstance()).build();
   }
 
   @Bean
