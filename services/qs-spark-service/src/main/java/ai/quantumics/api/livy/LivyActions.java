@@ -34,6 +34,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.JSONValue;
@@ -1132,14 +1133,16 @@ public class LivyActions {
         if (runningBatchResponse != null) {
             String batchJobState = runningBatchResponse.get("state").asText();
             if (LivySessionState.running.toString().equals(batchJobState)) {
-                updateRuleJobEntry(ruleJobId, RuleJobStatus.INPROCESS.getStatus(), null, modifiedBy, projectId);
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.INPROCESS.getStatus(), null, modifiedBy, projectId, null);
                 log.info("Running the Rule Job...");
             } else {
-                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+                List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, batchJobLog);
                 log.info("Failed running the Rule Job...");
             }
         } else {
-            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, THRESHOLD_ERROR);
             log.info("Failed running the Rule Job...");
         }
 
@@ -1151,7 +1154,9 @@ public class LivyActions {
                 jobName = jobName.replace(".py", "");
                 S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
                 if(s3Object == null) { //Error in livy job
-                    updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+                    List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                    String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                    updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, batchJobLog);
                     log.info("Failed running the Rule Job...");
                     return batchJobId;
                 }
@@ -1166,22 +1171,24 @@ public class LivyActions {
                         stringBuilder.append(line);
                     }
                     RuleJobOutput ruleJobOutput = objectMapper.readValue(stringBuilder.toString(), RuleJobOutput.class);
-                    updateRuleJobEntry(ruleJobId, RuleJobStatus.COMPLETE.getStatus(), ruleJobOutput.getJobOutput(), modifiedBy, projectId);
+                    updateRuleJobEntry(ruleJobId, RuleJobStatus.COMPLETE.getStatus(), ruleJobOutput.getJobOutput(), modifiedBy, projectId, null);
                     awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
                 }
                 log.info("Completed running the Rule Job...");
             } else {
-                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+                List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, batchJobLog);
                 log.info("Failed running the Rule Job...");
             }
         } else {
-            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId);
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, THRESHOLD_ERROR);
             log.info("Failed running the Rule Job...");
         }
 
         return batchJobId;
     }
-    private void updateRuleJobEntry(final int ruleJobId, final String status, String jobOutput, String modifiedBy, int projectId) throws SQLException {
+    private void updateRuleJobEntry(final int ruleJobId, final String status, String jobOutput, String modifiedBy, int projectId, String batchJobLog) throws SQLException {
         dbUtil.changeSchema("public");
         final Projects project = projectService.getProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
@@ -1189,8 +1196,10 @@ public class LivyActions {
         if(ruleJob != null) {
             ruleJob.setJobStatus(status);
             ruleJob.setJobOutput(jobOutput);
-            ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+            ruleJob.setBatchJobLog(batchJobLog);
+            ruleJob.setModifiedDate(DateTime.now().toDate());
             ruleJob.setModifiedBy(modifiedBy);
+            ruleJob.setJobFinishedDate(DateTime.now().toDate());
             ruleJobRepository.save(ruleJob);
         }
     }

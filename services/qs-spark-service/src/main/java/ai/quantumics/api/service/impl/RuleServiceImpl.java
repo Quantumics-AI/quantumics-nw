@@ -26,6 +26,7 @@ import ai.quantumics.api.vo.RuleTypeDetails;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.joda.time.DateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -104,8 +105,8 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setRuleDetails(gson.toJson(ruleDetails.getRuleDetails()));
 			qsRule.setUserId(ruleDetails.getUserId());
 			qsRule.setStatus(RuleStatus.ACTIVE.getStatus());
-			qsRule.setCreatedDate(QsConstants.getCurrentUtcDate());
-			qsRule.setModifiedDate(QsConstants.getCurrentUtcDate());
+			qsRule.setCreatedDate(DateTime.now().toDate());
+			qsRule.setModifiedDate(DateTime.now().toDate());
 			qsRule.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			qsRule.setSourceDatasourceId(ruleDetails.getSourceData().getDataSourceId());
@@ -166,7 +167,7 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setRuleDetails(gson.toJson(ruleDetails.getRuleDetails()));
 			qsRule.setUserId(ruleDetails.getUserId());
 			qsRule.setStatus(ruleDetails.getStatus());
-			qsRule.setModifiedDate(QsConstants.getCurrentUtcDate());
+			qsRule.setModifiedDate(DateTime.now().toDate());
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			ruleRepository.save(qsRule);
 			response.put("code", HttpStatus.SC_OK);

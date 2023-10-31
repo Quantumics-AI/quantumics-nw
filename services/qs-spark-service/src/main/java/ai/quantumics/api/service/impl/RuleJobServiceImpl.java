@@ -27,10 +27,14 @@ import ai.quantumics.api.util.RuleJobHelper;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
 import ai.quantumics.api.vo.RuleTypeDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpStatus;
+import org.joda.time.DateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -109,14 +113,18 @@ public class RuleJobServiceImpl implements RuleJobService {
                     ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
                     ruleJob.setUserId(userId);
                     ruleJob.setActive(true);
-                    ruleJob.setCreatedDate(QsConstants.getCurrentUtcDate());
-                    ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+                    ruleJob.setCreatedDate(DateTime.now().toDate());
+                    ruleJob.setModifiedDate(DateTime.now().toDate());
+                    ruleJob.setJobSubmittedDate(DateTime.now().toDate());
                     ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                     ruleJob.setModifiedBy(ruleJob.getCreatedBy());
                 } else {
                     ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
                     ruleJob.setJobOutput(null);
-                    ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+                    ruleJob.setJobSubmittedDate(DateTime.now().toDate());
+                    ruleJob.setJobFinishedDate(null);
+                    ruleJob.setBatchJobLog(null);
+                    ruleJob.setModifiedDate(DateTime.now().toDate());
                     ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                 }
                 ruleJob = ruleJobRepository.save(ruleJob);
@@ -198,9 +206,20 @@ public class RuleJobServiceImpl implements RuleJobService {
             dbUtil.changeSchema(project.getDbSchemaName());
             List<QsRuleJob> ruleJobList = ruleJobRepository.findAllByActiveTrueOrderByModifiedDateDesc();
             if (CollectionUtils.isNotEmpty(ruleJobList)) {
+                ObjectMapper mapper = new ObjectMapper();
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());
                     ruleJob.setRuleName(rule.getRuleName());
+                    if (ruleJob.getBatchJobLog() != null) {
+                        String batchLog = ruleJob.getBatchJobLog();
+                        JsonNode node;
+                        try {
+                            node = mapper.readValue(batchLog, JsonNode.class);
+                            ruleJob.setBatchJobLog(node.toPrettyString());
+                        } catch (JsonProcessingException jsonProcessingException) {
+                            log.error("Error while setting batch log :" + jsonProcessingException.getMessage());
+                        }
+                    }
                 });
             }
 

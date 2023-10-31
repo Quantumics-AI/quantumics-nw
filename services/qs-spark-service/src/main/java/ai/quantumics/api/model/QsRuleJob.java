@@ -26,8 +26,11 @@ public class QsRuleJob {
   private String jobStatus;
   @Column(columnDefinition = "TEXT")
   private String jobOutput;
+  private String batchJobLog;
   private int userId;
   private boolean active;
+  private Date jobSubmittedDate;
+  private Date jobFinishedDate;
   private Date createdDate;
   private Date modifiedDate;
   private String createdBy;
