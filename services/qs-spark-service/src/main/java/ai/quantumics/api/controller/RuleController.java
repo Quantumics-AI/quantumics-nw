@@ -88,22 +88,22 @@ public class RuleController {
     @GetMapping("/searchRule/{userId}/{projectId}/{ruleName}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Name")})
     public ResponseEntity<Object> searchRule(
-            @RequestBody final List<String> status,
+            @RequestParam(value = "status", required = false)  final List<String> status,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "ruleName") final String ruleName) {
-        return ruleService.searchRule(userId, projectId, ruleName,status);
+        return ruleService.searchRule(userId, projectId, ruleName, status);
     }
 
     @ApiOperation(value = "Rule", response = Json.class)
     @GetMapping("/getRuleByName/{userId}/{projectId}/{ruleName}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Name")})
     public ResponseEntity<Object> getRuleByName(
-            @RequestBody final List<String> status,
+            @RequestParam(value = "status", required = false)  final List<String> status,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "ruleName") final String ruleName) {
-        return ruleService.getRuleByName(userId, projectId, ruleName,status);
+        return ruleService.getRuleByName(userId, projectId, ruleName, status);
     }
 
 }
