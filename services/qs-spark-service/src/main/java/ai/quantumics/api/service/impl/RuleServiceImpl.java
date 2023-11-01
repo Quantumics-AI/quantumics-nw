@@ -8,7 +8,6 @@
 
 package ai.quantumics.api.service.impl;
 
-import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
@@ -278,7 +277,7 @@ public class RuleServiceImpl implements RuleService {
 			if(CollectionUtils.isEmpty(status)) {
 				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(ruleName, ruleName);
 			}else{
-				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCaseAndStatusIn(ruleName, ruleName,status);
+				qsRule = ruleRepository.findByStatusInAndRuleNameStartingWithIgnoreCaseOrStatusInAndRuleNameEndingWithIgnoreCase(status,ruleName, status, ruleName);
 			}
 
 			if(CollectionUtils.isEmpty(qsRule)){
