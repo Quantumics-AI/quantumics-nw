@@ -4,6 +4,7 @@ public enum RuleJobStatus {
     NOT_STARTED("Not Started"),
     INPROCESS("Inprocess"),
     COMPLETE("Complete"),
+    CANCELLED("Cancelled"),
     FAILED("Failed");
 
     private String ruleJobStatus;

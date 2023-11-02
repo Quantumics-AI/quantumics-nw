@@ -102,7 +102,7 @@ public class QsCustomLivyClient {
       status = true;
     } catch (final Exception e) {
       log.error("Exception while deleting batch Job {}", e.getMessage());
-      throw e;
+      //throw e;
     }
     
     return status;

@@ -11,10 +11,28 @@ package ai.quantumics.api.livy;
 import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.RuleJobStatus;
-import ai.quantumics.api.model.*;
+import ai.quantumics.api.model.EngFlowMetaDataAwsRef;
+import ai.quantumics.api.model.FileMetaDataAwsRef;
+import ai.quantumics.api.model.Projects;
+import ai.quantumics.api.model.QsFiles;
+import ai.quantumics.api.model.QsFolders;
+import ai.quantumics.api.model.QsRuleJob;
+import ai.quantumics.api.model.QsUdf;
+import ai.quantumics.api.model.RunJobStatus;
 import ai.quantumics.api.repo.RuleJobRepository;
-import ai.quantumics.api.req.*;
-import ai.quantumics.api.service.*;
+import ai.quantumics.api.req.ColumnMetaData;
+import ai.quantumics.api.req.DataFrameRequest;
+import ai.quantumics.api.req.EngFileOperationRequest;
+import ai.quantumics.api.req.FileJoinColumnMetadata;
+import ai.quantumics.api.req.JoinOperationRequest;
+import ai.quantumics.api.req.Metadata;
+import ai.quantumics.api.req.UdfOperationRequest;
+import ai.quantumics.api.service.FileMetaDataAwsService;
+import ai.quantumics.api.service.FileService;
+import ai.quantumics.api.service.FolderService;
+import ai.quantumics.api.service.ProjectService;
+import ai.quantumics.api.service.RunJobService;
+import ai.quantumics.api.service.UdfService;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.MetadataHelper;
 import ai.quantumics.api.util.QsUtil;
@@ -43,15 +61,29 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import static ai.quantumics.api.constants.QsConstants.*;
+import static ai.quantumics.api.constants.QsConstants.ENG_OP;
+import static ai.quantumics.api.constants.QsConstants.PROCESSED;
+import static ai.quantumics.api.constants.QsConstants.RAW;
+import static ai.quantumics.api.constants.QsConstants.RULE_OUTPUT_FOLDER;
+import static ai.quantumics.api.constants.QsConstants.THRESHOLD_ERROR;
 
 @Slf4j
 @Component
@@ -1129,6 +1161,8 @@ public class LivyActions {
         final int batchJobId = fromJson.get("id").asInt();
         log.info(" Batch Job ID {}", batchJobId);
 
+        updateBatchJobId(ruleJobId, batchJobId, projectId, modifiedBy);
+
         final JsonNode runningBatchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.running.toString());
         if (runningBatchResponse != null) {
             String batchJobState = runningBatchResponse.get("state").asText();
@@ -1188,19 +1222,37 @@ public class LivyActions {
 
         return batchJobId;
     }
+
+    private void updateBatchJobId(final int ruleJobId, final int batchJobId, int projectId, String modifiedBy) throws SQLException {
+        dbUtil.changeSchema("public");
+        final Projects project = projectService.getProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        QsRuleJob ruleJob = ruleJobRepository.findByJobIdAndActiveIsTrue(ruleJobId);
+        if(ruleJob != null) {
+            ruleJob.setBatchJobId(batchJobId);
+            ruleJob.setModifiedDate(DateTime.now().toDate());
+            ruleJob.setModifiedBy(modifiedBy);
+            ruleJobRepository.save(ruleJob);
+        }
+    }
+
     private void updateRuleJobEntry(final int ruleJobId, final String status, String jobOutput, String modifiedBy, int projectId, String batchJobLog) throws SQLException {
         dbUtil.changeSchema("public");
         final Projects project = projectService.getProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
         QsRuleJob ruleJob = ruleJobRepository.findByJobIdAndActiveIsTrue(ruleJobId);
         if(ruleJob != null) {
-            ruleJob.setJobStatus(status);
-            ruleJob.setJobOutput(jobOutput);
-            ruleJob.setBatchJobLog(batchJobLog);
-            ruleJob.setModifiedDate(DateTime.now().toDate());
-            ruleJob.setModifiedBy(modifiedBy);
-            ruleJob.setJobFinishedDate(DateTime.now().toDate());
-            ruleJobRepository.save(ruleJob);
+            if(ruleJob.getJobStatus().equals(RuleJobStatus.CANCELLED.getStatus()) && ruleJob.getBatchJobId() > 0) {
+                livyClient.deleteLivyBatchJob(ruleJob.getBatchJobId());
+            } else {
+                ruleJob.setJobStatus(status);
+                ruleJob.setJobOutput(jobOutput);
+                ruleJob.setBatchJobLog(batchJobLog);
+                ruleJob.setModifiedDate(DateTime.now().toDate());
+                ruleJob.setModifiedBy(modifiedBy);
+                ruleJob.setJobFinishedDate(DateTime.now().toDate());
+                ruleJobRepository.save(ruleJob);
+            }
         }
     }
 
@@ -1222,6 +1274,10 @@ public class LivyActions {
         }
 
         return null;
+    }
+
+    public void cancelBatchJob(final int batchJobId) throws SQLException {
+        livyClient.deleteLivyBatchJob(batchJobId);
     }
 
     private void updateAutoRunBatchScript(StringBuilder fileContents, int projectId, int eventId, String dfName) {

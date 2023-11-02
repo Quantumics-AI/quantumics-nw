@@ -124,6 +124,7 @@ public class RuleJobServiceImpl implements RuleJobService {
                     ruleJob.setJobSubmittedDate(DateTime.now().toDate());
                     ruleJob.setJobFinishedDate(null);
                     ruleJob.setBatchJobLog(null);
+                    ruleJob.setBatchJobId(0);
                     ruleJob.setModifiedDate(DateTime.now().toDate());
                     ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                 }
@@ -169,10 +170,13 @@ public class RuleJobServiceImpl implements RuleJobService {
             List<QsRuleJob> ruleJobs = ruleJobRepository.findByJobIdInAndActiveIsTrue(ruleJobRequest.getJobIds());
             for (QsRuleJob ruleJob : ruleJobs) {
                     ruleJob.setUserId(userId);
-                    ruleJob.setActive(false);
+                    ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
                     ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
                     ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                     ruleJobRepository.save(ruleJob);
+                    if(ruleJob.getBatchJobId() >0) {
+                        ruleJobHelper.cancelRuleJob(ruleJob.getBatchJobId());
+                    }
             }
             response.put("code", HttpStatus.SC_OK);
             response.put("message", "Rule Jobs Cancelled successfully");
