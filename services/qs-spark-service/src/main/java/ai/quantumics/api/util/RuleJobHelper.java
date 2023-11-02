@@ -15,34 +15,34 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Date;
 
+import static ai.quantumics.api.constants.QsConstants.ACCEPTANCE_PER;
+import static ai.quantumics.api.constants.QsConstants.COLUMNS_DETAILS;
+import static ai.quantumics.api.constants.QsConstants.COLUMN_LEVEL;
+import static ai.quantumics.api.constants.QsConstants.DATA_COMPLETENESS;
+import static ai.quantumics.api.constants.QsConstants.DATA_PROFILER;
+import static ai.quantumics.api.constants.QsConstants.DQ_COLUMN_SUM_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME;
+import static ai.quantumics.api.constants.QsConstants.DQ_NULL_VALUE_TEMPLATE_NAME;
+import static ai.quantumics.api.constants.QsConstants.DQ_ROW_COUNT_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_COLUMN_VALUE;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_MULTI_COLUMN_VALUE;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_ROW;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_VALUE;
-import static ai.quantumics.api.constants.QsConstants.RULE_OUTPUT_FOLDER;
-import static ai.quantumics.api.constants.QsConstants.DATA_COMPLETENESS;
+import static ai.quantumics.api.constants.QsConstants.LEVEL_NAME;
+import static ai.quantumics.api.constants.QsConstants.NULL_VALUE;
 import static ai.quantumics.api.constants.QsConstants.ROW_COUNT;
-import static ai.quantumics.api.constants.QsConstants.SUM_OF_COLUMN_VALUE;
-import static ai.quantumics.api.constants.QsConstants.DATA_PROFILER;
-import static ai.quantumics.api.constants.QsConstants.TABLE_LEVEL;
-import static ai.quantumics.api.constants.QsConstants.COLUMN_LEVEL;
-import static ai.quantumics.api.constants.QsConstants.DQ_ROW_COUNT_TEMPLATE_NAME;
+import static ai.quantumics.api.constants.QsConstants.RULE_OUTPUT_FOLDER;
+import static ai.quantumics.api.constants.QsConstants.RULE_TYPE_NAME;
+import static ai.quantumics.api.constants.QsConstants.S3_OUTPUT_PATH;
 import static ai.quantumics.api.constants.QsConstants.SOURCE_BUCKET;
 import static ai.quantumics.api.constants.QsConstants.SOURCE_PATH;
+import static ai.quantumics.api.constants.QsConstants.SUM_OF_COLUMN_VALUE;
+import static ai.quantumics.api.constants.QsConstants.TABLE_LEVEL;
 import static ai.quantumics.api.constants.QsConstants.TARGET_BUCKET;
 import static ai.quantumics.api.constants.QsConstants.TARGET_PATH;
-import static ai.quantumics.api.constants.QsConstants.S3_OUTPUT_PATH;
-import static ai.quantumics.api.constants.QsConstants.RULE_TYPE_NAME;
-import static ai.quantumics.api.constants.QsConstants.LEVEL_NAME;
-import static ai.quantumics.api.constants.QsConstants.DQ_COLUMN_SUM_TEMPLATE_NAME;
-import static ai.quantumics.api.constants.QsConstants.DQ_NULL_VALUE_TEMPLATE_NAME;
-import static ai.quantumics.api.constants.QsConstants.ACCEPTANCE_PER;
-import static ai.quantumics.api.constants.QsConstants.COLUMNS_DETAILS;
-import static ai.quantumics.api.constants.QsConstants.NULL_VALUE;
 
 @Slf4j
 @Component
@@ -121,6 +121,11 @@ public class RuleJobHelper {
 
         int batchId = livyActions.invokeRuleJobOperation(scriptFilePath, qsRuleJobBucket, jobName, ruleJob.getJobId(), modifiedBy, projectId);
         log.info("Batch Id received after the Livy Job submission is: {}", batchId);
+    }
+
+    @Async("qsThreadPool")
+    public void cancelRuleJob(int batchJobId) throws Exception {
+        livyActions.cancelBatchJob(batchJobId);
     }
 
     private String getJobName(QsRuleJob qsRuleJob) {
