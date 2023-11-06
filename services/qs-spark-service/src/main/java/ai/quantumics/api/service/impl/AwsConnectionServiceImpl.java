@@ -127,7 +127,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public Page<AwsDatasourceResponse> getActiveConnections(int page, int pageSize) {
-        List<AwsDatasourceResponse> response = new ArrayList<>();
         Pageable paging = PageRequest.of(page-1, pageSize);
         Page<AWSDatasource> awsDatasource = awsConnectionRepo.findByActiveTrueOrderByCreatedDateDesc(paging);
         return awsDatasource.map(this::createResponse);
