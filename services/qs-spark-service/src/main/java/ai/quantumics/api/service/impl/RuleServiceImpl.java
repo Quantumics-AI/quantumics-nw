@@ -290,7 +290,7 @@ public class RuleServiceImpl implements RuleService {
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Rules Fetched Successfully");
 			response.put("projectName", project.getProjectDisplayName());
-			response.put("result", qsRule.stream().map(this::convertToRuleDetails));
+			response.put("result", qsRule.map(this::convertToRuleDetails));
 		} catch (final Exception ex) {
 			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			response.put("message", "Error while Fetching rule :  " + ex.getMessage());
