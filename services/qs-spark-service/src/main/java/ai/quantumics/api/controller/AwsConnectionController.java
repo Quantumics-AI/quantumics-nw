@@ -12,6 +12,7 @@ import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.BucketFileContent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,14 +64,16 @@ public class AwsConnectionController {
     }
 
     @GetMapping("/getConnections/{userId}/{projectId}")
-    public ResponseEntity<List<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
-                                                                 @PathVariable(value = "projectId") final int projectId) throws Exception {
+    public ResponseEntity<Page<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
+                                                                         @PathVariable(value = "projectId") final int projectId,
+                                                                         @RequestParam(name = "page", required = true) int page,
+                                                                         @RequestParam(name = "size", required = true) int size) throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections(page, size));
     }
 
     @GetMapping("/getConnectionByName/{userId}/{projectId}/{datasourceName}")

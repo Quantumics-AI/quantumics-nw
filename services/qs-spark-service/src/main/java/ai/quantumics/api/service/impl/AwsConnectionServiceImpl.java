@@ -37,6 +37,9 @@ import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -123,14 +126,11 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public List<AwsDatasourceResponse> getActiveConnections() {
+    public Page<AwsDatasourceResponse> getActiveConnections(int page, int pageSize) {
         List<AwsDatasourceResponse> response = new ArrayList<>();
-        Optional<List<AWSDatasource>> awsDatasource = awsConnectionRepo.findByActiveOrderByCreatedDateDesc(true);
-        awsDatasource.get().forEach(datasource -> {
-            response.add(createResponse(datasource));
-        });
-
-        return response;
+        Pageable paging = PageRequest.of(page-1, pageSize);
+        Page<AWSDatasource> awsDatasource = awsConnectionRepo.findByActiveTrueOrderByCreatedDateDesc(paging);
+        return awsDatasource.map(this::createResponse);
     }
     @Override
     public AwsDatasourceResponse getConnectionByName(String datasourceName) {
