@@ -74,17 +74,17 @@ public class AwsConnectionController {
     }
 
     @GetMapping("/getConnectionByName/{userId}/{projectId}/{datasourceName}")
-    public ResponseEntity<AwsDatasourceResponse> getConnectionByName(
+    public ResponseEntity<Object> getConnectionByName(
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "datasourceName") final String datasourceName)
             throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
-        QsUserV2 user = validatorUtils.checkUser(userId);
+        validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnectionByName(datasourceName.trim()));
+        return awsConnectionService.getConnectionByName(datasourceName.trim());
 
     }
 

@@ -5,6 +5,7 @@ import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
 import ai.quantumics.api.vo.BucketFileContent;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +18,7 @@ public interface AwsConnectionService {
 
     List<AwsDatasourceResponse> getActiveConnections();
 
-    AwsDatasourceResponse getConnectionByName(String datasourceName);
+    ResponseEntity<Object> getConnectionByName(String datasourceName);
 
     AwsDatasourceResponse getConnectionById(Integer id);
 

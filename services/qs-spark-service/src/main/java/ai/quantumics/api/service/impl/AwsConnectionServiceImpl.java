@@ -33,10 +33,12 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -133,14 +135,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return response;
     }
     @Override
-    public AwsDatasourceResponse getConnectionByName(String datasourceName) {
-
+    public ResponseEntity<Object> getConnectionByName(String datasourceName) {
+        final Map<String, Object> response = new HashMap<>();
         Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(datasourceName,true);
         if (dataSources.isPresent()) {
-            return createResponse(dataSources.get());
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", DATA_SOURCE_EXIST);
+            response.put("result", createResponse(dataSources.get()));
+            response.put("isExist",true);
         }else{
-            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
+            response.put("code", HttpStatus.SC_BAD_REQUEST);
+            response.put("message", DATA_SOURCE_NOT_EXIST);
+            response.put("isExist",false);
         }
+        return ResponseEntity.ok().body(response);
     }
 
     @Override
