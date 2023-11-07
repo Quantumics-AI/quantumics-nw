@@ -16,15 +16,15 @@ s3Path = $S3_OUTPUT_PATH
 column = $COLUMNS
 
 # Read the CSV files without specifying a date format
-source_df = spark.read.csv(f"s3a://{bucket1}/{filepath1}", header=True, inferSchema=True)
-target_df = spark.read.csv(f"s3a://{bucket2}/{filepath2}", header=True, inferSchema=True)
+source_df = spark.read.csv(f"s3a://{bucket1}/{filepath1}", header=True, inferSchema=True).select(column)
+target_df = spark.read.csv(f"s3a://{bucket2}/{filepath2}", header=True, inferSchema=True).select(column)
 
 # Check if either source_df or target_df has no records
 if source_df.count() == 0 or target_df.count() == 0:
     if source_df.count() == 0:
-        print("Source file does not have records.")
+        print("Source file column does not have records.")
     if target_df.count() == 0:
-        print("Target file does not have records.")
+        print("Target file column does not have records.")
 else:
     # Create a mapping from the original data types to the desired types
     data_type_mapping = {
@@ -71,7 +71,7 @@ else:
             return 0
 
         # Calculate the mean using PySpark's mean function
-        mean = df.selectExpr(f"avg({column_name})").collect()[0][0]
+        mean = df.selectExpr(f"avg(`{column_name}`)").collect()[0][0]
         return mean
 
     # Get DataType of column
@@ -94,15 +94,15 @@ else:
     target_unique_percentage = round_value((target_unique_count / target_total_count) * 100)
 
     # Calculate the minimum value in the specified column
-    source_min_row = source_df.selectExpr(f"min({column})").first()
+    source_min_row = source_df.selectExpr(f"min(`{column}`)").first()
     source_min_value = source_min_row[0] if source_min_row is not None and source_min_row[0] is not None else 0
-    target_min_row = target_df.selectExpr(f"min({column})").first()
+    target_min_row = target_df.selectExpr(f"min(`{column}`)").first()
     target_min_value = target_min_row[0] if target_min_row is not None and target_min_row[0] is not None else 0
 
     # Calculate the maximum value in the specified column
-    source_max_row = source_df.selectExpr(f"max({column})").first()
+    source_max_row = source_df.selectExpr(f"max(`{column}`)").first()
     source_max_value = source_max_row[0] if source_max_row is not None and source_max_row[0] is not None else 0
-    target_max_row = target_df.selectExpr(f"max({column})").first()
+    target_max_row = target_df.selectExpr(f"max(`{column}`)").first()
     target_max_value = target_max_row[0] if target_max_row is not None and target_max_row[0] is not None else 0
 
     # Calculate the median for the specified column
