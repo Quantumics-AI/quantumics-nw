@@ -14,7 +14,7 @@ public interface AwsConnectionService {
 
     AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException;
 
-    AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest,Integer id, String userName) throws DatasourceNotFoundException;
+    ResponseEntity<Object> updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest,Integer id, String userName) throws DatasourceNotFoundException;
 
     List<AwsDatasourceResponse> getActiveConnections();
 

@@ -124,7 +124,7 @@ public class AwsConnectionController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
+    public ResponseEntity<Object> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
                                                                   @PathVariable(value = "id") final int id)
             throws DatasourceNotFoundException {
 
@@ -134,7 +134,7 @@ public class AwsConnectionController {
         dbUtil.changeSchema(project.getDbSchemaName());
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
+        return awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName);
     }
 
     @GetMapping("/buckets/{userId}/{projectId}")

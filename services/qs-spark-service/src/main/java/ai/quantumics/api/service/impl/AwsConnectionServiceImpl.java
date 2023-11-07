@@ -58,6 +58,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_UPDATED;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
@@ -105,18 +106,23 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
-
+    public ResponseEntity<Object> updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
+        final Map<String, Object> response = new HashMap<>();
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActiveTrue(awsDatasourceRequest.getConnectionName().trim());
         if (dataSources.isPresent()) {
-            throw new BadRequestException(DATA_SOURCE_EXIST);
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", DATA_SOURCE_EXIST);
+            return ResponseEntity.ok().body(response);
         }
 
         dataSource.setConnectionName(awsDatasourceRequest.getConnectionName());
         dataSource.setModifiedBy(userName);
         dataSource.setModifiedDate(DateTime.now().toDate());
-        return createResponse(awsConnectionRepo.saveAndFlush(dataSource));
+        response.put("code", HttpStatus.SC_OK);
+        response.put("message", DATA_SOURCE_UPDATED);
+        response.put("result", createResponse(awsConnectionRepo.saveAndFlush(dataSource)));
+        return ResponseEntity.ok().body(response);
     }
 
     private AwsDatasourceResponse createResponse(AWSDatasource awsDatasource) {
