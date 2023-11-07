@@ -33,17 +33,17 @@ spring:
               - OPTIONS
       routes:
         - id: quantumsparkapi
-          uri: http://localhost:8082
+          uri: http://apiservice:8082
           predicates:
             - Path=/QuantumSparkServiceAPI/**
 
         - id: commonservicesapi
-          uri: http://localhost:8083
+          uri: http://commonservice:8083
           predicates:
             - Path=/QSCommonService/**
 
         - id: userservicesapi
-          uri: http://localhost:8081
+          uri: http://userservice:8081
           predicates:
             - Path=/QSUserService/**
 

@@ -1,1 +1,1 @@
-appConfiguration = {"apiUrl":"http://localhost:8080", "redashUrl":"https://dredash.quantumics.ai"}
+appConfiguration = {"apiUrl":"", "redashUrl":""}
