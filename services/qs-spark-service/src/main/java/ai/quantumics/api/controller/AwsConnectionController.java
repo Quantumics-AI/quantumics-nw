@@ -80,14 +80,17 @@ public class AwsConnectionController {
     public ResponseEntity<Object> getConnectionByName(
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId,
-            @PathVariable(value = "datasourceName") final String datasourceName)
+            @PathVariable(value = "datasourceName") final String datasourceName,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size,
+            @RequestParam(name = "filter", defaultValue = "false") boolean filter)
             throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return awsConnectionService.getConnectionByName(datasourceName.trim());
+        return awsConnectionService.getConnectionByName(datasourceName.trim(), page, size, filter);
 
     }
 

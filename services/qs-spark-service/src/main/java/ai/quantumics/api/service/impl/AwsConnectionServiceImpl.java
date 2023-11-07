@@ -141,13 +141,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return awsDatasource.map(this::createResponse);
     }
     @Override
-    public ResponseEntity<Object> getConnectionByName(String datasourceName) {
+    public ResponseEntity<Object> getConnectionByName(String datasourceName, int page, int pageSize, boolean filter) {
         final Map<String, Object> response = new HashMap<>();
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(datasourceName,true);
-        if (dataSources.isPresent()) {
+        Page<AWSDatasource> dataSources;
+        Pageable paging = PageRequest.of(page-1, pageSize);
+        if (filter){
+            dataSources = awsConnectionRepo.findByActiveTrueAndConnectionNameStartingWithIgnoreCaseOrActiveTrueAndConnectionNameEndingWithIgnoreCaseOrderByCreatedDateDesc(datasourceName, datasourceName, paging);
+        }else{
+            dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActiveTrueOrderByCreatedDateDesc(datasourceName, paging);
+        }
+
+        if (!dataSources.isEmpty()) {
             response.put("code", HttpStatus.SC_OK);
             response.put("message", DATA_SOURCE_EXIST);
-            response.put("result", createResponse(dataSources.get()));
+            response.put("result", dataSources.map(this::createResponse));
             response.put("isExist",true);
         }else{
             response.put("code", HttpStatus.SC_BAD_REQUEST);
