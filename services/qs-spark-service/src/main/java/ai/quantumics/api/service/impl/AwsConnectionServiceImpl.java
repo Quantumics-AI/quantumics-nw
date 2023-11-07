@@ -33,6 +33,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -59,6 +61,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_UPDATED;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
@@ -106,18 +109,23 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public AwsDatasourceResponse updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
-
+    public ResponseEntity<Object> updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
+        final Map<String, Object> response = new HashMap<>();
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
-        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCase(awsDatasourceRequest.getConnectionName().trim());
+        Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActiveTrue(awsDatasourceRequest.getConnectionName().trim());
         if (dataSources.isPresent()) {
-            throw new BadRequestException(DATA_SOURCE_EXIST);
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", DATA_SOURCE_EXIST);
+            return ResponseEntity.ok().body(response);
         }
 
         dataSource.setConnectionName(awsDatasourceRequest.getConnectionName());
         dataSource.setModifiedBy(userName);
         dataSource.setModifiedDate(DateTime.now().toDate());
-        return createResponse(awsConnectionRepo.saveAndFlush(dataSource));
+        response.put("code", HttpStatus.SC_OK);
+        response.put("message", DATA_SOURCE_UPDATED);
+        response.put("result", createResponse(awsConnectionRepo.saveAndFlush(dataSource)));
+        return ResponseEntity.ok().body(response);
     }
 
     private AwsDatasourceResponse createResponse(AWSDatasource awsDatasource) {
@@ -133,14 +141,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return awsDatasource.map(this::createResponse);
     }
     @Override
-    public AwsDatasourceResponse getConnectionByName(String datasourceName) {
-
+    public ResponseEntity<Object> getConnectionByName(String datasourceName) {
+        final Map<String, Object> response = new HashMap<>();
         Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActive(datasourceName,true);
         if (dataSources.isPresent()) {
-            return createResponse(dataSources.get());
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", DATA_SOURCE_EXIST);
+            response.put("result", createResponse(dataSources.get()));
+            response.put("isExist",true);
         }else{
-            throw new BadRequestException(DATA_SOURCE_NOT_EXIST);
+            response.put("code", HttpStatus.SC_BAD_REQUEST);
+            response.put("message", DATA_SOURCE_NOT_EXIST);
+            response.put("isExist",false);
         }
+        return ResponseEntity.ok().body(response);
     }
 
     @Override

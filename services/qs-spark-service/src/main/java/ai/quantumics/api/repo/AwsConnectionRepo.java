@@ -19,7 +19,7 @@ public interface AwsConnectionRepo extends JpaRepository<AWSDatasource, Integer>
 
 	Page<AWSDatasource> findByActiveTrueOrderByCreatedDateDesc(Pageable pageable);
 
-	Optional<AWSDatasource> findByConnectionNameIgnoreCase(String connectionName);
+	Optional<AWSDatasource> findByConnectionNameIgnoreCaseAndActiveTrue(String connectionName);
 	List<AWSDatasource> findByActiveAndConnectionNameStartingWithIgnoreCaseOrActiveAndConnectionNameEndingWithIgnoreCase(boolean active, String connectionName, boolean active1, String connectionName1);
 
 }

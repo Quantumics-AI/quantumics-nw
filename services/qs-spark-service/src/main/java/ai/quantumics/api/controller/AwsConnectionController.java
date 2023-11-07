@@ -77,17 +77,17 @@ public class AwsConnectionController {
     }
 
     @GetMapping("/getConnectionByName/{userId}/{projectId}/{datasourceName}")
-    public ResponseEntity<AwsDatasourceResponse> getConnectionByName(
+    public ResponseEntity<Object> getConnectionByName(
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "datasourceName") final String datasourceName)
             throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
-        QsUserV2 user = validatorUtils.checkUser(userId);
+        validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnectionByName(datasourceName.trim()));
+        return awsConnectionService.getConnectionByName(datasourceName.trim());
 
     }
 
@@ -127,7 +127,7 @@ public class AwsConnectionController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
+    public ResponseEntity<Object> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
                                                                   @PathVariable(value = "id") final int id)
             throws DatasourceNotFoundException {
 
@@ -137,7 +137,7 @@ public class AwsConnectionController {
         dbUtil.changeSchema(project.getDbSchemaName());
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
+        return awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName);
     }
 
     @GetMapping("/buckets/{userId}/{projectId}")
