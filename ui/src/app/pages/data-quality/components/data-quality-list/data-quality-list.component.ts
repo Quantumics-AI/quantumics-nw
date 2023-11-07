@@ -278,7 +278,7 @@ export class DataQualityListComponent implements OnInit {
     this.ruleCreationService.runRule(this.userId, this.projectId, req).subscribe((response) => {
       this.loading = false;
       this.ruleId = [];
-      this.snakbar.open(response.message);
+      this.snakbar.open(response.message, '', 7000);
       
     }, (error) => {
       this.loading = false;
