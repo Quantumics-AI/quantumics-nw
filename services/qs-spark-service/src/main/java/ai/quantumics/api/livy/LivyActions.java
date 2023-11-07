@@ -1250,7 +1250,9 @@ public class LivyActions {
                 ruleJob.setBatchJobLog(batchJobLog);
                 ruleJob.setModifiedDate(DateTime.now().toDate());
                 ruleJob.setModifiedBy(modifiedBy);
-                ruleJob.setJobFinishedDate(DateTime.now().toDate());
+                if(!status.equals(RuleJobStatus.INPROCESS.getStatus())) {
+                    ruleJob.setJobFinishedDate(DateTime.now().toDate());
+                }
                 ruleJobRepository.save(ruleJob);
             }
         }
