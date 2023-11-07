@@ -19,7 +19,7 @@ public interface AwsConnectionService {
 
     Page<AwsDatasourceResponse> getActiveConnections(int page, int pageSize);
 
-    ResponseEntity<Object> getConnectionByName(String datasourceName);
+    ResponseEntity<Object> getConnectionByName(String datasourceName, int page, int pageSize, boolean filter);
 
     AwsDatasourceResponse getConnectionById(Integer id);
 
