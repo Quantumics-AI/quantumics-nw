@@ -47,7 +47,7 @@ export class DataQualityListComponent implements OnInit {
 
   public ruleStatus: string = 'Active';
   public pageNumebr: number = 1;
-  public pageLength: number = 100;
+  public pageLength: number = 3;
 
   public ruleId: any = [];
   public covertTime: any;

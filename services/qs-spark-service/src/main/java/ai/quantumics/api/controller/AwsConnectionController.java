@@ -66,8 +66,8 @@ public class AwsConnectionController {
     @GetMapping("/getConnections/{userId}/{projectId}")
     public ResponseEntity<Page<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
                                                                          @PathVariable(value = "projectId") final int projectId,
-                                                                         @RequestParam(name = "page", required = true) int page,
-                                                                         @RequestParam(name = "size", required = true) int size) throws Exception {
+                                                                         @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                         @RequestParam(name = "size", defaultValue = "100") int size) throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);

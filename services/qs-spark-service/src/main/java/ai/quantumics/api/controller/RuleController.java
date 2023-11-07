@@ -92,8 +92,8 @@ public class RuleController {
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "ruleName") final String ruleName,
-            @RequestParam(name = "page", required = true) int page,
-            @RequestParam(name = "size", required = true) int size) {
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size) {
         return ruleService.searchRule(userId, projectId, ruleName,status, page, size);
     }
 
