@@ -76,6 +76,7 @@ public class RuleJobServiceImpl implements RuleJobService {
     @Override
     public ResponseEntity<Object> runRuleJob(RuleJobRequest ruleJobRequest, int userId, int projectId) {
         final Map<String, Object> response = new HashMap<>();
+        int inProcessRulesCount = 0;
 		List<Integer> inProcessRules = new ArrayList<>();
         log.info("Invoking RunRuleJob  API for ruleIds {}", ruleJobRequest.toString());
         try {
@@ -96,13 +97,14 @@ public class RuleJobServiceImpl implements RuleJobService {
 
             dbUtil.changeSchema(project.getDbSchemaName());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
-
+                QsRule rule = ruleRepository.findByRuleId(ruleId);
                 QsRuleJob ruleJob = ruleJobRepository.findByRuleIdAndActiveIsTrue(ruleId);
-                if (ruleJob != null && ruleJob.getJobStatus().equals(RuleJobStatus.INPROCESS.getStatus())) {
+                if (ruleJob != null && (ruleJob.getJobStatus().equals(RuleJobStatus.INPROCESS.getStatus()) || ruleJob.getJobStatus().equals(RuleJobStatus.NOT_STARTED.getStatus()))) {
 					inProcessRules.add(ruleId);
+                    inProcessRulesCount++;
 					continue;
                 }
-                QsRule rule = ruleRepository.findByRuleId(ruleId);
+
                 if (rule == null) {
                     response.put("code", HttpStatus.SC_BAD_REQUEST);
                     response.put("message", "Requested rule with Id: " + ruleId + " not found.");
@@ -132,13 +134,12 @@ public class RuleJobServiceImpl implements RuleJobService {
                 RuleDetails ruleDetails = convertToRuleDetails(rule);
                 ruleJobHelper.submitRuleJob(ruleJob, ruleDetails, controllerHelper.getFullName(userObj.getQsUserProfile()), projectId);
             }
-			if(CollectionUtils.isNotEmpty(inProcessRules)) {
-				response.put("code", HttpStatus.SC_BAD_REQUEST);
-				response.put("message", "Following rules are already in process: " + inProcessRules);
-				return ResponseEntity.ok().body(response);
-			}
             response.put("code", HttpStatus.SC_OK);
-            response.put("message", "Rule Job submitted successfully");
+            if (inProcessRulesCount > 0) {
+                response.put("message", "Out of selected " + ruleJobRequest.getRuleIds().size() + "rules, " + (ruleJobRequest.getRuleIds().size() - inProcessRulesCount) + " rules are submitted successfully and remaining " + inProcessRulesCount + " rules are already inprocess ");
+            } else {
+                response.put("message", "All the selected " + ruleJobRequest.getRuleIds().size() + " rules are submitted successfully for processing");
+            }
         } catch (final Exception ex) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             response.put("message", "Error while submitting rule job:  " + ex.getMessage());
