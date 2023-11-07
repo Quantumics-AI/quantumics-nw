@@ -2,6 +2,8 @@ package ai.quantumics.api.repo;
 
 import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.model.AWSDatasource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,9 +17,9 @@ public interface AwsConnectionRepo extends JpaRepository<AWSDatasource, Integer>
 
 	Optional<AWSDatasource> findByIdAndActive(Integer id,boolean active) throws DatasourceNotFoundException;
 
-	Optional<List<AWSDatasource>> findByActiveOrderByCreatedDateDesc(boolean active);
+	Page<AWSDatasource> findByActiveTrueOrderByCreatedDateDesc(Pageable pageable);
 
-	Optional<AWSDatasource> findByConnectionNameIgnoreCase(String connectionName);
+	Optional<AWSDatasource> findByConnectionNameIgnoreCaseAndActiveTrue(String connectionName);
 	List<AWSDatasource> findByActiveAndConnectionNameStartingWithIgnoreCaseOrActiveAndConnectionNameEndingWithIgnoreCase(boolean active, String connectionName, boolean active1, String connectionName1);
 
 }

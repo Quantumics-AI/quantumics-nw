@@ -12,6 +12,7 @@ import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.BucketFileContent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,28 +64,30 @@ public class AwsConnectionController {
     }
 
     @GetMapping("/getConnections/{userId}/{projectId}")
-    public ResponseEntity<List<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
-                                                                 @PathVariable(value = "projectId") final int projectId) throws Exception {
+    public ResponseEntity<Page<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
+                                                                         @PathVariable(value = "projectId") final int projectId,
+                                                                         @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                         @RequestParam(name = "size", defaultValue = "100") int size) throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         QsUserV2 user = validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections(page, size));
     }
 
     @GetMapping("/getConnectionByName/{userId}/{projectId}/{datasourceName}")
-    public ResponseEntity<AwsDatasourceResponse> getConnectionByName(
+    public ResponseEntity<Object> getConnectionByName(
             @PathVariable(value = "userId") final int userId,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "datasourceName") final String datasourceName)
             throws Exception {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
-        QsUserV2 user = validatorUtils.checkUser(userId);
+        validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnectionByName(datasourceName.trim()));
+        return awsConnectionService.getConnectionByName(datasourceName.trim());
 
     }
 
@@ -124,7 +127,7 @@ public class AwsConnectionController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<AwsDatasourceResponse> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
+    public ResponseEntity<Object> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
                                                                   @PathVariable(value = "id") final int id)
             throws DatasourceNotFoundException {
 
@@ -134,7 +137,7 @@ public class AwsConnectionController {
         dbUtil.changeSchema(project.getDbSchemaName());
         final String userName = user.getQsUserProfile().getUserFirstName() + " "
                 + user.getQsUserProfile().getUserLastName();
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName));
+        return awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName);
     }
 
     @GetMapping("/buckets/{userId}/{projectId}")

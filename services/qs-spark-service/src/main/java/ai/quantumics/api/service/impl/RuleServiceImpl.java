@@ -254,9 +254,9 @@ public class RuleServiceImpl implements RuleService {
 		return ResponseEntity.ok().body(response);
 	}
 	@Override
-	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, List<String> status) {
+	public ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, List<String> status, int page, int pageSize) {
 		final Map<String, Object> response = new HashMap<>();
-		List<QsRule> qsRule;
+		Page<QsRule> qsRule;
 		try {
 			dbUtil.changeSchema("public");
 			final Projects project = projectService.getProject(projectId, userId);
@@ -274,13 +274,14 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 			dbUtil.changeSchema(project.getDbSchemaName());
+			Pageable paging = PageRequest.of(page-1, pageSize);
 			if(CollectionUtils.isEmpty(status)) {
-				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(ruleName, ruleName);
+				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(ruleName, ruleName, paging);
 			}else{
-				qsRule = ruleRepository.findByStatusInAndRuleNameStartingWithIgnoreCaseOrStatusInAndRuleNameEndingWithIgnoreCase(status,ruleName, status, ruleName);
+				qsRule = ruleRepository.findByStatusInAndRuleNameStartingWithIgnoreCaseOrStatusInAndRuleNameEndingWithIgnoreCase(status,ruleName, status, ruleName, paging);
 			}
 
-			if(CollectionUtils.isEmpty(qsRule)){
+			if(qsRule.isEmpty()){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "No Rule found with Id: "+ ruleName);
 
@@ -289,7 +290,7 @@ public class RuleServiceImpl implements RuleService {
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Rules Fetched Successfully");
 			response.put("projectName", project.getProjectDisplayName());
-			response.put("result", qsRule.stream().map(this::convertToRuleDetails));
+			response.put("result", qsRule.map(this::convertToRuleDetails));
 		} catch (final Exception ex) {
 			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			response.put("message", "Error while Fetching rule :  " + ex.getMessage());

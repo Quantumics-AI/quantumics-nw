@@ -927,7 +927,7 @@ BEGIN
         EXECUTE '
 	    CREATE TABLE '||schemaName||'.qsp_aws_datasource (
 	    id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
-        connection_name character varying(50) CHECK (LENGTH(connection_name) >= 3 AND LENGTH(connection_name) <= 50) NOT NULL UNIQUE,
+        connection_name character varying(50) CHECK (LENGTH(connection_name) >= 3 AND LENGTH(connection_name) <= 50) NOT NULL,
         sub_data_source varchar(255) NOT NULL,
         access_type varchar(255) NOT NULL,
         bucket_name varchar(255) NOT NULL,

@@ -10,10 +10,10 @@ package ai.quantumics.api.constants;
 
 public class DatasourceConstants {
 
-  public static final String DATA_SOURCE_EXIST = "Entered Data Source Name is already used.Please enter a different name";
-  public static final String DATA_SOURCE_NOT_EXIST = "Data source does not exist";
+  public static final String DATA_SOURCE_EXIST = "Entered Connection Name is already used.Please enter a different name";
+  public static final String DATA_SOURCE_NOT_EXIST = "Connection does not exist";
   public static final String INVALID_ACCESS_TYPE = "Invalid Access Type";
-  public static final String DATA_SOURCE_DELETED = "Data source deleted successfully";
+  public static final String DATA_SOURCE_DELETED = "Connection deleted successfully";
   public static final String EMPTY_BUCKET = "Oops! There is no bucket available under your account";
   public static final String PUBLIC_SCHEMA = "public";
   public static final String Files = "files";
@@ -30,6 +30,7 @@ public class DatasourceConstants {
   public static final String RULE_NAME_EXIST = "Entered rule name is already used.Please enter a different name.";
   public static final String RULE_NAME_NOT_EXIST = "No Rule found";
   public static final String ERROR_FETCHING_RULE = "Error while Fetching rule :  ";
+  public static final String DATA_SOURCE_UPDATED = "Connection updated successfully";
   private DatasourceConstants() {}
 
 }

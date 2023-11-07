@@ -91,8 +91,10 @@ public class RuleController {
             @RequestParam(value = "status", required = false)  final List<String> status,
             @PathVariable(value = "projectId") final int projectId,
             @PathVariable(value = "userId") final int userId,
-            @PathVariable(value = "ruleName") final String ruleName) {
-        return ruleService.searchRule(userId, projectId, ruleName, status);
+            @PathVariable(value = "ruleName") final String ruleName,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size) {
+        return ruleService.searchRule(userId, projectId, ruleName,status, page, size);
     }
 
     @ApiOperation(value = "Rule", response = Json.class)
