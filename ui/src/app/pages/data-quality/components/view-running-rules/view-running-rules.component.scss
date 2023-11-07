@@ -248,6 +248,13 @@
 .vr {
     color: blue;
     text-decoration: underline;
+    font-weight: 500;
+}
+
+.vl {
+    color: #dc3545;
+    text-decoration: underline;
+    font-weight: 500;
 }
 
 //no running rules
@@ -311,4 +318,13 @@
 
 .mr-r-20 {
     margin-right: 20px;
+}
+
+.mr-l-10 {
+    margin-left: 10px;
+}
+
+.list-height {
+    // height: calc(100vh - 250px);
+    height: 500px;
 }

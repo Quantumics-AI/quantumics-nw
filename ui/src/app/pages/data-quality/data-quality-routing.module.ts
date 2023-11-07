@@ -8,6 +8,7 @@ import { RuleTypesComponent } from './components/rule-types/rule-types.component
 import { ViewRunningRulesComponent } from './components/view-running-rules/view-running-rules.component';
 import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
 import { BrowseFileComponent } from './components/browse-file/browse-file.component';
+import { RuleLogsComponent } from './components/rule-logs/rule-logs.component';
 
 const routes: Routes = [
     {
@@ -33,6 +34,10 @@ const routes: Routes = [
     {
         path: 'create/table',
         component: BrowseFileComponent
+    },
+    {
+        path: 'logs',
+        component: RuleLogsComponent
     },
     //   {
     //     path: '',

@@ -26,6 +26,8 @@ export class EditDataSourceComponent implements OnInit {
   public selectedType: string;
   public sourceListData: any;
   public alreadyExist: boolean = false;
+  public pageSize: number = 1;
+  public pageLength: number = 100;
 
   constructor(
     public modal: NgbActiveModal,
@@ -38,7 +40,7 @@ export class EditDataSourceComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAccessTypes();
-    this.getAwsList()
+    // this.getAwsList()
     this.fg = this.fb.group({
       sourceId: [this.sourceData.id],
       dataSourceName: [this.sourceData.connectionName, [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
@@ -71,45 +73,48 @@ export class EditDataSourceComponent implements OnInit {
     }
   }
 
-  public getAwsList(): void {
-    this.loading = true;
-    this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
-      this.loading = false;
-      this.sourceListData = response;
-      if (this.sourceListData.length > 1) {
-        this.sourceListData.sort((val1, val2) => {
-          return (
-            (new Date(val2.createdDate) as any) -
-            (new Date(val1.createdDate) as any)
-          );
-        });
-      }
-    }, (error) => {
-      this.loading = false;
-    })
-  }
+  // public getAwsList(): void {
+  //   this.loading = true;
+  //   this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
+  //     this.loading = false;
+  //     this.sourceListData = response;
+  //     if (this.sourceListData.length > 1) {
+  //       this.sourceListData.sort((val1, val2) => {
+  //         return (
+  //           (new Date(val2.createdDate) as any) -
+  //           (new Date(val1.createdDate) as any)
+  //         );
+  //       });
+  //     }
+  //   }, (error) => {
+  //     this.loading = false;
+  //   })
+  // }
 
   checkIfNameExists() {
-    if (this.sourceListData.length > 0) {
-      const value = this.fg.get('dataSourceName').value;
-      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-
-      // const enteredName = this.fg.get('dataSourceName').value;
-      const nameExists = this.sourceListData.some(item => item.connectionName === titleCaseValue);
-      
-      if (nameExists) {
-        this.alreadyExist = true;
-      } else {
-        this.alreadyExist = false;
-      }
+    if(this.fg.get('dataSourceName').value.length <= 0){
+      this.alreadyExist = false;
     }
+    // if (this.sourceListData.length > 0) {
+    //   const value = this.fg.get('dataSourceName').value;
+    //   const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+    //   // const enteredName = this.fg.get('dataSourceName').value;
+    //   const nameExists = this.sourceListData.some(item => item.connectionName === titleCaseValue);
+      
+    //   if (nameExists) {
+    //     this.alreadyExist = true;
+    //   } else {
+    //     this.alreadyExist = false;
+    //   }
+    // }
     
   }
 
   modelChangeDataSourceName(str) {
 
     // const re = /^[a-zA-Z0-9_]+$/;
-
+    this.alreadyExist = false;
     if (this.fg.controls.dataSourceName.value != "") {
 
       const validCapital = String(str).match(/^([A-Z])/);
@@ -137,11 +142,34 @@ export class EditDataSourceComponent implements OnInit {
 
   }
 
+  public checkExistName(): void {
+    if(this.sourceData.connectionName === this.fg.get('dataSourceName').value) {
+      this.snakbar.open("No change in the name");
+      this.modal.close();
+    } else {
+      const name = this.fg.get('dataSourceName').value;
+      this.sourceDataService.getIsExistConnection(this.userId, this.projectId, name, this.pageSize, this.pageLength).subscribe((response) => {
+        
+        console.log(response.isExist);
+        if(response.isExist){
+          this.alreadyExist = true;
+          
+        } else {
+          this.alreadyExist = false;
+          this.updateData();
+        }
+        
+      }, (error) => {
+  
+      });
+    }
+    
+  }
 
   public updateData(): void {
-    const value = this.fg.get('dataSourceName').value;
-    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-    this.fg.get('dataSourceName').setValue(titleCaseValue);
+    // const value = this.fg.get('dataSourceName').value;
+    // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    // this.fg.get('dataSourceName').setValue(titleCaseValue);
     
     const request = {
       projectId: this.projectId,
@@ -156,7 +184,7 @@ export class EditDataSourceComponent implements OnInit {
     this.sourceDataService.updateSourceData(this.awsId, request).subscribe((response) => {
       // if (response.code === 200) {
         this.modal.close(response);
-        this.snakbar.open("Connection updated successfully");
+        this.snakbar.open(response.message);
       // }
     }, (error) => {
       this.snakbar.open(error);

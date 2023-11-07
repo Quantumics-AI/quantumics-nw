@@ -58,6 +58,9 @@ export class EditRuleComponent implements OnInit {
   public pageLength: number = 100;
   public alreadyExist: boolean = false;
   public getRuleList: any;
+  public statusBody: any = ["Active","Inactive"];
+  public connectionPage: number = 1;
+  public connectionPageSize: number = 100;
 
   constructor(
     private fb: FormBuilder,
@@ -116,7 +119,7 @@ export class EditRuleComponent implements OnInit {
 
     this.getDataConnection();
     this.getBucketData();
-    this.getRules();
+    // this.getRules();
   }
 
   ngAfterViewInit(): void {
@@ -193,7 +196,7 @@ export class EditRuleComponent implements OnInit {
   }
 
   public getDataConnection(): void {
-    this.ruleCreationService.getDataConnection(this.projectId, this.userId).subscribe((response) => {
+    this.ruleCreationService.getDataConnection(this.projectId, this.userId, this.connectionPage, this.connectionPageSize).subscribe((response) => {
       this.dataConnectionList = response;
     }, (error) => {
 
@@ -229,19 +232,27 @@ export class EditRuleComponent implements OnInit {
     });
   }
 
-  checkIfNameExists() {
-    if (this.getRuleList.length > 0) {
-      const value = this.fg.get('ruleName').value;
-      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-
-      // const enteredName = this.fg.get('dataSourceName').value;
-      const nameExists = this.getRuleList.some(item => item.ruleName === titleCaseValue);
+  public checkExistName(): void {
+    const ruleName = this.fg.get('ruleName').value;
+    if (this.fetchEditRule?.ruleName != ruleName){
+      this.ruleCreationService.existRuleName(this.userId, this.projectId, ruleName, this.statusBody).subscribe((response) => {
       
-      if (nameExists) {
-        this.alreadyExist = true;
-      } else {
-        this.alreadyExist = false;
-      }
+        if (response.isExist) {
+          this.alreadyExist = true;
+        } else {
+          this.alreadyExist = false;
+        }
+        
+      }, (error) => {
+  
+      });
+    }
+    
+  }
+
+  checkIfNameExists() {
+    if(this.fg.get('ruleName').value.length <= 0){
+      this.alreadyExist = false;
     }
     
   }

@@ -1,4 +1,4 @@
-<div class="main-container">
+<!-- <div class="main-container"> -->
     <div class="page-header1">
         <ol class="breadcrumb">
             <li class="breadcrumb-item breadcrumb-top">
@@ -24,7 +24,7 @@
             <span class="breadcrumb-item active">Ingest</span>
         </p>
     </nav> -->
-    <nav class="navbar navbar-light src-nav">
+    <nav class="navbar navbar-light src-nav bg-w">
         <div class="bck">
             <a class="navbar-brand back-func" (click)="back()">
                 <img src="assets/img/db-connectors/back-arrow.svg" alt="">&nbsp;
@@ -41,11 +41,16 @@
         </div>
     </nav>
 
-    <div class="page-content fx">
-        <div class="row gutters">
-            <img class="img-fluid source-img" alt="Responsive image" src="assets/img/db-connectors/animation.svg">
-            <p class="source-content">Bring data from multiple Sources in near real-time and analyze it using your favorite DataOps tool.</p>
-            <div class="source-div">
+    <div class="page-content">
+        <!-- <div class="row gutters"> -->
+            <div class="text-center">
+                <img class="img-fluid source-img" alt="Responsive image" src="assets/img/db-connectors/animation.svg">
+            </div>
+            <div>
+                <p class="source-content">Bring data from multiple Sources in near real-time and analyze it using your favorite DataOps tool.</p>
+            </div>
+           
+            <div class="source-div text-center">
                 <ng-container>
                     <div class="card source-card" *ngFor="let sourceType of  sourceTypes$ | async | filter:searchBy:type">
                         <div class="card-body" style="cursor: pointer;" (click)="handleSelection(sourceType?.dataSourceName, sourceType.dataSourceType)">
@@ -116,6 +121,6 @@
                     </div>
                 </div>
             </div> -->
-        </div>
+        <!-- </div> -->
     </div>
-</div>
+<!-- </div> -->

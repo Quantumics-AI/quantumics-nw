@@ -12,8 +12,8 @@ export class RuleCreationService {
 
   constructor(private http: HttpClient, private quantumfacade: Quantumfacade) { }
 
-  public getDataConnection(projectId: number, userId: number): Observable<any> {
-    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnections/${projectId}/${userId}`);
+  public getDataConnection(projectId: number, userId: number, pageNumber: number, sizeLength: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnections/${projectId}/${userId}?page=${pageNumber}&size=${sizeLength}`);
   }
 
   // public  {
@@ -77,7 +77,17 @@ export class RuleCreationService {
     return this.http.put(`/QuantumSparkServiceAPI/api/v1/rulejob/${userId}/${projectId}`, data);
   }
 
-  public existRuleName(userId:number, projectId:number,rulename: string): Observable<any> {
-    return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/getRuleByName/${userId}/${projectId}/${rulename}`);
+  // public existRuleName(userId:number, projectId:number,rulename: string, statusBody: any): Observable<any> {
+  //   const params = new HttpParams().set('',statusBody);
+  //   return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/getRuleByName/${userId}/${projectId}/${rulename}`, { params });
+  // }
+
+  public existRuleName(userId:number, projectId:number,rulename: string, statusBody: any): Observable<any> {
+    const statusParam = statusBody.join(',');
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/getRuleByName/${userId}/${projectId}/${rulename}?status=${statusParam}`);
+  }
+  // QuantumSparkServiceAPI/api/v1/qsrules/searchRule/1/1/rule7
+  public getSearchRule(userId: number, projectId: number, searchRule: string, pageNumber: number, sizeLength: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/searchRule/${userId}/${projectId}/${searchRule}?page=${pageNumber}&size=${sizeLength}`);
   }
 }

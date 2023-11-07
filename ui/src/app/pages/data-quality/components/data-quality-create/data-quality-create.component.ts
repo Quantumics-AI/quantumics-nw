@@ -17,6 +17,11 @@ function acceptancePercentageValidator(control: FormControl) {
     return null; // Accept empty input
   }
 
+  // Check if the input is a whole number (no decimals)
+  if (!/^\d+$/.test(inputValue)) {
+    return { invalidPercentage: true };
+  }
+
   const numericValue = parseFloat(inputValue);
   if (isNaN(numericValue) || numericValue < 0 || numericValue > 20) {
     return { invalidPercentage: true };
@@ -71,8 +76,9 @@ export class DataQualityCreateComponent implements OnInit {
   public loading: boolean
   public ruleStatus: string = 'Active';
   public pageNumebr: number = 1;
-  public pageLength: number = 100;
+  public pageLength: number = 10000;
   public alreadyExist: boolean = false;
+  public statusBody: any = ["Active","Inactive"];
 
   constructor(
     private fb: FormBuilder,
@@ -127,7 +133,7 @@ export class DataQualityCreateComponent implements OnInit {
       subLavelRadio: new FormControl(''),
       selectColumnAttribute: [''],
       selectMultipleAttribute: new FormControl(''),
-      acceptancePercentage: new FormControl('', [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
+      acceptancePercentage: new FormControl(0, [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
       //
     });
     if(this.columnDataType){
@@ -137,7 +143,7 @@ export class DataQualityCreateComponent implements OnInit {
 
     this.getDataConnection();
     this.getBucketData();
-    this.getRules();
+    // this.getRules();
   }
 
   public removeDuplicates(array: any[], key: string) {
@@ -177,22 +183,22 @@ export class DataQualityCreateComponent implements OnInit {
     this.getRuleTypeList();
   }
 
-  public getRules(): void {
-    this.loading = true;
-    this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
+  // public getRules(): void {
+  //   this.loading = true;
+  //   this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
       
-      this.loading = false;
-      this.getRuleList = response?.result?.content;
+  //     this.loading = false;
+  //     this.getRuleList = response?.result?.content;
       
-    }, (error) => {
-      this.loading = false;
-    });
-  }
+  //   }, (error) => {
+  //     this.loading = false;
+  //   });
+  // }
 
   public checkExistName(): void {
     const ruleName = this.fg.get('ruleName').value;
-    this.ruleCreationService.existRuleName(this.userId, this.projectId, ruleName).subscribe((response) => {
-      console.log("......", response);
+    this.ruleCreationService.existRuleName(this.userId, this.projectId, ruleName, this.statusBody).subscribe((response) => {
+      
       if (response.isExist) {
         this.alreadyExist = true;
       } else {
@@ -238,8 +244,8 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   public getDataConnection(): void {
-    this.ruleCreationService.getDataConnection(this.projectId, this.userId).subscribe((response) => {
-      this.dataConnectionList = response;
+    this.ruleCreationService.getDataConnection(this.projectId, this.userId, this.pageNumebr, this.pageLength).subscribe((response) => {
+      this.dataConnectionList = response?.content;
     }, (error) => {
 
     })
@@ -311,7 +317,7 @@ export class DataQualityCreateComponent implements OnInit {
 
   public onChangeRuleTypes(value: string): void {
     this.fg.controls.selectColumnAttribute.setValue('');
-    this.fg.controls.acceptancePercentage.setValue('');
+    this.fg.controls.acceptancePercentage.setValue(0);
     this.fg.get('selectColumnAttribute')?.clearValidators();
     this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
     this.selectedSubLevel = null;
@@ -321,7 +327,7 @@ export class DataQualityCreateComponent implements OnInit {
 
   public onChangeSubLevel(value: string): void {
     this.fg.controls.selectColumnAttribute.setValue('');
-    this.fg.controls.acceptancePercentage.setValue('');
+    this.fg.controls.acceptancePercentage.setValue(0);
     this.selectedSubLevel = value;
     if (value == "Multiple Column"){
       this.fg.get('selectColumnAttribute').setValidators([Validators.maxLength(5)]);
@@ -450,6 +456,14 @@ export class DataQualityCreateComponent implements OnInit {
   public onSelectBucketTwo(d: string): void {
 
   }
+
+  // onInput(event: any) {
+  //   // Get the input element
+  //   const inputElement = event.target;
+    
+  //   // Remove any dots (.) from the input value
+  //   inputElement.value = inputElement.value.replace(/\./g, '');
+  // }
 
   public saveRuleFunction(): void {
     const value = this.fg.get('ruleName').value;

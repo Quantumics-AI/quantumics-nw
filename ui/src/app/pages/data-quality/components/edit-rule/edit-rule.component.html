@@ -73,8 +73,8 @@
                                 <label for="inputName" class="p2">Rule description*</label>
                                 <textarea class="form-control input-design" formControlName="ruleDescription" #description
                                 autocomplete="off" minlength="10" maxlength="150" (ngModelChange)="modelChangeDescription($event)"
-                                    (focus)="d.open()" (input)="description.value.length > 0 ? d.close() : d.open()" (blur)="d.close()"
-                                    triggers="manual" #d="ngbPopover" [ngbPopover]="popRuleDesContent"
+                                    (focus)="d.open()" (input)="checkIfNameExists(); description.value.length > 0 ? d.close() : d.open()" 
+                                    (blur)="checkExistName();d.close()" triggers="manual" #d="ngbPopover" [ngbPopover]="popRuleDesContent"
                                     popoverClass="folder-pophover" placement="bottom">
                                 </textarea>
                                 <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">Rule description must be

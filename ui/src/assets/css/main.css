@@ -1164,3 +1164,47 @@ label {
   color: #dc3545;
   font-weight: 500;
 }
+
+/* Search buttons */
+.search-success-btn {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: #00977C;
+  border-color: #00977C;
+}
+
+.search-disable-btn {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: #667085;
+  border-color: #ced4da;
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+  background-color: #f7f7f7;
+}
+
+/* Radio n checkbox */
+input[type=radio]{
+  accent-color: #00977C;
+}
+
+input[type=radio]:checked{
+  accent-color: #00977C;
+}
+
+input[type=checkbox]{
+  accent-color: #00977C;
+}
+
+input[type=checkbox]:checked{
+  accent-color: #00977C;
+}

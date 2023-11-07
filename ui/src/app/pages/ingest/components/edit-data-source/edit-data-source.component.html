@@ -82,7 +82,7 @@
 
         <div class="text-center">
             <button type="button" class="btn btn-outline-success connectionBtns" 
-            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid || alreadyExist" (click)="updateData()"
+            [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid || alreadyExist" (click)="checkExistName()"
             >Update</button>
         </div>
     </form>

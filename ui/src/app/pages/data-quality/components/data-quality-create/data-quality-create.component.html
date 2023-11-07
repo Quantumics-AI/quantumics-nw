@@ -338,12 +338,12 @@
                                             <div *ngIf="!level.columnLevel">
                                                 <ng-container *ngIf="selectedSubLevel != 'Table Level'">
                                                     <div class="dif">
-                                                        <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                        <input type="text" pattern="^[0-9]*$" class="form-control input-design" placeholder="Acceptance Percentage"
                                                         formControlName="acceptancePercentage" autocomplete="off">
                                                         <span class="pr">%</span>
                                                     </div>
                                                     <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12">
-                                                        Please enter a number between 0 and 20.
+                                                        Please enter a number between 0 and 20
                                                     </div>
                                                 </ng-container>
                                                 
@@ -393,10 +393,9 @@
                                                 <ng-container *ngIf="selectedSubLevel != 'Column level'">
                                                     <div class="dif">
                                                         <div style="position: relative; display: flex;">
-                                                            <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                            <input type="text" pattern="^[0-9]*$" class="form-control input-design" placeholder="Acceptance Percentage"
                                                             formControlName="acceptancePercentage" autocomplete="off">
                                                             <span class="pr">%</span>
-                                                        
                                                         
                                                             <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
                                                                 Please enter a number between 0 and 20.
@@ -423,7 +422,7 @@
                                     </select>
                                     <div class="dif">
                                         <div style="position: relative; display: flex;">
-                                            <input type="number" class="form-control input-design" placeholder="Acceptance Percentage"
+                                            <input type="text" pattern="^[0-9]*$" class="form-control input-design" placeholder="Acceptance Percentage"
                                             formControlName="acceptancePercentage" autocomplete="off">
                                             <span class="pr">%</span>
                                         

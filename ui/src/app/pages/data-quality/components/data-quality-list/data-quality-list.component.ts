@@ -10,7 +10,7 @@ import { EditRuleComponent } from '../edit-rule/edit-rule.component';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
 import { ViewRunningRulesComponent } from '../view-running-rules/view-running-rules.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
-import { RuleFilter } from '../../models/rule-filter.model';
+import { RuleFilter, RuleListFilter } from '../../models/rule-filter.model';
 
 @Component({
   selector: 'app-data-quality-list',
@@ -27,6 +27,10 @@ export class DataQualityListComponent implements OnInit {
     { label: 'Inactive', name: 'Inactive', selected: false },
     { label: 'Deleted', name: 'Deleted', selected: false }
   ] as RuleFilter[];
+  public filterBy = [
+    { label: 'Date', name: 'date', selected: false },
+    { label: 'Rule type', name: 'type', selected: false }
+  ] as RuleListFilter[];
 
   public dataQualityList: any;
   public ruleCount: any;
@@ -57,6 +61,10 @@ export class DataQualityListComponent implements OnInit {
   public searchString: string;
   searchTerm: any = { ruleName: '' };
   public timezone: any;
+  buttonDisabled: boolean = true;
+  searchSuccessClass: string = 'search-success-btn';
+  searchInvalidClass: string = 'search-disable-btn';
+  public searchNull: boolean = false;
 
   constructor(
     private readonly router: Router,
@@ -94,17 +102,36 @@ export class DataQualityListComponent implements OnInit {
       this.paginationData = response?.result;
       // this.pageSize = this.paginationData.size;
       // this.endIndex = this.pageSize;
-      if (this.dataQualityList.length > 1) {
-        this.dataQualityList.sort((val1, val2) => {
-          return (
-            (new Date(val2.createdDate) as any) -
-            (new Date(val1.createdDate) as any)
-          );
-        });
-      }
+      // if (this.dataQualityList.length > 1) {
+      //   this.dataQualityList.sort((val1, val2) => {
+      //     return (
+      //       (new Date(val2.createdDate) as any) -
+      //       (new Date(val1.createdDate) as any)
+      //     );
+      //   });
+      // }
       
     }, (error) => {
       this.loading = false;
+    });
+  }
+
+  public searchRule(): void {
+    this.ruleCreationService.getSearchRule(this.userId, this.projectId, this.searchString, this.pageNumebr, this.pageLength).subscribe((response) => {
+      // debugger
+      console.log(response);
+      if (response.code === 400) {
+        this.searchNull = true;
+      } 
+      if(response.code === 200){
+        this.searchNull = false;
+        this.dataQualityList = response?.result?.content;
+        this.ruleCount =  response?.result?.content;
+        this.paginationData = response?.result;
+      }
+      
+    }, (error) => {
+      
     });
   }
 
@@ -294,16 +321,17 @@ export class DataQualityListComponent implements OnInit {
     if(this.pageNumebr < currentPage){
       this.pageNumebr = currentPage;
     } else {
-      this.pageNumebr = this.pageNumebr - currentPage;
+      this.pageNumebr = currentPage;
     }
     this.getRules();
     // this.pageNumebr = 
-    this.startIndex = (currentPage - 1) * this.pageSize;
-    this.endIndex = this.startIndex + this.pageSize;
+    // this.startIndex = (currentPage - 1) * this.pageSize;
+    // this.endIndex = this.startIndex + this.pageSize;
   }
 
   searchInput(str) {
     this.searchString = str;
+    this.buttonDisabled = str.trim() === '';
     if (str.length == 0) {
       this.searchDiv = false;
     } else {
@@ -368,7 +396,14 @@ export class DataQualityListComponent implements OnInit {
   }
 
   clearSearhInput() {
+    this.getRules();
+    this.searchNull = false;
     this.searchTerm = { ruleName: '' };
     this.searchDiv = false;
+    this.buttonDisabled = true;
+  }
+
+  public onChangeFilterBy(value: string): void {
+    
   }
 }

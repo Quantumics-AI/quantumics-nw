@@ -20,6 +20,7 @@ import { ShowFileComponent } from './components/show-file/show-file.component';
 import { StatusDeleteConfirmationComponent } from './components/status-delete-confirmation/status-delete-confirmation.component';
 import { FilterPipeModule } from 'ngx-filter-pipe';
 import { FilterPipe, FilterDatabasePipe } from './pipes/filter.pipe';
+import { RuleLogsComponent } from './components/rule-logs/rule-logs.component';
 
 @NgModule({
     declarations: [
@@ -37,7 +38,8 @@ import { FilterPipe, FilterDatabasePipe } from './pipes/filter.pipe';
         ShowFileComponent,
         StatusDeleteConfirmationComponent,
         FilterPipe,
-        FilterDatabasePipe
+        FilterDatabasePipe,
+        RuleLogsComponent
     ],
     imports: [
         CommonModule,

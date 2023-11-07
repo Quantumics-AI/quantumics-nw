@@ -11,8 +11,8 @@
         </ol>
     </div>
     <div class="page-content pd-20">
-        <ng-container *ngIf="sourceListData.length > 0">
-            <div class="card card-d">
+        <ng-container *ngIf="connectionCount?.length > 0">
+            <div class="card card-d mr-b-0">
                 <div class="card-header ch pd-16">
                     <div class="di mr-t-6" *ngIf="!searchDiv">
                         <p class="card-main-text">AWS</p>
@@ -31,6 +31,10 @@
                             <input type="text" id="searchTerm" [(ngModel)]="searchTerm.connectionName" class="form-control search-input br-bx-n h36"
                                 placeholder="Enter Connection Name" aria-label="Username" aria-describedby="basic-addon1"
                                 (ngModelChange)="searchInput($event)">
+                            <div class="input-group-append">
+                                <button class="btn" type="button" [ngClass]="buttonDisabled ? searchInvalidClass : searchSuccessClass"
+                                [disabled]="buttonDisabled" (click)="searchRule()">Search</button>
+                            </div>
                         </div>
     
                     </div>
@@ -65,37 +69,39 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="td-text" *ngFor="let d of sourceListData | filterBy: searchTerm | slice:startIndex:endIndex">
-                                    <td class="fn">
-                                        <span><img src="assets/img/project-stats/folder-i.svg"></span>
-                                        {{ d?.connectionName }}</td>
-                                    <td>{{d.subDataSource}}</td>
-                                    <!-- <td >{{d.accessType}}</td> -->
-                                    <!-- <td>{{ parseConnectionData(d.connectionData)?.iam }}</td> -->
-                                    <td >
-                                        {{convertToUKTimeZone(d?.createdDate)}}
-                                        <!-- {{d?.createdDate | date: 'dd-MM-yy, hh:mm a'}} -->
-                                    </td>
-                                    <td >
-                                        {{convertToUKTimeZone(d?.modifiedDate)}}
-                                        <!-- {{d?.modifiedDate | date: 'dd-MM-yy, hh:mm a'}} -->
-                                    </td>
-                                    <td class="text-center">
-                                        <div ngbDropdown container="body">
-                                            <a ngbDropdownToggle class="menu-icon">
-                                                <img src="assets/img/project-stats/menu.svg" class="default-img">
-                                                <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
-                                            </a>
-    
-                                            <div ngbDropdownMenu class="dr-m">
-                                                <button ngbDropdownItem class="h-37" (click)="edit(d)">Edit</button>
-                                                <button ngbDropdownItem class="h-37" (click)="delete(d.id)">Delete</button>
+                                <ng-container *ngIf="!searchNull">
+                                    <tr class="td-text" *ngFor="let d of sourceListData">
+                                        <td class="fn">
+                                            <span><img src="assets/img/project-stats/folder-i.svg"></span>
+                                            {{ d?.connectionName }}</td>
+                                        <td>{{d.subDataSource}}</td>
+                                        <!-- <td >{{d.accessType}}</td> -->
+                                        <!-- <td>{{ parseConnectionData(d.connectionData)?.iam }}</td> -->
+                                        <td >
+                                            {{convertToUKTimeZone(d?.createdDate)}}
+                                            <!-- {{d?.createdDate | date: 'dd-MM-yy, hh:mm a'}} -->
+                                        </td>
+                                        <td >
+                                            {{convertToUKTimeZone(d?.modifiedDate)}}
+                                            <!-- {{d?.modifiedDate | date: 'dd-MM-yy, hh:mm a'}} -->
+                                        </td>
+                                        <td class="text-center">
+                                            <div ngbDropdown container="body">
+                                                <a ngbDropdownToggle class="menu-icon">
+                                                    <img src="assets/img/project-stats/menu.svg" class="default-img">
+                                                    <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
+                                                </a>
+        
+                                                <div ngbDropdownMenu class="dr-m">
+                                                    <button ngbDropdownItem class="h-37" (click)="edit(d)">Edit</button>
+                                                    <button ngbDropdownItem class="h-37" (click)="delete(d.id)">Delete</button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                </ng-container>
                                 <tr style="background-color: white !important;"
-                                    *ngIf="(sourceListData | filterBy: searchTerm).length == 0">
+                                    *ngIf="searchNull">
                                     <td colspan="5">
                                         <div class="text-center s-div">
                                             <img src="assets/img/govern/no-search.svg">
@@ -107,26 +113,25 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr  *ngIf="(sourceListData | filterBy: searchTerm).length > 10" style="background-color: white !important;" class="pg-tr">
-                                    <td colspan="6" class="pg-pd">
-                                        <div class="text-center">
-                                            <ngb-pagination [collectionSize]="sourceListData.length" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
-                                            [rotate]="true" aria-label="Custom pagination" (pageChange)="onPageChange($event)">
-                                                <ng-template ngbPaginationPrevious>
-                                                    <span class="btn nextBtn">
-                                                    <img src="assets/img/govern/arrow-left.svg">Previous
-                                                </span></ng-template>
-                                                <ng-template ngbPaginationNext><span class="btn nextBtn">
-                                                    Next <img src="assets/img/govern/arrow-right.svg">
-                                                </span></ng-template>
-                                            </ngb-pagination>
-                                        </div>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="paginationData?.totalPages > 1">
+            <div class="text-center">
+                <ngb-pagination [collectionSize]="paginationData?.totalElements" [(page)]="page"
+                    [pageSize]="paginationData.size" [maxSize]="5" [rotate]="true"
+                    aria-label="Custom pagination" (pageChange)="onPageChange($event)">
+                    <ng-template ngbPaginationPrevious>
+                        <span class="btn nextBtn">
+                            <img src="assets/img/govern/arrow-left.svg">Previous
+                        </span></ng-template>
+                    <ng-template ngbPaginationNext><span class="btn nextBtn">
+                            Next <img src="assets/img/govern/arrow-right.svg">
+                        </span></ng-template>
+                </ngb-pagination>
             </div>
         </ng-container>
         <ng-container  *ngIf="sourceListData.length == 0">

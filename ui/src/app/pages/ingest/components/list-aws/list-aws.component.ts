@@ -44,6 +44,17 @@ export class ListAwsComponent {
   public isDescending: boolean;
   public timezone: any;
 
+  public connectionCount: any;
+  public pageNumebr: number = 1;
+  public pageLength: number = 100;
+  buttonDisabled: boolean = true;
+  searchSuccessClass: string = 'search-success-btn';
+  searchInvalidClass: string = 'search-disable-btn';
+  public searchNull: boolean = false;
+  public filter: boolean = true;
+  public paginationData: any;
+  public isSearch: boolean = false;
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -66,26 +77,51 @@ export class ListAwsComponent {
   ngOnInit(): void {
     this.projectId = localStorage.getItem('project_id');
     this.getAwsList();
+    sessionStorage.clear();
   }
 
   public getAwsList(): void {
     this.loading = true;
-    this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
+    this.sourceDataService.getSourceData(+this.projectId, this.userId, this.pageNumebr, this.pageLength).subscribe((response) => {
       this.loading = false;
       console.log("getAws", response);
-      this.sourceListData = response;
-      if (this.sourceListData.length > 1) {
-        this.sourceListData.sort((val1, val2) => {
-          return (
-            (new Date(val2.createdDate) as any) -
-            (new Date(val1.createdDate) as any)
-          );
-        });
-      }
+      this.sourceListData = response?.content;
+      this.connectionCount = response?.content;
+      this.paginationData = response;
+      // if (this.sourceListData.length > 1) {
+      //   this.sourceListData.sort((val1, val2) => {
+      //     return (
+      //       (new Date(val2.createdDate) as any) -
+      //       (new Date(val1.createdDate) as any)
+      //     );
+      //   });
+      // }
     }, (error) => {
       this.loading = false;
     })
   }
+
+  public searchRule(): void {
+    this.buttonDisabled = true;
+    this.isSearch = true;
+    this.sourceDataService.getSearchConnection(this.userId, +this.projectId, this.searchString, this.filter, this.pageNumebr, this.pageLength).subscribe((response) => {
+      // debugger
+      console.log("------->",response);
+      if (response.code === 400) {
+        this.searchNull = true;
+      } 
+      if(response.code === 200){
+        this.searchNull = false;
+        this.sourceListData = response?.result?.content;
+        this.connectionCount = response?.result?.content;
+        this.paginationData = response?.result;
+      }
+      
+    }, (error) => {
+      
+    });
+  }
+
 
   parseConnectionData(connectionData: string): { iam: string } | null {
     try {
@@ -198,21 +234,38 @@ export class ListAwsComponent {
 
   searchInput(str) {
     this.searchString = str;
+    this.buttonDisabled = str.trim() === '';
     if (str.length == 0) {
       this.searchDiv = false;
+      this.isSearch = false;
+      this.getAwsList();
     } else {
       this.searchDiv = true;
     }
   }
 
   clearSearhInput() {
+    this.searchNull = false;
     this.searchTerm = { connectionName: '' };
     this.searchDiv = false;
+    this.buttonDisabled = true;
+    this.isSearch = false;
   }
 
   public onPageChange(currentPage: number): void {
-    this.startIndex = (currentPage - 1) * this.pageSize;
-    this.endIndex = this.startIndex + this.pageSize;
+    if(this.pageNumebr < currentPage){
+      this.pageNumebr = currentPage;
+    } else {
+      this.pageNumebr = currentPage;
+    }
+    if(this.isSearch){
+      this.searchRule();
+    } else {
+      this.getAwsList();
+    }
+    
+    // this.startIndex = (currentPage - 1) * this.pageSize;
+    // this.endIndex = this.startIndex + this.pageSize;
   }
 
   convertToUKTime(createdDate: number): string {

@@ -49,6 +49,9 @@ export class CreateAwsComponent {
   transformedData: any[] = [];
   public sourceListData: any;
   public alreadyExist: boolean = false;
+  public connectionData: any;
+  public pageSize: number = 1;
+  public pageLength: number = 100;
 
   constructor(
     private fb: FormBuilder,
@@ -60,6 +63,7 @@ export class CreateAwsComponent {
     private sourceDataService: SourceDataService,
   ){
     // this.awsData = new AwsData();
+    this.connectionData = JSON.parse(sessionStorage.getItem('awsData'));
     this.certificate$ = this.quantumFacade.certificate$;
     this.certificate$
       .pipe(takeUntil(this.unsubscribe))
@@ -82,41 +86,76 @@ export class CreateAwsComponent {
     });
 
     this.getAccessTypes();
-    this.getAwsList()
+    // this.getAwsList()
   }
 
-  public getAwsList(): void {
-    this.loading = true;
-    this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
-      this.loading = false;
-      this.sourceListData = response;
-      if (this.sourceListData.length > 1) {
-        this.sourceListData.sort((val1, val2) => {
-          return (
-            (new Date(val2.createdDate) as any) -
-            (new Date(val1.createdDate) as any)
-          );
-        });
+  ngAfterViewInit(): void {
+    if (this.connectionData) {
+      this.fg.controls.dataSourceName.setValue(this.connectionData.connectionName);
+      this.connection = true;
+    }
+  }
+
+  // public getAwsList(): void {
+  //   this.loading = true;
+  //   this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
+  //     this.loading = false;
+  //     this.sourceListData = response;
+  //     if (this.sourceListData.length > 1) {
+  //       this.sourceListData.sort((val1, val2) => {
+  //         return (
+  //           (new Date(val2.createdDate) as any) -
+  //           (new Date(val1.createdDate) as any)
+  //         );
+  //       });
+  //     }
+  //   }, (error) => {
+  //     this.loading = false;
+  //   })
+  // }
+
+  public checkExistName(): void {
+    const name = this.fg.get('dataSourceName').value;
+    this.sourceDataService.getIsExistConnection(this.userId, this.projectId, name, this.pageSize, this.pageLength).subscribe((response) => {
+      
+      console.log(response.isExist);
+      if(response.isExist){
+        this.alreadyExist = true;
+        
+      } else {
+        this.alreadyExist = false;
+        this.testConnection();
       }
+      
+      // if (response.isExist) {
+      //   this.alreadyExist = true;
+      // } else {
+      //   this.alreadyExist = false;
+      // }
+      
     }, (error) => {
-      this.loading = false;
-    })
+
+    });
   }
 
   checkIfNameExists() {
-    if (this.sourceListData.length > 0) {
-      const value = this.fg.get('dataSourceName').value;
-      const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-
-      // const enteredName = this.fg.get('dataSourceName').value;
-      const nameExists = this.sourceListData.some(item => item.connectionName === titleCaseValue);
-      
-      if (nameExists) {
-        this.alreadyExist = true;
-      } else {
-        this.alreadyExist = false;
-      }
+    if(this.fg.get('dataSourceName').value.length <= 0){
+      this.alreadyExist = false;
     }
+
+    // if (this.sourceListData.length > 0) {
+    //   const value = this.fg.get('dataSourceName').value;
+    //   // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+    //   // const enteredName = this.fg.get('dataSourceName').value;
+    //   const nameExists = this.sourceListData.some(item => item.connectionName === value);
+      
+    //   if (nameExists) {
+    //     this.alreadyExist = true;
+    //   } else {
+    //     this.alreadyExist = false;
+    //   }
+    // }
     
   }
 
@@ -157,7 +196,7 @@ export class CreateAwsComponent {
 
   modelChangeDataSourceName(str) {
     // const re = /^[a-zA-Z0-9_]+$/;
-
+    this.alreadyExist = false;
     if (this.fg.controls.dataSourceName.value != "") {
 
       const validCapital = String(str).match(/^([A-Z])/);
@@ -188,7 +227,39 @@ export class CreateAwsComponent {
 
 
   public continue(): void {
-    this.router.navigate([`projects/${this.projectId}/ingest/select-source-target`]);
+    const name = this.fg.get('dataSourceName').value;
+    this.sourceDataService.getIsExistConnection(this.userId, this.projectId, name, this.pageSize, this.pageLength).subscribe((response) => {
+      
+      console.log(response.isExist);
+      if(response.isExist){
+        this.alreadyExist = true;
+        this.connection = false;
+        
+      } else {
+        this.alreadyExist = false;
+        this.connection = true;
+        this.connectionParams = {
+          projectId: this.projectId,
+          userId: this.userId,
+          connectionName: this.fg.controls.dataSourceName.value,
+          accessType: this.fg.controls.connectionType.value,
+          subDataSource: this.fg.controls.subDataSource.value,
+          bucketName: '',
+        } as AwsData;
+        sessionStorage.setItem('awsData', JSON.stringify(this.connectionParams));
+        this.router.navigate([`projects/${this.projectId}/ingest/select-source-target`]);
+      }
+      
+      // if (response.isExist) {
+      //   this.alreadyExist = true;
+      // } else {
+      //   this.alreadyExist = false;
+      // }
+      
+    }, (error) => {
+
+    });
+    
   }
 
   public testConnection(): void {
@@ -197,9 +268,9 @@ export class CreateAwsComponent {
     //   iam: this.fg.controls.roleName.value,
     // } as RoleData;
 
-    const value = this.fg.get('dataSourceName').value;
-    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-    this.fg.get('dataSourceName').setValue(titleCaseValue);
+    // const value = this.fg.get('dataSourceName').value;
+    // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    // this.fg.get('dataSourceName').setValue(titleCaseValue);
 
     this.connectionParams = {
       projectId: this.projectId,
@@ -219,6 +290,7 @@ export class CreateAwsComponent {
       this.connection = true;
     }, (error) => {
       this.snakbar.open(error);
+      this.connection = false;
     });
     
   }

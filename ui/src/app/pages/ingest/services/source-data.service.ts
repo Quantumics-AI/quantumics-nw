@@ -83,8 +83,8 @@ export class SourceDataService {
     );
   }
 
-  public getSourceData(projectId: number, userId: number): Observable<any> {
-    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnections/${projectId}/${userId}`);
+  public getSourceData(projectId: number, userId: number,  pageNumber: number, sizeLength: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnections/${projectId}/${userId}?page=${pageNumber}&size=${sizeLength}`);
   }
 
   updateSourceData(sourceId: number, data: any): Observable<any> {
@@ -116,5 +116,15 @@ export class SourceDataService {
         return response;
       })
     );
+  }
+
+  // Search functionality - connection
+  public getSearchConnection(projectId: number, userId: number, connectionName: string, filter: boolean,  pageNumber: number, sizeLength: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnectionByName/${projectId}/${userId}/${connectionName}?filter=${filter}&page=${pageNumber}&size=${sizeLength}`);
+  }
+
+  // connnection is-exist 
+  public getIsExistConnection(projectId: number, userId: number, connectionName: string,  pageNumber: number, sizeLength: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnectionByName/${projectId}/${userId}/${connectionName}?page=${pageNumber}&size=${sizeLength}`);
   }
 }

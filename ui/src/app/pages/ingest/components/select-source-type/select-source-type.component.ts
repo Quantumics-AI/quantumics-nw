@@ -34,6 +34,7 @@ export class SelectSourceTypeComponent implements OnInit {
     this.folderName = this.activatedRoute.snapshot.paramMap.get('folderName');
     this.projectName = localStorage.getItem('projectname');
     this.sourceTypes$ = this.foldersService.getSourceTypes();
+    sessionStorage.clear();
   }
 
   public back(): void {

@@ -9,8 +9,8 @@
     <div class="page-content pd-20" >
         <ng-container *ngIf="!loading">
             <ng-container *ngIf="ruleCount?.length > 0 || ruleCountInactive?.length > 0 || ruleCountDeleted?.length > 0; else noDataQualityRules">
-                <div class="card card-d">
-                    <div class="card-header ch pd-b-0">
+                <div class="card card-d mr-b-0">
+                    <div class="ch pd-b-0 br-b">
                         <div>
                             <div class="di mr-t-6">
                                 <p class="card-main-text">List of rules</p>
@@ -26,8 +26,12 @@
                                             </span>
                                         </div>
                                         <input type="text" id="searchTerm" [(ngModel)]="searchTerm.ruleName" class="form-control search-input br-bx-n h36"
-                                            placeholder="Enter Rule Name" aria-label="Username" aria-describedby="basic-addon1"
+                                            placeholder="Search by Rule Name" aria-label="Username" aria-describedby="basic-addon1"
                                             (ngModelChange)="searchInput($event)">
+                                        <div class="input-group-append">
+                                            <button class="btn" type="button" [ngClass]="buttonDisabled ? searchInvalidClass : searchSuccessClass"
+                                            [disabled]="buttonDisabled" (click)="searchRule()">Search</button>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -42,11 +46,23 @@
                                     </ng-container>
                                 </p>
                             </div>
-                        </div>  
+                        </div>
+                        <!-- <div class="mr-b-8">
+                            <p class="mr-b-0 p2">Filter By:</p>
+                            <ng-container *ngFor="let item of filterBy">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" 
+                                    id="exampleRadios1" [value]="item.name" (change)="onChangeFilterBy(item.name)">
+                                    <label class="form-check-label p2" for="exampleRadios1">
+                                      {{item.label}}
+                                    </label>
+                                </div>
+                            </ng-container>
+                        </div> -->
                         
                     </div>
                     <div class="card-body pd-0">
-                        <div class="table-responsive br-r">
+                        <div class="table-responsive br-r list-height">
                             <table class="table m-0 table-fixed table-striped">
                                 <thead class="thead-light">
                                     <tr class="fixed-th">
@@ -71,60 +87,66 @@
                                                 src="/assets/img/data-profile/sort.svg"></span>
                                         </th>
                                         <th class="pd-l-24">Status</th>
-                                        <th class="float-right">Action</th>
+                                        <th class="pd-l-24">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <ng-container *ngIf="dataQualityList.length else noRules">
-                                        <tr class="td-text" *ngFor="let dataQuality of dataQualityList | filterBy: searchTerm">
-                                            <td class="pt-2"> <label>
-                                                <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
-                                            </label></td>
-                                            <td class="fn text-over">
-                                                <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>
-                                            </td>
-                                            <td class="text-over">
-                                                <span title="{{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}">
-                                                    {{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}
-                                                </span>  
-                                            </td>
-                                            <td>{{dataQuality?.createdBy}}</td>
-                                            <td>
-                                                <!-- {{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}} -->
-                                                {{convertToUKTimeZone(dataQuality?.createdDate)  }}
-                                            </td>
-                                            <!-- <td class="cp">{{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}}</td> -->
-                                            <td>
-                                                {{convertToUKTimeZone(dataQuality?.modifiedDate)}}
-                                                <!-- {{convertToUKTime(dataQuality?.modifiedDate)}} -->
-                                            </td>
-                                            <td  [ngClass]="{
-                                                'greenStatus': dataQuality?.status === 'Active',
-                                                'orangeStatus': dataQuality?.status === 'Inactive',
-                                                'redStatus': dataQuality?.status === 'Deleted'
-                                              }">
-                                                {{(dataQuality?.status)}}
-                                            </td>
-            
-                                            <td>
-                                                <span *ngIf="dataQuality?.status != 'Deleted'">
-                                                    <img class="cp h-16" src="assets/img/govern/edit.svg" title="Edit DQ rule"
-                                                     (click)="edit(dataQuality);">
-                                                </span>
-                                                <!-- <div ngbDropdown container="body" *ngIf="dataQuality?.status != 'Deleted'">
-                                                    <a ngbDropdownToggle class="menu-icon">
-                                                        <img src="assets/img/project-stats/menu.svg" class="default-img">
-                                                        <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
-                                                    </a>
-            
-                                                    <div ngbDropdownMenu class="dr-m">
-                                                        <button ngbDropdownItem class="h-37" (click)="edit(dataQuality);">Edit</button>
-                                                    </div>
-                                                </div> -->
-                                            </td>
-                                        </tr>
-                                        <tr style="background-color: white !important;"
-                                            *ngIf="(dataQualityList | filterBy: searchTerm).length == 0">
+                                        <ng-container *ngIf="!searchNull">
+                                            <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
+                                                <td class="pt-2"> <label>
+                                                    <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
+                                                </label></td>
+                                                <td class="fn text-over">
+                                                    <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>
+                                                </td>
+                                                <td class="text-over">
+                                                    <span *ngIf="dataQuality?.ruleDetails?.ruleTypeName != 'Null Value'" title="{{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}">
+                                                        {{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}
+                                                    </span>
+                                                    <span *ngIf="dataQuality?.ruleDetails?.ruleTypeName == 'Null Value'" title="{{dataQuality?.ruleDetails?.ruleTypeName}}">
+                                                        {{dataQuality?.ruleDetails?.ruleTypeName}}
+                                                    </span> 
+                                                </td>
+                                                <td>{{dataQuality?.createdBy}}</td>
+                                                <td>
+                                                    <!-- {{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}} -->
+                                                    {{convertToUKTimeZone(dataQuality?.createdDate)  }}
+                                                </td>
+                                                <!-- <td class="cp">{{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}}</td> -->
+                                                <td>
+                                                    {{convertToUKTimeZone(dataQuality?.modifiedDate)}}
+                                                    <!-- {{convertToUKTime(dataQuality?.modifiedDate)}} -->
+                                                </td>
+                                                <td  [ngClass]="{
+                                                    'greenStatus': dataQuality?.status === 'Active',
+                                                    'orangeStatus': dataQuality?.status === 'Inactive',
+                                                    'redStatus': dataQuality?.status === 'Deleted'
+                                                  }">
+                                                    {{(dataQuality?.status)}}
+                                                </td>
+                
+                                                <td class="text-center">
+                                                    <span *ngIf="dataQuality?.status != 'Deleted'">
+                                                        <img class="cp h-16" src="assets/img/govern/edit.svg" title="Edit DQ rule"
+                                                         (click)="edit(dataQuality);">
+                                                    </span>
+                                                    <!-- <div ngbDropdown container="body" *ngIf="dataQuality?.status != 'Deleted'">
+                                                        <a ngbDropdownToggle class="menu-icon">
+                                                            <img src="assets/img/project-stats/menu.svg" class="default-img">
+                                                            <img src="assets/img/pipline/hover-menu.svg" class="hover-img">
+                                                        </a>
+                
+                                                        <div ngbDropdownMenu class="dr-m">
+                                                            <button ngbDropdownItem class="h-37" (click)="edit(dataQuality);">Edit</button>
+                                                        </div>
+                                                    </div> -->
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                        
+                                        <tr class="h-405" style="background-color: white !important;"
+                                            *ngIf="searchNull">
                                             <td colspan="7">
                                                 <div class="text-center s-div">
                                                     <img src="assets/img/govern/no-search.svg">
@@ -136,24 +158,12 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr *ngIf="paginationData?.totalPages > 1"
+                                        <!-- <tr *ngIf="paginationData?.totalPages > 1"
                                             style="background-color: white !important;" class="pg-tr">
                                             <td colspan="8" class="pg-pd">
-                                                <div class="text-center">
-                                                    <ngb-pagination [collectionSize]="paginationData?.totalElements" [(page)]="page"
-                                                        [pageSize]="paginationData.size" [maxSize]="5" [rotate]="true"
-                                                        aria-label="Custom pagination" (pageChange)="onPageChange($event)">
-                                                        <ng-template ngbPaginationPrevious>
-                                                            <span class="btn nextBtn">
-                                                                <img src="assets/img/govern/arrow-left.svg">Previous
-                                                            </span></ng-template>
-                                                        <ng-template ngbPaginationNext><span class="btn nextBtn">
-                                                                Next <img src="assets/img/govern/arrow-right.svg">
-                                                            </span></ng-template>
-                                                    </ngb-pagination>
-                                                </div>
+                                                
                                             </td>
-                                        </tr>
+                                        </tr> -->
                                     </ng-container>
                                     <ng-template #noRules>
                                         <tr class="no-dataset">
@@ -175,9 +185,27 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- <div class="btn-div text-center" *ngIf="ruleStatus == 'Active' && dataQualityList.length && (dataQualityList | filterBy: searchTerm).length != 0">
+                            <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run Rule</button>
+                        </div> -->
                     </div>
                 </div>
-                <div class="btn-div text-center" *ngIf="ruleStatus == 'Active' && dataQualityList.length && (dataQualityList | filterBy: searchTerm).length != 0">
+                <ng-container *ngIf="paginationData?.totalPages > 1">
+                    <div class="text-center">
+                        <ngb-pagination [collectionSize]="paginationData?.totalElements" [(page)]="page"
+                            [pageSize]="paginationData.size" [maxSize]="5" [rotate]="true"
+                            aria-label="Custom pagination" (pageChange)="onPageChange($event)">
+                            <ng-template ngbPaginationPrevious>
+                                <span class="btn nextBtn">
+                                    <img src="assets/img/govern/arrow-left.svg">Previous
+                                </span></ng-template>
+                            <ng-template ngbPaginationNext><span class="btn nextBtn">
+                                    Next <img src="assets/img/govern/arrow-right.svg">
+                                </span></ng-template>
+                        </ngb-pagination>
+                    </div>
+                </ng-container>
+                <div class="btn-div text-center mt-3" *ngIf="ruleStatus == 'Active' && dataQualityList.length && (dataQualityList | filterBy: searchTerm).length != 0">
                     <button class="btn btn-design" [disabled]="!anyCheckboxSelected" (click)="runRule()">Run Rule</button>
                 </div>
             </ng-container>

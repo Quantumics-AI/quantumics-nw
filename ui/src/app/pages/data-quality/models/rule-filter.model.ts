@@ -3,3 +3,8 @@ export interface RuleFilter {
     label: string;
     selected: boolean;
 }
+export interface RuleListFilter {
+    name: string;
+    label: string;
+    selected: boolean;
+}

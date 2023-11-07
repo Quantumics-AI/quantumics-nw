@@ -32,80 +32,13 @@ export class ViewRunningRulesComponent implements OnInit {
   public cancelBtn: boolean;
   public outputData: any;
   public startIndex: number = 0;
-  public pageSize: number = 10;
+  public pageSize: number = 100;
   public endIndex: number = this.pageSize;
   public page = 1;
-  // public dataProfiler = {
-  //   "match" : false,
-  //   "pass" : false,
-  //   "ruleTypeName" : "Data Profiler",
-  //   "levelName" : "Column level",
-  //   "SourceFile" : "s3a://qsai-nw-src/DuplicateValues/Duplicate_Value_Data_Null.csv",
-  //   "TargetFile" : "s3a://qsai-nw-src/DuplicateValues/Duplicate_Value_Data_Null.csv",
-  //   "data" : [
-  //     {
-  //       "dataset" : "Date Type",
-  //       "source" : "Number",
-  //       "target" : "Number",
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Column",
-  //       "source" : "Salary",
-  //       "target" : "Salary",
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Missing",
-  //       "source" : 0,
-  //       "target" : 0,
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Missing %",
-  //       "source" : 0.00,
-  //       "target" : 0.00,
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Unique",
-  //       "source" : 900,
-  //       "target" : 800,
-  //       "match" : false
-  //     },
-  //     {
-  //       "dataset" : "Unique %",
-  //       "source" : 90.00,
-  //       "target" : 80.00,
-  //       "match" : false
-  //     },
-  //     {
-  //       "dataset" : "Minimum",
-  //       "source" : 100000,
-  //       "target" : 100000,
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Maximum",
-  //       "source" : 250000,
-  //       "target" : 250000,
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Median",
-  //       "source" : 150000,
-  //       "target" : 150000,
-  //       "match" : true
-  //     },
-  //     {
-  //       "dataset" : "Mean",
-  //       "source" : 125000,
-  //       "target" : 125000,
-  //       "match" : true
-  //     }
-  //   ]
-    
-  //   }
+
+  anyCheckboxSelected: boolean = false;
+  public ruleId: any = [];
+  public selectedJobIds: number[] = [];
 
   constructor(
     // public modal: NgbActiveModal,
@@ -141,17 +74,47 @@ export class ViewRunningRulesComponent implements OnInit {
       console.log("Rule data:", response);
       this.runningList = response?.result;
       this.loading = false;
-      if (this.runningList.length > 1) {
-        this.runningList.sort((val1, val2) => {
-          return (
-            (new Date(val2.createdDate) as any) -
-            (new Date(val1.createdDate) as any)
-          );
-        });
-      }
       // Check if there is at least one object with jobStatus "Inprocess"
       const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
       // If there is an in-process job, show the button; otherwise, hide it
+      // Loop through the updated runningList and update selectedJobIds array
+      // this.runningList.forEach(view => {
+      //   const jobId = view.jobId;
+      //   if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
+      //     if(this.selectedJobIds.length != 0) {
+      //       // Check if jobId is already in the selectedJobIds array
+      //       if (!this.selectedJobIds.includes(jobId)) {
+      //         // If not, add it to the selectedJobIds array
+      //         this.selectedJobIds.push(jobId);
+      //       }
+      //     }
+          
+      //   } else {
+      //     // Check if jobId is in the selectedJobIds array
+      //     const index = this.selectedJobIds.indexOf(jobId);
+      //     if (index !== -1) {
+      //       // If it is, remove it from the selectedJobIds array
+      //       this.selectedJobIds.splice(index, 1);
+      //     }
+      //   }
+      // });
+
+      this.runningList.forEach(view => {
+        const jobId = view.jobId;
+        if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
+          const isSelected = this.selectedJobIds.includes(jobId);
+          view.isChecked = isSelected; // Add an 'isChecked' property to each item
+        } else {
+          // Check if jobId is in the selectedJobIds array
+          const index = this.selectedJobIds.indexOf(jobId);
+          if (index !== -1) {
+            // If it is, remove it from the selectedJobIds array
+            this.selectedJobIds.splice(index, 1);
+          }
+        }
+        
+      });
+
       if (hasInprocessJob) {
         setTimeout(refreshPage, 5000);
         this.cancelBtn = true;
@@ -200,23 +163,30 @@ export class ViewRunningRulesComponent implements OnInit {
     });
   }
 
+  public viewLog(v: any): void {
+    localStorage.setItem('batchJobLog', v?.batchJobLog);
+    this.router.navigate([]).then(() => { window.open(`/projects/${this.projectId}/data-quality/logs`, '_blank'); });
+  }
+
   public cancelInprocess(): void {
+    console.log(this.selectedJobIds);
+    
     const modalRef = this.modalService.open(ConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
     modalRef.result.then((result) => {
       this.loading = true;
-      // Initialize an empty array to store jobIds
-      const jobIds: number[] = [];
+      // // Initialize an empty array to store jobIds
+      // const jobIds: number[] = [];
   
-      // Iterate through the runningList to find objects with jobStatus "Inprocess"
-      for (const item of this.runningList) {
-          if (item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started' ) {
-              // Push the jobIds into the array
-              jobIds.push(item.jobId);
-          }
-      }
+      // // Iterate through the runningList to find objects with jobStatus "Inprocess"
+      // for (const item of this.runningList) {
+      //     if (item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started' ) {
+      //         // Push the jobIds into the array
+      //         jobIds.push(item.jobId);
+      //     }
+      // }
   
       const req = {
-        jobIds : jobIds
+        jobIds : this.selectedJobIds
       };
   
       this.ruleCreationService.cancelRunningRule(this.userId, this.projectId, req).subscribe((res) => {
@@ -228,9 +198,9 @@ export class ViewRunningRulesComponent implements OnInit {
       });
   
       // Now, 'jobIds' contains all the jobIds for objects with jobStatus "Inprocess"
-      console.log(jobIds); // You can use the 'jobIds' array as needed
+      console.log(this.selectedJobIds); // You can use the 'jobIds' array as needed
     }, (error) => {
-
+      this.snakbar.open(error);
     });
     
   }
@@ -268,5 +238,21 @@ export class ViewRunningRulesComponent implements OnInit {
   public onPageChange(currentPage: number): void {
     this.startIndex = (currentPage - 1) * this.pageSize;
     this.endIndex = this.startIndex + this.pageSize;
+  }
+
+  selectRule(event: any, d: any): void {
+    const jobId = d.jobId;
+
+    if (event.target.checked) {
+      // Checkbox is checked, add jobId to the selectedJobIds array
+      this.selectedJobIds.push(jobId);
+    } else {
+      // Checkbox is unchecked, remove jobId from the selectedJobIds array
+      const index = this.selectedJobIds.indexOf(jobId);
+      if (index !== -1) {
+        this.selectedJobIds.splice(index, 1);
+      }
+    }
+    
   }
 }

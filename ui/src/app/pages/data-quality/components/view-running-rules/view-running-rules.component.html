@@ -25,7 +25,7 @@
             </div>
             <ng-container *ngIf="runningList.length else noJobs">
                 <div class="card-body pd-0">
-                    <div class="table-responsive br">
+                    <div class="table-responsive br list-height">
                         <table class="table m-0 table-fixed table-striped">
                             <thead class="thead-light">
                                 <tr class="fixed-th">
@@ -37,6 +37,8 @@
                                             </a>
                                         </em>
                                     </th>
+                                    <th class="pd-l-24">Submitted Date</th>
+                                    <th class="pd-l-24">Finished Date</th>
                                     <th class="pd-l-24">Result</th>
                                     <th class="pd-l-24">Action</th>
                                 </tr>
@@ -44,19 +46,25 @@
                             <tbody>
                                 <tr class="td-text" *ngFor="let view of runningList">
                                     <td>
-                                        {{view?.ruleName}}
+                                        <input type="checkbox" (change)="selectRule($event, view)" [checked]="view.isChecked" 
+                                        *ngIf="view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess'">
+                                        <span class="mr-l-10">{{view?.ruleName}}</span>
+                                        
                                     </td>
-                                    <td [ngClass]="{'redStatus': view?.jobStatus === 'Failed'}">
+                                    <td [ngClass]="{'redStatus': view?.jobStatus === 'Failed' || view?.jobStatus === 'Cancelled'}">
                                         {{view?.jobStatus}}
                                     </td>
+                                    <td>{{view?.jobSubmittedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                    <td>{{view?.jobFinishedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
                                     <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'MisMatch'}">
                                         {{ view?.jobOutput ? parseJobOutput(view?.jobOutput) : '' }}
                                     </td>
                                     <td>
-                                        <span *ngIf="view?.jobOutput" class="cp vr" (click)="viewResult(view)">View result</span>
+                                        <span *ngIf="view?.jobOutput" class="cp vr" (click)="viewResult(view)">View Result</span>
+                                        <span *ngIf="view?.jobStatus === 'Failed'" class="cp vl" (click)="viewLog(view)">View Logs</span>
                                     </td>
                                 </tr>
-                                <tr  *ngIf="(runningList).length > 10" style="background-color: white !important;" class="pg-tr">
+                                <!-- <tr  *ngIf="(runningList).length > 10" style="background-color: white !important;" class="pg-tr">
                                     <td colspan="6" class="pg-pd">
                                         <div class="text-center">
                                             <ngb-pagination [collectionSize]="runningList.length" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
@@ -71,7 +79,7 @@
                                             </ngb-pagination>
                                         </div>
                                     </td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -92,7 +100,8 @@
         </div>
         <div class="btn-div text-center" *ngIf="runningList.length">
             <!-- <button class="btn btn-design mr-r-20" (click)="back()">Okay</button> -->
-            <button class="btn btn-design" *ngIf="cancelBtn" (click)="cancelInprocess()">Cancel</button>
+            <button class="btn btn-design" *ngIf="cancelBtn" (click)="cancelInprocess()"
+            [disabled]="selectedJobIds.length === 0">Cancel</button>
         </div>
     </div>
 </app-loader>
