@@ -1250,7 +1250,6 @@ public class LivyActions {
                 if(s3Object == null) { //Error in livy job
                    log.info("Failed running the row count Job...");
                    throw new RuntimeException("Failed running the row count Job");
-                   //return String.valueOf(batchJobId);
                 }
                 S3ObjectInputStream inputStream = s3Object.getObjectContent();
 

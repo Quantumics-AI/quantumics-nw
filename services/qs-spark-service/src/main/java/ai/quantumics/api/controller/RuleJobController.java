@@ -77,7 +77,7 @@ public class RuleJobController {
     return ruleJobService.fetchRuleJobList(userId, projectId);
   }
 
-  @ApiOperation(value = "rulejob", response = Json.class)
+  @ApiOperation(value = "rowCountJob", response = Json.class)
   @GetMapping("/rowCount/{userId}/{projectId}")
   @ApiResponses(
           value = {
