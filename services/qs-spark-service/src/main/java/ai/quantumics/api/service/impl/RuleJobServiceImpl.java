@@ -33,12 +33,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,40 +99,32 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
+            List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
                 QsRule rule = ruleRepository.findByRuleId(ruleId);
-                QsRuleJob ruleJob = ruleJobRepository.findByRuleIdAndActiveIsTrue(ruleId);
-                if (ruleJob != null && (ruleJob.getJobStatus().equals(RuleJobStatus.INPROCESS.getStatus()) || ruleJob.getJobStatus().equals(RuleJobStatus.NOT_STARTED.getStatus()))) {
-					inProcessRules.add(ruleId);
+                List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, LocalDate.now());
+                if (CollectionUtils.isNotEmpty(ruleJobs)) {
+                    inProcessRules.add(ruleId);
                     inProcessRulesCount++;
-					continue;
+                    continue;
                 }
-
                 if (rule == null) {
                     response.put("code", HttpStatus.SC_BAD_REQUEST);
                     response.put("message", "Requested rule with Id: " + ruleId + " not found.");
                 }
-                if (ruleJob == null && ruleId > 0) {
-                    ruleJob = new QsRuleJob();
-                    ruleJob.setRuleId(ruleId);
-                    ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
-                    ruleJob.setUserId(userId);
-                    ruleJob.setActive(true);
-                    ruleJob.setCreatedDate(DateTime.now().toDate());
-                    ruleJob.setModifiedDate(DateTime.now().toDate());
-                    ruleJob.setJobSubmittedDate(DateTime.now().toDate());
-                    ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-                    ruleJob.setModifiedBy(ruleJob.getCreatedBy());
-                } else {
-                    ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
-                    ruleJob.setJobOutput(null);
-                    ruleJob.setJobSubmittedDate(DateTime.now().toDate());
-                    ruleJob.setJobFinishedDate(null);
-                    ruleJob.setBatchJobLog(null);
-                    ruleJob.setBatchJobId(0);
-                    ruleJob.setModifiedDate(DateTime.now().toDate());
-                    ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-                }
+
+                QsRuleJob ruleJob = new QsRuleJob();
+                ruleJob.setRuleId(ruleId);
+                ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
+                ruleJob.setUserId(userId);
+                ruleJob.setActive(true);
+                ruleJob.setCreatedDate(DateTime.now().toDate());
+                ruleJob.setModifiedDate(DateTime.now().toDate());
+                ruleJob.setJobSubmittedDate(DateTime.now().toDate());
+                ruleJob.setBusinessDate(LocalDate.now());
+                ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                ruleJob.setModifiedBy(ruleJob.getCreatedBy());
+
                 ruleJob = ruleJobRepository.save(ruleJob);
                 RuleDetails ruleDetails = convertToRuleDetails(rule);
                 ruleJobHelper.submitRuleJob(ruleJob, ruleDetails, controllerHelper.getFullName(userObj.getQsUserProfile()), projectId);
@@ -215,7 +210,7 @@ public class RuleJobServiceImpl implements RuleJobService {
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());
                     ruleJob.setRuleName(rule.getRuleName());
-                    if (ruleJob.getBatchJobLog() != null) {
+                    if (StringUtils.isNotEmpty(ruleJob.getBatchJobLog())) {
                         String batchLog = ruleJob.getBatchJobLog();
                         JsonNode node;
                         try {
