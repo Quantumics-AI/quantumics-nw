@@ -17,5 +17,6 @@ public interface RuleJobService {
     ResponseEntity<Object> cancelRuleJobs(CancelJobRequest ruleJobRequest, int userId, int projectId);
 
     ResponseEntity<Object> fetchRuleJobList(int userId, int projectId);
+    ResponseEntity<Object> getRowCount(String bucketName, String filePath, int userId, int projectId);
 
 }

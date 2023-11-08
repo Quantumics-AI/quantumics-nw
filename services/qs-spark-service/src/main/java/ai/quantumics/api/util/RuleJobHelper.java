@@ -4,6 +4,7 @@ import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.livy.LivyActions;
 import ai.quantumics.api.model.QsRuleJob;
 import ai.quantumics.api.vo.RuleDetails;
+import ai.quantumics.api.vo.RuleJobOutput;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -34,6 +35,7 @@ import static ai.quantumics.api.constants.QsConstants.DUPLICATE_VALUE;
 import static ai.quantumics.api.constants.QsConstants.LEVEL_NAME;
 import static ai.quantumics.api.constants.QsConstants.NULL_VALUE;
 import static ai.quantumics.api.constants.QsConstants.ROW_COUNT;
+import static ai.quantumics.api.constants.QsConstants.ROW_COUNT_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.RULE_OUTPUT_FOLDER;
 import static ai.quantumics.api.constants.QsConstants.RULE_TYPE_NAME;
 import static ai.quantumics.api.constants.QsConstants.S3_OUTPUT_PATH;
@@ -128,6 +130,26 @@ public class RuleJobHelper {
         livyActions.cancelBatchJob(batchJobId);
     }
 
+    public RuleJobOutput submitRowCountJob(String bucketName, String filePath, int projectId) throws Exception {
+        log.info("Invoking submitRowCountJob API for bucketName {} and filePath {}", bucketName, filePath);
+        final StringBuilder fileContents = new StringBuilder();
+        final String jobName = String.format("%d-etl-%d.py", new Date().getTime(), projectId);
+        String scriptStr = "";
+
+        readLinesFromTemplate(fileContents, ROW_COUNT_TEMPLATE_NAME);
+        scriptStr = rowCountEtlScriptVarsInit(fileContents, bucketName, filePath, jobName);
+
+        final URL s3ContentUpload = awsAdapter.s3ContentUploadV2(qsEtlScriptBucket, jobName, scriptStr);
+        final String scriptFilePath = String.format("%s%s", qsEtlScriptBucket, jobName);
+
+        log.info("uploaded to - s3 Full Path - {} and to path {}", s3ContentUpload, scriptFilePath);
+
+        RuleJobOutput ruleJobOutput = livyActions.invokeRowCountJobOperation(scriptFilePath, qsRuleJobBucket, jobName);
+        log.info("Batch Id received after the Livy Job submission is: {}", ruleJobOutput);
+        return ruleJobOutput;
+    }
+
+
     private String getJobName(QsRuleJob qsRuleJob) {
         return String.format("%d-etl-%d.py", new Date().getTime(), qsRuleJob.getRuleId());
     }
@@ -179,6 +201,18 @@ public class RuleJobHelper {
         temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
         temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
         temp = temp.replace(ACCEPTANCE_PER, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getAcceptance()));
+        return temp;
+    }
+
+    public String rowCountEtlScriptVarsInit(StringBuilder fileContents, String bucket, String file, String jobName) {
+        String temp;
+        jobName = jobName.replace(".py", "");
+
+        final String outputBucketName =
+                String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
+        temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", bucket));
+        temp = temp.replace(SOURCE_PATH, String.format("'%s'", file));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         return temp;
     }
 

@@ -108,6 +108,7 @@ public class QsConstants {
   public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/Write_Xlsx_To_Csv.py";
   public static final String QS_LIVY_TEMPLATE_NAME = "ai/quantumics/ml/etl_livy_template.py";
   public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Row_Count_Template.py";
+  public static final String ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/Row_Count_Template.py";
   public static final String DQ_COLUMN_SUM_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Sum_Of_Column_Template.py";
   public static final String DQ_NULL_VALUE_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Null_Value_Template.py";
   public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Row_Template.py";

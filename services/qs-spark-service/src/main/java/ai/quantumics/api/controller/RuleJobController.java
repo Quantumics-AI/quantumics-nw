@@ -77,6 +77,21 @@ public class RuleJobController {
     return ruleJobService.fetchRuleJobList(userId, projectId);
   }
 
+  @ApiOperation(value = "rulejob", response = Json.class)
+  @GetMapping("/rowCount/{userId}/{projectId}")
+  @ApiResponses(
+          value = {
+                  @ApiResponse(code = 200, message = "OKAY"),
+                  @ApiResponse(code = 409, message = "Failure message")
+          })
+  public ResponseEntity<Object> rowCount(
+          @RequestParam(value = "bucketName") final String bucketName,
+          @RequestParam(value = "filePath") final String filePath,
+          @PathVariable(value = "userId") final int userId,
+          @PathVariable(value = "projectId") final int projectId)
+          throws Exception {
+    return ruleJobService.getRowCount(bucketName, filePath, userId, projectId);
+  }
   @GetMapping("/getRuleJobStatus")
   public ResponseEntity<List<String>> getRuleJobStatus() {
     return ResponseEntity.status(HttpStatus.OK).body(RuleJobStatus.getStatusList());
