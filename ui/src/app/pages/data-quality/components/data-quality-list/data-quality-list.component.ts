@@ -65,6 +65,7 @@ export class DataQualityListComponent implements OnInit {
   searchSuccessClass: string = 'search-success-btn';
   searchInvalidClass: string = 'search-disable-btn';
   public searchNull: boolean = false;
+  public totalNumberOfRules: number;
 
   constructor(
     private readonly router: Router,
@@ -100,6 +101,7 @@ export class DataQualityListComponent implements OnInit {
       this.dataQualityList = response?.result?.content;
       this.ruleCount =  response?.result?.content;
       this.paginationData = response?.result;
+      this.totalNumberOfRules = response?.result?.totalElements;
       // this.pageSize = this.paginationData.size;
       // this.endIndex = this.pageSize;
       // if (this.dataQualityList.length > 1) {
@@ -117,6 +119,7 @@ export class DataQualityListComponent implements OnInit {
   }
 
   public searchRule(): void {
+    this.buttonDisabled = true;
     this.ruleCreationService.getSearchRule(this.userId, this.projectId, this.searchString, this.pageNumebr, this.pageLength).subscribe((response) => {
       // debugger
       console.log(response);
@@ -128,6 +131,7 @@ export class DataQualityListComponent implements OnInit {
         this.dataQualityList = response?.result?.content;
         this.ruleCount =  response?.result?.content;
         this.paginationData = response?.result;
+        this.totalNumberOfRules = response?.result?.totalElements;
       }
       
     }, (error) => {
@@ -309,6 +313,7 @@ export class DataQualityListComponent implements OnInit {
       
       this.dataQualityList = response?.result?.content;
       this.paginationData = response?.result;
+      this.totalNumberOfRules = response?.result?.totalElements;
       this.loading = false;
     }, (error) => {
       this.loading = false;
@@ -334,6 +339,8 @@ export class DataQualityListComponent implements OnInit {
     this.buttonDisabled = str.trim() === '';
     if (str.length == 0) {
       this.searchDiv = false;
+      // this.isSearch = false;
+      this.getRules();
     } else {
       this.searchDiv = true;
     }
