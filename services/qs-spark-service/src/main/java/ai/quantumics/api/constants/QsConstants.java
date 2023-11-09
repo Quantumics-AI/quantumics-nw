@@ -95,28 +95,30 @@ public class QsConstants {
   
   // ANALYTICS Constants
   public static final String PII_DETECTION = "pii";
-  public static final String PII_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/PII_Detection.py";
+  public static final String PII_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/pii_detection.py";
   public static final String OUTLIERS_DETECTION = "outliers";
 
-  public static final String COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/Column_Value_Freq.py";
+  public static final String COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/column_value_freq.py";
 
-  public static final String FILE_STATS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/File_Statistics.py";
-  public static final String OUTLIERS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/Outliers_Detection.py";
-  public static final String DELTA_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/Delta_Detection.py";
-  public static final String PII_COL_DETECTION_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/PII_Column_Detection.py";
+  public static final String FILE_STATS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/file_statistics.py";
+  public static final String OUTLIERS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/outliers_detection.py";
+  public static final String DELTA_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/delta_detection.py";
+  public static final String PII_COL_DETECTION_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/pii_column_detection.py";
   public static final String QS_LIVY_TEMPLATE_ENG_NAME = "ai/quantumics/ml/etl_livy_template_eng.py";
-  public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/Write_Xlsx_To_Csv.py";
+  public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/write_xlsx_to_csv.py";
   public static final String QS_LIVY_TEMPLATE_NAME = "ai/quantumics/ml/etl_livy_template.py";
-  public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Row_Count_Template.py";
-  public static final String DQ_COLUMN_SUM_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Sum_Of_Column_Template.py";
-  public static final String DQ_NULL_VALUE_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Null_Value_Template.py";
-  public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Row_Template.py";
-  public static final String DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Duplicate_Value_Column_Template.py";
-  public static final String DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Data_Profile_Table_Level_Template.py";
-  public static final String DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/DQ_Data_Profile_Column_Level_Template.py";
+  public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/dq_row_count_template.py";
+  public static final String ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/row_count_template.py";
+  public static final String DQ_COLUMN_SUM_TEMPLATE_NAME = "ai/quantumics/ml/dq_sum_of_column_template.py";
+  public static final String DQ_NULL_VALUE_TEMPLATE_NAME = "ai/quantumics/ml/dq_null_value_template.py";
+  public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/dq_duplicate_value_row_template.py";
+  public static final String DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME = "ai/quantumics/ml/dq_duplicate_value_column_template.py";
+  public static final String DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/dq_data_profile_table_level_template.py";
+  public static final String DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/dq_data_profile_column_level_template.py";
 
   public static final String RULE_OUTPUT_FOLDER = "ruleoutput";
   public static final String SOURCE_BUCKET = "$SOURCE_BUCKET";
+  public static final String APP_RULE_DETAILS = "$APP_RULE_DETAILS";
   public static final String SOURCE_PATH = "$SOURCE_PATH";
   public static final String TARGET_BUCKET = "$TARGET_BUCKET";
   public static final String TARGET_PATH = "$TARGET_PATH";

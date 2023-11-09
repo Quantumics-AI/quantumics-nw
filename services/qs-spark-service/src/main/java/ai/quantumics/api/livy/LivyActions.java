@@ -1223,6 +1223,60 @@ public class LivyActions {
         return batchJobId;
     }
 
+    public RuleJobOutput invokeRowCountJobOperation(final String pysparkScriptS3FileLoc, String bucketName, String jobName) throws Exception {
+        log.info("Invoked the Livy Job for running this Row count Job...");
+
+        final JsonObject payload = new JsonObject();
+        payload.addProperty("file", pysparkScriptS3FileLoc);
+        payload.addProperty("executorMemory", executorMemory);
+        payload.addProperty("driverMemory", driverMemory);
+        String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+
+        final JsonNode fromJson = mapper.readTree(jsonRes);
+        final int batchJobId = fromJson.get("id").asInt();
+        log.info(" Batch Job ID {}", batchJobId);
+        RuleJobOutput ruleJobOutput = null;
+
+        final JsonNode batchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.success.toString());
+        if (batchResponse != null) {
+            String batchJobState = batchResponse.get("state").asText();
+
+            if (LivySessionState.success.toString().equals(batchJobState)) {
+                jobName = jobName.replace(".py", "");
+                S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                if(s3Object == null) { //Error in livy job
+                   log.info("Failed running the row count Job...");
+                   throw new RuntimeException("Failed running the row count Job");
+                }
+                S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+                // Read the JSON data from the input stream
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+                    ruleJobOutput = objectMapper.readValue(stringBuilder.toString(), RuleJobOutput.class);
+                    awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                    log.info("Inside Completed running the Row count Job..{}",ruleJobOutput.getJobOutput());
+                }
+                log.info("Completed running the Row count Job...");
+            } else {
+                List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                log.info("Failed running the row count Job..{}", batchJobLog);
+            }
+        } else {
+            log.info("Failed running the Row count Job");
+        }
+
+        return ruleJobOutput;
+    }
     private void updateBatchJobId(final int ruleJobId, final int batchJobId, int projectId, String modifiedBy) throws SQLException {
         dbUtil.changeSchema("public");
         final Projects project = projectService.getProject(projectId);

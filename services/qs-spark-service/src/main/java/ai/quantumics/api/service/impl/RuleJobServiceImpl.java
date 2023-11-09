@@ -26,6 +26,7 @@ import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.RuleJobHelper;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
+import ai.quantumics.api.vo.RuleJobOutput;
 import ai.quantumics.api.vo.RuleTypeDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -45,6 +46,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ai.quantumics.api.constants.QsConstants.PUBLIC;
 
 @Slf4j
 @Service
@@ -234,6 +237,32 @@ public class RuleJobServiceImpl implements RuleJobService {
         return ResponseEntity.ok().body(response);
     }
 
+    @Override
+    public ResponseEntity<Object> getRowCount(String bucketName, String filePath, int userId, int projectId) {
+        log.info("Invoking getRowCount API for bucketName {} and filePath {}", bucketName, filePath);
+        final Map<String, Object> response = new HashMap<>();
+        try {
+            dbUtil.changeSchema(PUBLIC);
+            final Projects project = projectService.getProject(projectId, userId);
+            if (project == null) {
+                response.put("code", HttpStatus.SC_BAD_REQUEST);
+                response.put("message", "Requested project with Id: " + projectId + " for User with Id: " + userId + " not found.");
+                return ResponseEntity.ok().body(response);
+            }
+            QsUserV2 userObj = userService.getUserById(userId);
+            if (userObj == null) {
+                response.put("code", HttpStatus.SC_BAD_REQUEST);
+                response.put("message", "Requested User with Id: " + userId + " not found.");
+                return ResponseEntity.ok().body(response);
+            }
+            RuleJobOutput jobOutput = ruleJobHelper.submitRowCountJob(bucketName, filePath, projectId);
+            response.put("message", jobOutput.getJobOutput());
+        } catch (final Exception ex) {
+            response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.put("message", "Error while submitting row count job:  " + ex.getMessage());
+        }
+        return ResponseEntity.ok().body(response);
+    }
 
     public RuleDetails convertToRuleDetails(QsRule qsRule) {
         Gson gson = new Gson();

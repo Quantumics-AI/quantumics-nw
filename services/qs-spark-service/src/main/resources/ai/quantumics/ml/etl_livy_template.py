@@ -13,7 +13,7 @@ import unicodedata
 
  
 # SPARK Session & Glue Catalog Configuration (Important)
-spark = SparkSession.builder.appName("Quantumics").config("hive.metastore.client.factory.class", "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory").enableHiveSupport().getOrCreate()
+spark = SparkSession.builder.appName("EDI-DQ-RULE").config("hive.metastore.client.factory.class", "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory").enableHiveSupport().getOrCreate()
 
 dbname=$DB_NAME
 dbtable=$DB_TABLE

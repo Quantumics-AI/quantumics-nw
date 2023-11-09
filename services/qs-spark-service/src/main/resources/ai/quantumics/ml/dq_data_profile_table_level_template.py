@@ -6,7 +6,7 @@ import re
 import boto3
 
 # Initialize a Spark session
-spark = SparkSession.builder.appName("Quantumics").getOrCreate()
+spark = SparkSession.builder.appName("EDI-DQ-RULE_DATA-PROFILE-TABLE-LEVEL").getOrCreate()
 
 # Define your S3 bucket and file paths here
 bucket1 = $SOURCE_BUCKET
