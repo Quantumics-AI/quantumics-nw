@@ -985,6 +985,7 @@ BEGIN
         	active boolean default true,
         	batch_job_log text COLLATE pg_catalog."default",
         	batch_job_id integer,
+        	business_date DATE,
         	job_submitted_date timestamp without time zone,
         	job_finished_date timestamp without time zone,
         	CONSTRAINT qsp_rule_job_pkey PRIMARY KEY (job_id)

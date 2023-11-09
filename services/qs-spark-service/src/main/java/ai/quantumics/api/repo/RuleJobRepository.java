@@ -12,6 +12,7 @@ import ai.quantumics.api.model.QsRuleJob;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -20,4 +21,5 @@ public interface RuleJobRepository extends JpaRepository<QsRuleJob, Integer> {
     QsRuleJob findByJobIdAndActiveIsTrue(int jobId);
     List<QsRuleJob> findByJobIdInAndActiveIsTrue(List<Integer> jobIds);
     List<QsRuleJob> findAllByActiveTrueOrderByModifiedDateDesc();
+    List<QsRuleJob> findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(int ruleId, List<String> statuses, LocalDate businessDate);
 }

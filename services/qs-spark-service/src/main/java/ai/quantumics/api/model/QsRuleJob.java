@@ -11,6 +11,7 @@ package ai.quantumics.api.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -30,6 +31,7 @@ public class QsRuleJob {
   private int batchJobId;
   private int userId;
   private boolean active;
+  private LocalDate businessDate;
   private Date jobSubmittedDate;
   private Date jobFinishedDate;
   private Date createdDate;
