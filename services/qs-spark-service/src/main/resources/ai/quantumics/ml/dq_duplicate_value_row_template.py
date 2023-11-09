@@ -4,7 +4,7 @@ import json
 import os
 
 # Initialize a Spark session
-spark = SparkSession.builder.appName("Quantumics").getOrCreate()
+spark = SparkSession.builder.appName("EDI-DQ-RULE_DUPLICATE-VALUE-ROW").getOrCreate()
 
 s3_bucket_name = $SOURCE_BUCKET
 s3_file_path = $SOURCE_PATH

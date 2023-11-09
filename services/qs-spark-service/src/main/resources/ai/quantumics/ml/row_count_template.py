@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 import json
 
 # Initialize a Spark session
-spark = SparkSession.builder.appName("Quantumics").getOrCreate()
+spark = SparkSession.builder.appName("EDI-DQ-RULE").getOrCreate()
 
 bucket = $SOURCE_BUCKET
 filepath = $SOURCE_PATH

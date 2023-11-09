@@ -3,7 +3,7 @@ from pyspark.sql.functions import col
 import json
 
 # Initialize a Spark session
-spark = SparkSession.builder.appName("Quantumics").getOrCreate()
+spark = SparkSession.builder.appName("EDI-DQ-RULE_DATA-PROFILE-COLUMN-LEVEL").getOrCreate()
 
 # Replace these with actual values
 bucket1 = $SOURCE_BUCKET
