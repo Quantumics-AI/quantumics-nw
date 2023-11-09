@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.util.Date;
 
 import static ai.quantumics.api.constants.QsConstants.ACCEPTANCE_PER;
+import static ai.quantumics.api.constants.QsConstants.APP_RULE_DETAILS;
 import static ai.quantumics.api.constants.QsConstants.COLUMNS_DETAILS;
 import static ai.quantumics.api.constants.QsConstants.COLUMN_LEVEL;
 import static ai.quantumics.api.constants.QsConstants.DATA_COMPLETENESS;
@@ -211,6 +212,7 @@ public class RuleJobHelper {
         final String outputBucketName =
                 String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
         temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", bucket));
+        temp = temp.replace(APP_RULE_DETAILS, String.format("'%s'", bucket + " - " + file + " - " + jobName));
         temp = temp.replace(SOURCE_PATH, String.format("'%s'", file));
         temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
         return temp;

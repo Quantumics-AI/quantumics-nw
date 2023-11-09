@@ -118,6 +118,7 @@ public class QsConstants {
 
   public static final String RULE_OUTPUT_FOLDER = "ruleoutput";
   public static final String SOURCE_BUCKET = "$SOURCE_BUCKET";
+  public static final String APP_RULE_DETAILS = "$APP_RULE_DETAILS";
   public static final String SOURCE_PATH = "$SOURCE_PATH";
   public static final String TARGET_BUCKET = "$TARGET_BUCKET";
   public static final String TARGET_PATH = "$TARGET_PATH";
