@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
@@ -69,7 +70,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
-
+@Slf4j
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Autowired
@@ -112,6 +113,15 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     public ResponseEntity<Object> updateConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, Integer id, String userName) throws DatasourceNotFoundException {
         final Map<String, Object> response = new HashMap<>();
         AWSDatasource dataSource = awsConnectionRepo.findByIdAndActive(id,true).orElseThrow(() -> new DatasourceNotFoundException(DATA_SOURCE_NOT_EXIST));
+        Optional<AWSDatasource> sameDataSource = awsConnectionRepo.findByIdAndConnectionNameIgnoreCaseAndActiveTrue(id, awsDatasourceRequest.getConnectionName());
+        if (sameDataSource.isPresent()) {
+            dataSource.setModifiedBy(userName);
+            dataSource.setModifiedDate(DateTime.now().toDate());
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", DATA_SOURCE_UPDATED);
+            response.put("result", createResponse(awsConnectionRepo.saveAndFlush(dataSource)));
+            return ResponseEntity.ok().body(response);
+        }
         Optional<AWSDatasource> dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActiveTrue(awsDatasourceRequest.getConnectionName().trim());
         if (dataSources.isPresent()) {
             response.put("code", HttpStatus.SC_OK);
@@ -239,8 +249,13 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 throw new BadRequestException(CONNECTION_FAILED);
             }
         } else {
-            amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
-            amazonS3Client.listBuckets();
+            try {
+                amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+                amazonS3Client.listBuckets();
+            } catch(Exception e){
+                    log.info(e.getMessage());
+                    throw new BadRequestException(CONNECTION_FAILED);
+                }
         }
         return CONNECTION_SUCCESSFUL;
     }

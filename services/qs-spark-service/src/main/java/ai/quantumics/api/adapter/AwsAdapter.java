@@ -11,7 +11,7 @@ package ai.quantumics.api.adapter;
 import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.AwsAccessType;
-import ai.quantumics.api.exceptions.BucketNotFoundException;
+import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.QsRecordNotFoundException;
 import ai.quantumics.api.model.CleansingParam;
 import ai.quantumics.api.model.FileMetaDataAwsRef;
@@ -70,7 +70,6 @@ import com.amazonaws.services.cloudwatch.model.ListMetricsRequest;
 import com.amazonaws.services.cloudwatch.model.ListMetricsResult;
 import com.amazonaws.services.cloudwatch.model.Metric;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.BucketAccelerateConfiguration;
 import com.amazonaws.services.s3.model.BucketAccelerateStatus;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -131,7 +130,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static ai.quantumics.api.constants.DatasourceConstants.BUCKET_NOT_EXIST;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PATTERN;
 import static ai.quantumics.api.constants.QsConstants.ENG;
 import static ai.quantumics.api.constants.QsConstants.PROCESSED;
@@ -2802,19 +2801,9 @@ public class AwsAdapter {
 			HeadBucketRequest bucketLocationRequest =  new HeadBucketRequest(bucketName);
 			s3Client.headBucket(bucketLocationRequest);
 			log.info("Connection established success");
-		}catch(AmazonServiceException exception){
-			String region = getRegionFromMessage(exception.getErrorMessage());
-			if(region == null){
-				log.error("Error while creating s3 client {}", exception.getErrorMessage());
-				throw new BucketNotFoundException(BUCKET_NOT_EXIST);
-			}
-			s3Client = AmazonS3ClientBuilder
-					.standard()
-					.withRegion(region)
-					.build();
-			return s3Client;
 		}catch(Exception e){
 			log.info(e.getMessage());
+			throw new BadRequestException(CONNECTION_FAILED);
 		}
 		return s3Client;
 	}
