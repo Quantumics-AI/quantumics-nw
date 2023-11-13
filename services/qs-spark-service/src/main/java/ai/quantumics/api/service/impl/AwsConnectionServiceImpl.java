@@ -230,7 +230,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String getFoldersAndFilePath(String bucketName) throws IOException {
-        //List<String> objectNames = new ArrayList<>();
         List<S3ObjectSummary> objectSummaries = new ArrayList<>();
         listObjects(bucketName, "",objectSummaries);
         return getFoldersAndFilePathHierarchy(objectSummaries);
