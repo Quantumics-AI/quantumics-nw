@@ -81,7 +81,7 @@ export class ListAwsComponent {
   }
 
   public getAwsList(): void {
-    this.loading = true;
+    // this.loading = true;
     this.sourceDataService.getSourceData(+this.projectId, this.userId, this.pageNumebr, this.pageLength).subscribe((response) => {
       this.loading = false;
       console.log("getAws", response);
@@ -104,6 +104,7 @@ export class ListAwsComponent {
   public searchRule(): void {
     this.buttonDisabled = true;
     this.isSearch = true;
+    this.pageNumebr = 1;
     this.sourceDataService.getSearchConnection(this.userId, +this.projectId, this.searchString, this.filter, this.pageNumebr, this.pageLength).subscribe((response) => {
       // debugger
       console.log("------->",response);
@@ -235,6 +236,8 @@ export class ListAwsComponent {
   searchInput(str) {
     this.searchString = str;
     this.buttonDisabled = str.trim() === '';
+    this.searchNull = false;
+    this.getAwsList();
     if (str.length == 0) {
       this.searchDiv = false;
       this.isSearch = false;

@@ -60,6 +60,7 @@ export class BrowseFileComponent implements OnInit {
   public fileContent: any;
   public columnType: any;
   public rowCount: number;
+  public totalRowCount: any;
 
   public childData: any;
   public isShowTable: boolean = false;
@@ -96,7 +97,6 @@ export class BrowseFileComponent implements OnInit {
 
   public getBrowseFileData(): void {
     this.ruleCreationService.getBrowseFile(this.userId, +this.projectId, this.bucketName).subscribe((res) => {
-      console.log("Browse Data", res);
       
       this.fileStructure = res;
     })
@@ -144,7 +144,7 @@ export class BrowseFileComponent implements OnInit {
       this.openNodes.push(node);
     }
 
-    console.log(this.openNodes);
+    // console.log(this.openNodes);
     
   }
 
@@ -165,6 +165,19 @@ export class BrowseFileComponent implements OnInit {
     // })
   }
   
+  public formatFileSize(bytes): string {
+    if (bytes < 1024) {
+      return bytes + " bytes";
+    } else if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(2) + " KB";
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    } else if (bytes < 1024 * 1024 * 1024 * 1024) {
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+    } else {
+      return (bytes / (1024 * 1024 * 1024 * 1024)).toFixed(2) + " TB";
+    }
+  }
 
   public showTable(file: any): void {
     // debugger
@@ -176,17 +189,18 @@ export class BrowseFileComponent implements OnInit {
       this.openNodes.push(file.fileName);
     }
 
-    console.log('show table', file.fileName , 'open nodes:', this.openNodes );
-    console.log('path',this.openNodes.join('/') );
+    // console.log('show table', file.fileName , 'open nodes:', this.openNodes );
+    // console.log('path',this.openNodes.join('/') );
     this.filePath = this.openNodes.join('/');
     // myArray.join('/')
     this.getFileData();
+    this.getRowCount();
     
   }
 
   public getFileData(): void {
     this.ruleCreationService.getFileContent(this.userId, +this.projectId, this.bucketName, this.filePath).subscribe((res) => {
-      console.log("Browse Data", res);
+      
       this.headers = res.headers;
       this.fileContent = res.content;
       this.columnType = res.columnDatatype;
@@ -199,6 +213,19 @@ export class BrowseFileComponent implements OnInit {
       this.snakbar.open(error);
       this.filePath = "";
       this.openNodes.pop();
+    })
+  }
+
+  
+  public getRowCount(): void {
+    this.totalRowCount = '';
+    this.ruleCreationService.getFileRowCount(this.userId, +this.projectId, this.bucketName, this.filePath).subscribe((res) => {
+      console.log("Row data", res);
+      const parsedObject = JSON.parse(res.message);
+      this.totalRowCount = parsedObject?.rowCount;
+      console.log("Row data", this.totalRowCount);
+    }, (error) => {
+      this.snakbar.open(error);
     })
   }
 

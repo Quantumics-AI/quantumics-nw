@@ -28,6 +28,7 @@ export class EditDataSourceComponent implements OnInit {
   public alreadyExist: boolean = false;
   public pageSize: number = 1;
   public pageLength: number = 100;
+  public editable: boolean = false;
 
   constructor(
     public modal: NgbActiveModal,
@@ -115,6 +116,7 @@ export class EditDataSourceComponent implements OnInit {
 
     // const re = /^[a-zA-Z0-9_]+$/;
     this.alreadyExist = false;
+    this.editable = true;
     if (this.fg.controls.dataSourceName.value != "") {
 
       const validCapital = String(str).match(/^([A-Z])/);
@@ -143,9 +145,12 @@ export class EditDataSourceComponent implements OnInit {
   }
 
   public checkExistName(): void {
-    if(this.sourceData.connectionName === this.fg.get('dataSourceName').value) {
-      this.snakbar.open("No change in the name");
-      this.modal.close();
+    const checkD = this.sourceData.connectionName.toLowerCase() === this.fg.get('dataSourceName').value.toLowerCase();
+    
+    if(checkD) {
+      // this.snakbar.open("No change in the name");
+      // this.modal.close();
+      this.updateData();
     } else {
       const name = this.fg.get('dataSourceName').value;
       this.sourceDataService.getIsExistConnection(this.userId, this.projectId, name, this.pageSize, this.pageLength).subscribe((response) => {

@@ -74,7 +74,8 @@
                                   </td>
                                   <td class="child-node">{{file?.fileLastModified | date: 'dd-MM-yy, hh:mm a'}}</td> <!-- Empty cell for createdDateTime for child nodes -->
                                   <td class="child-node">File</td>
-                                  <td class="child-node">{{convertKBtoMB(file.fileSize) | number: '1.2-2'}} MB</td> <!-- Empty cell for createdBy for child nodes -->
+                                  <!-- <td class="child-node">{{convertKBtoMB(file.fileSize) | number: '1.2-2'}} MB</td> -->
+                                  <td class="child-node">{{formatFileSize(file.fileSize)}}</td> <!-- Empty cell for createdBy for child nodes -->
                                 </tr>
                               </ng-container>
                             </ng-container>
@@ -93,7 +94,7 @@
 <div *ngIf="isShowTable"
     style="position: absolute; bottom: 0px; border: 1px solid rgba(0, 0, 0, 0.125);width: 100%;height: 400px;background: #fff; z-index: 999;">
     <app-show-file (close)="isShowTable = !isShowTable" [file]="selectedFile" [rowCount]="rowCount" 
-    [filePath]="filePath" [fileContent]="fileContent" [headers]="headers" [columnType]="columnType"></app-show-file>
+    [filePath]="filePath" [fileContent]="fileContent" [headers]="headers" [columnType]="columnType" [totalRowCount]="totalRowCount"></app-show-file>
 </div>
 
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, importProvidersFrom } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -11,6 +11,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { RuleCreationService } from '../../services/rule-creation.service';
 import { StatusDeleteConfirmationComponent } from '../status-delete-confirmation/status-delete-confirmation.component';
 
+
+function alwaysInvalid(control: AbstractControl): { alwaysInvalid: true } {
+  return { alwaysInvalid: true };
+}
 @Component({
   selector: 'app-edit-rule',
   templateUrl: './edit-rule.component.html',
@@ -60,7 +64,9 @@ export class EditRuleComponent implements OnInit {
   public getRuleList: any;
   public statusBody: any = ["Active","Inactive"];
   public connectionPage: number = 1;
-  public connectionPageSize: number = 100;
+  public connectionPageSize: number = 10000;
+  public selectedStatusValue: string;
+  public editableForm: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -87,6 +93,7 @@ export class EditRuleComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loading = true;
     const ruleDescriptionPattern = /^[A-Za-z0-9\s!@#$%^&*()\-_+=\[\]{}|;:'",.<>?/~`\\]*$/;
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
@@ -114,12 +121,14 @@ export class EditRuleComponent implements OnInit {
       selectMultipleAttribute: new FormControl({ value: '', disabled: true }),
       percentage: new FormControl({ value: '', disabled: true }),
       //
-      status: new FormControl('', Validators.required)
+      status: new FormControl('', Validators.required),
+      dummyValidator: ['', [alwaysInvalid]]
     });
 
     this.getDataConnection();
     this.getBucketData();
     // this.getRules();
+    // this.fg.invalid == true;
   }
 
   ngAfterViewInit(): void {
@@ -181,6 +190,10 @@ export class EditRuleComponent implements OnInit {
             this.selectedMultipleAttributeName.push(c); 
           })
         }
+
+        this.fg.removeControl('dummyValidator');
+        this.fg.updateValueAndValidity();
+        this.loading = false;
         
         // this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
         //   this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
@@ -197,7 +210,7 @@ export class EditRuleComponent implements OnInit {
 
   public getDataConnection(): void {
     this.ruleCreationService.getDataConnection(this.projectId, this.userId, this.connectionPage, this.connectionPageSize).subscribe((response) => {
-      this.dataConnectionList = response;
+      this.dataConnectionList = response?.content;
     }, (error) => {
 
     })
@@ -221,20 +234,21 @@ export class EditRuleComponent implements OnInit {
   }
 
   public getRules(): void {
-    this.loading = true;
+    // this.loading = true;
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
       
-      this.loading = false;
+      // this.loading = false;
       this.getRuleList = response?.result?.content;
       
     }, (error) => {
-      this.loading = false;
+      // this.loading = false;
     });
   }
 
   public checkExistName(): void {
     const ruleName = this.fg.get('ruleName').value;
-    if (this.fetchEditRule?.ruleName != ruleName){
+    const checkD = this.fetchEditRule?.ruleName.toLowerCase() === this.fg.get('ruleName').value.toLowerCase();
+    if (!checkD){
       this.ruleCreationService.existRuleName(this.userId, this.projectId, ruleName, this.statusBody).subscribe((response) => {
       
         if (response.isExist) {
@@ -250,11 +264,40 @@ export class EditRuleComponent implements OnInit {
     
   }
 
+  public testUpdateData(): void {
+    const ruleName = this.fg.get('ruleName').value;
+    const checkD = this.fetchEditRule?.ruleName.toLowerCase() === this.fg.get('ruleName').value.toLowerCase();
+    if (checkD){
+      this.updateRuleFunction();
+    } else {
+      
+      this.ruleCreationService.existRuleName(this.userId, this.projectId, ruleName, this.statusBody).subscribe((response) => {
+      
+        if (response.isExist) {
+          this.alreadyExist = true;
+          this.snakbar.open(response.message);
+        } else {
+          this.alreadyExist = false;
+          this.updateRuleFunction();
+        }
+        
+      }, (error) => {
+  
+      });
+    }
+  }
+
   checkIfNameExists() {
+    this.alreadyExist = false;
+    this.editableForm = true;
     if(this.fg.get('ruleName').value.length <= 0){
       this.alreadyExist = false;
     }
     
+  }
+
+  checkDescription(){
+    this.editableForm = true;
   }
 
   public selectedType(type: boolean): void {
@@ -266,6 +309,7 @@ export class EditRuleComponent implements OnInit {
   }
 
   public selectedStatus(s: any): void {
+    this.editableForm = true;
     // if (s == 'Deleted') {
     //   const modalRef = this.modalService.open(StatusDeleteConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
     //   modalRef.result.then((result) => {
@@ -401,9 +445,9 @@ export class EditRuleComponent implements OnInit {
   }
 
   public updateData(): void {
-    const value = this.fg.get('ruleName').value;
-    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-    this.fg.get('ruleName').setValue(titleCaseValue);
+    // const value = this.fg.get('ruleName').value;
+    // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    // this.fg.get('ruleName').setValue(titleCaseValue);
     if (this.fg.controls.sourceAndTarget.value) {
       this.saveRulePayload = {
         ruleId: this.ruleId,

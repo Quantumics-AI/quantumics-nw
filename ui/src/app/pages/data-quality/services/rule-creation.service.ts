@@ -59,6 +59,11 @@ export class RuleCreationService {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/content/${userId}/${projectId}?bucket=${bucketName}&file=${filePath}`);
   }
 
+  //file row Count
+  public getFileRowCount(userId: number, projectId: number, bucketName: string, filePath: string): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/rulejob/rowCount/${userId}/${projectId}?bucketName=${bucketName}&filePath=${filePath}`);
+  }
+
   // rule job
   public runRule(userId:number, projectId:number, request: any): Observable<any> {
     const headers = new HttpHeaders().set('Content-Type', 'application/json');

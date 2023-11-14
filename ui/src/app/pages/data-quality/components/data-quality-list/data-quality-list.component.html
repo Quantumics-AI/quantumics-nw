@@ -14,7 +14,7 @@
                         <div>
                             <div class="di mr-t-6">
                                 <p class="card-main-text">List of rules</p>
-                                <p></p>
+                                <p class="p1 mr-b-0"> Total {{selectedStatus}} Rules: ({{totalNumberOfRules}})</p>
                             </div>
                             <div class="pull-right">
                                 <span (click)="viewRunning()" class="mr-r-20 view-list cp">View Running Rules</span>
@@ -25,7 +25,7 @@
                                                 <img src="assets/img/govern/search.svg">
                                             </span>
                                         </div>
-                                        <input type="text" id="searchTerm" [(ngModel)]="searchTerm.ruleName" class="form-control search-input br-bx-n h36"
+                                        <input type="text" id="searchTerm" [(ngModel)]="searchTerm.ruleName" class="form-control search-input br-bx-n h36 z-0"
                                             placeholder="Search by Rule Name" aria-label="Username" aria-describedby="basic-addon1"
                                             (ngModelChange)="searchInput($event)">
                                         <div class="input-group-append">
@@ -95,7 +95,7 @@
                                         <ng-container *ngIf="!searchNull">
                                             <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
                                                 <td class="pt-2"> <label>
-                                                    <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
+                                                    <input *ngIf="dataQuality.status == 'Active'" type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
                                                 </label></td>
                                                 <td class="fn text-over">
                                                     <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>

@@ -255,4 +255,35 @@ export class ViewRunningRulesComponent implements OnInit {
     }
     
   }
+
+  convertToUKTimeZone(timestamp: number) {
+    if(timestamp) {
+      const ukTimestamp = new Date(timestamp);
+
+      // Check if Daylight Saving Time (DST) is in effect (typically from the last Sunday in March to the last Sunday in October)
+      const today = new Date();
+      const dstStart = new Date(today.getFullYear(), 2, 31 - ((5 * today.getFullYear() / 4 + 4) % 7), 1); // Last Sunday in March
+      const dstEnd = new Date(today.getFullYear(), 9, 31 - ((5 * today.getFullYear() / 4 + 1) % 7), 1); // Last Sunday in October
+      const isDST = today > dstStart && today < dstEnd;
+
+      // Adjust for DST (1 hour ahead if DST is in effect)
+      if (isDST) {
+        ukTimestamp.setHours(ukTimestamp.getHours() + 1);
+      }
+
+      const day = ukTimestamp.getUTCDate();
+      const month = ukTimestamp.getUTCMonth() + 1; // Months are zero-based, so add 1
+      const year = ukTimestamp.getUTCFullYear() % 100; // Get the last two digits of the year
+      const hours = ukTimestamp.getUTCHours();
+      const minutes = ukTimestamp.getUTCMinutes();
+
+      // Format date components with leading zeros if needed
+      const formattedDate = `${day < 10 ? '0' : ''}${day}-${month < 10 ? '0' : ''}${month}-${year}`;
+      const formattedTime = `${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+      const amPm = hours < 12 ? 'AM' : 'PM';
+
+      return `${formattedDate}, ${formattedTime} ${amPm}`;
+    }
+    
+  }
 }

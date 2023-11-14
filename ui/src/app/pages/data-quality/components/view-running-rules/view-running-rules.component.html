@@ -54,8 +54,14 @@
                                     <td [ngClass]="{'redStatus': view?.jobStatus === 'Failed' || view?.jobStatus === 'Cancelled'}">
                                         {{view?.jobStatus}}
                                     </td>
-                                    <td>{{view?.jobSubmittedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
-                                    <td>{{view?.jobFinishedDate | date: 'dd-MM-yy, hh:mm a'}}</td>
+                                    <td>
+                                        <!-- {{view?.jobSubmittedDate | date: 'dd-MM-yy, hh:mm a'}} -->
+                                        {{convertToUKTimeZone(view?.jobSubmittedDate)}}
+                                    </td>
+                                    <td>
+                                        <!-- {{view?.jobFinishedDate | date: 'dd-MM-yy, hh:mm a'}} -->
+                                        {{convertToUKTimeZone(view?.jobFinishedDate)}}
+                                    </td>
                                     <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'MisMatch'}">
                                         {{ view?.jobOutput ? parseJobOutput(view?.jobOutput) : '' }}
                                     </td>

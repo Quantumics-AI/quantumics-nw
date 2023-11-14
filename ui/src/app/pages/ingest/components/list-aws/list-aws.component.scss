@@ -359,3 +359,16 @@ input[type=text]::-moz-focus-inner {
 .h-12 {
   height: 12px;
 }
+
+.z-0 {
+  z-index: 0 !important;
+}
+
+.list-height {
+  // height: calc(100vh - 250px);
+  height: 530px;
+}
+
+.h-405 {
+  height: 485px;
+}

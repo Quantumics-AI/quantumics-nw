@@ -13,16 +13,23 @@ import { RuleCreationService } from '../../services/rule-creation.service';
 
 function acceptancePercentageValidator(control: FormControl) {
   const inputValue = control.value;
-  if (inputValue === null || inputValue === '') {
-    return null; // Accept empty input
+  // Convert inputValue to string if it's not
+  const inputValueString = typeof inputValue === 'string' ? inputValue : inputValue.toString();
+  const replacedValue = inputValueString.replace(/[^0-9]/g, '');
+  if (replacedValue === null || replacedValue === '') {
+    return { emptyPercentage: true }; // Accept empty input
   }
 
-  // Check if the input is a whole number (no decimals)
-  if (!/^\d+$/.test(inputValue)) {
+  // Replace non-numeric characters
+  // const replacedValue = inputValueString.replace(/[^0-9]/g, '');
+
+  // Check if the replaced value is a whole number (no decimals)
+  // debugger
+  if (!/^[0-9]+$/.test(replacedValue)) {
     return { invalidPercentage: true };
   }
 
-  const numericValue = parseFloat(inputValue);
+  const numericValue = parseInt(replacedValue, 10);
   if (isNaN(numericValue) || numericValue < 0 || numericValue > 20) {
     return { invalidPercentage: true };
   }
@@ -79,6 +86,7 @@ export class DataQualityCreateComponent implements OnInit {
   public pageLength: number = 10000;
   public alreadyExist: boolean = false;
   public statusBody: any = ["Active","Inactive"];
+  public selectedSubColumn: string;
 
   constructor(
     private fb: FormBuilder,
@@ -121,16 +129,16 @@ export class DataQualityCreateComponent implements OnInit {
       subDataSourceOne: new FormControl('s3', Validators.required),
       sourceDataConnection: new FormControl('', Validators.required),
       sourceBucketOne: new FormControl('', Validators.required),
-      sourceFolderPath: new FormControl({ value: '', disabled: true }, Validators.required),
+      sourceFolderPath: new FormControl('', Validators.required),
       //
-      sourceDataSourceTwo: new FormControl('aws'),
-      subDataSourceTwo: new FormControl('s3'),
-      sourceDataConnectionTwo: new FormControl(),
-      sourceBucketTwo: new FormControl(''),
-      sourceFolderPathTwo: new FormControl({ value: '', disabled: true }),
+      sourceDataSourceTwo: new FormControl('aws', Validators.required),
+      subDataSourceTwo: new FormControl('s3', Validators.required),
+      sourceDataConnectionTwo: new FormControl('', Validators.required),
+      sourceBucketTwo: new FormControl('', Validators.required),
+      sourceFolderPathTwo: new FormControl('', Validators.required),
       //types
       ruleType: new FormControl('', Validators.required),
-      subLavelRadio: new FormControl(''),
+      subLavelRadio: new FormControl('', Validators.required),
       selectColumnAttribute: [''],
       selectMultipleAttribute: new FormControl(''),
       acceptancePercentage: new FormControl(0, [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
@@ -157,6 +165,19 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.controls.ruleName.setValue(this.formData.ruleName);
       this.fg.controls.ruleDescription.setValue(this.formData.ruleDescription);
       this.fg.controls.sourceAndTarget.setValue(this.formData?.sourceAndTarget);
+      if(!this.formData?.sourceAndTarget){
+        this.fg.get('sourceDataSourceTwo')?.clearValidators();
+        this.fg.get('subDataSourceTwo')?.clearValidators();
+        this.fg.get('sourceDataConnectionTwo')?.clearValidators();
+        this.fg.get('sourceBucketTwo')?.clearValidators();
+        this.fg.get('sourceFolderPathTwo')?.clearValidators();
+
+        this.fg.get('sourceDataSourceTwo')?.updateValueAndValidity();
+        this.fg.get('subDataSourceTwo')?.updateValueAndValidity();
+        this.fg.get('sourceDataConnectionTwo')?.updateValueAndValidity();
+        this.fg.get('sourceBucketTwo')?.updateValueAndValidity();
+        this.fg.get('sourceFolderPathTwo')?.updateValueAndValidity();
+      }
       this.fg.controls.sourceDataConnection.setValue(this.formData?.sourceDataConnection);
       this.fg.controls.sourceBucketOne.setValue(this.formData?.sourceBucketOne);
       this.bucketSourceOne.push(this.formData?.sourceBucketOne);
@@ -176,9 +197,8 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.controls.sourceDataConnectionTwo.setValue(this.formData?.sourceDataConnectionTwo);
       this.fg.controls.sourceBucketTwo.setValue(this.formData?.sourceBucketTwo);
       this.bucketSourceTwo.push(this.formData?.sourceBucketTwo);
-      
+      this.checkExistName();
     } else {
-      console.log("not added");
     }
     this.getRuleTypeList();
   }
@@ -211,6 +231,7 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   checkIfNameExists() {
+    this.alreadyExist = false;
     if(this.fg.get('ruleName').value.length <= 0){
       this.alreadyExist = false;
     }
@@ -232,6 +253,19 @@ export class DataQualityCreateComponent implements OnInit {
     
   }
 
+  validateInput(event: any): void {
+    const inputElement = event.target;
+    const inputValue = inputElement.value;
+  
+    // Remove any non-numeric characters, including decimals
+    const sanitizedValue = inputValue.replace(/[^0-9]/g, '');
+  
+    // Update the input value with the sanitized value
+    inputElement.value = sanitizedValue;
+    this.fg.controls.acceptancePercentage.setValue(sanitizedValue);
+    // debugger
+  }
+
   // check max 5 column 
   validateMaxSelection(maxSelection: number): ValidatorFn {
     return (control) => {
@@ -243,6 +277,14 @@ export class DataQualityCreateComponent implements OnInit {
     };
   }
 
+  // public loadMoreData(): void {
+  //   // Increase the page number
+  //   this.pageLength += 5;
+  
+  //   // Call the endpoint to fetch the next set of data
+  //   this.getDataConnection();
+  // }
+
   public getDataConnection(): void {
     this.ruleCreationService.getDataConnection(this.projectId, this.userId, this.pageNumebr, this.pageLength).subscribe((response) => {
       this.dataConnectionList = response?.content;
@@ -250,6 +292,14 @@ export class DataQualityCreateComponent implements OnInit {
 
     })
   }
+
+  // public onSelectScroll(event: Event): void {
+  //   // Check if the user has scrolled to the bottom
+  //   const target = event.target as HTMLSelectElement;
+  //   if (target.scrollTop + target.clientHeight >= target.scrollHeight) {
+  //     this.loadMoreData();
+  //   }
+  // }
 
   public getRuleTypeList(): void {
     const v = this.fg.get('sourceAndTarget').value;
@@ -272,6 +322,42 @@ export class DataQualityCreateComponent implements OnInit {
   // change radio button 
   public selectedType(type: boolean): void {
     this.getRuleTypeList();
+    console.log("...", type);
+
+    if (type) {
+      this.fg.get('sourceDataSourceTwo').setValidators([Validators.required]);
+      this.fg.get('subDataSourceTwo').setValidators([Validators.required]);
+      this.fg.get('sourceDataConnectionTwo').setValidators([Validators.required]);
+      this.fg.get('sourceBucketTwo').setValidators([Validators.required]);
+      this.fg.get('sourceFolderPathTwo').setValidators([Validators.required]);
+    } else {
+      this.fg.get('sourceDataSourceTwo')?.clearValidators();
+      this.fg.get('subDataSourceTwo')?.clearValidators();
+      this.fg.get('sourceDataConnectionTwo')?.clearValidators();
+      this.fg.get('sourceBucketTwo')?.clearValidators();
+      this.fg.get('sourceFolderPathTwo')?.clearValidators();
+    }
+    
+    this.fg.get('sourceDataSourceTwo')?.updateValueAndValidity();
+    this.fg.get('subDataSourceTwo')?.updateValueAndValidity();
+    this.fg.get('sourceDataConnectionTwo')?.updateValueAndValidity();
+    this.fg.get('sourceBucketTwo')?.updateValueAndValidity();
+    this.fg.get('sourceFolderPathTwo')?.updateValueAndValidity();
+
+    // sourceDataSource: new FormControl('aws', Validators.required),
+    //   subDataSourceOne: new FormControl('s3', Validators.required),
+    //   sourceDataConnection: new FormControl('', Validators.required),
+    //   sourceBucketOne: new FormControl('', Validators.required),
+    //   sourceFolderPath: new FormControl({ value: '', disabled: true }, Validators.required),
+    //   //
+    //   sourceDataSourceTwo: new FormControl('aws', Validators.required),
+    //   subDataSourceTwo: new FormControl('s3', Validators.required),
+    //   sourceDataConnectionTwo: new FormControl('', Validators.required),
+    //   sourceBucketTwo: new FormControl('', Validators.required),
+    //   sourceFolderPathTwo: new FormControl({ value: '', disabled: true }, Validators.required),
+
+
+
     // if (type === 'sourceAndTarget') {
     //   this.fg.get('sourceDataSource').setValidators([Validators.required]);
     //   this.fg.get('sourceDataConnection').setValidators([Validators.required]);
@@ -316,24 +402,75 @@ export class DataQualityCreateComponent implements OnInit {
   }
 
   public onChangeRuleTypes(value: string): void {
+    this.fg.get('subLavelRadio').setValidators([Validators.required]);
+    this.fg.get('subLavelRadio')?.updateValueAndValidity();
     this.fg.controls.selectColumnAttribute.setValue('');
     this.fg.controls.acceptancePercentage.setValue(0);
-    this.fg.get('selectColumnAttribute')?.clearValidators();
-    this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
+    // this.fg.get('selectColumnAttribute')?.clearValidators();
+    // this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
     this.selectedSubLevel = null;
     this.selectedMainRuleType = value;
+
+    if(value === 'Null Value'){
+      this.fg.get('subLavelRadio')?.clearValidators();
+      this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
+      // this.fg.get('acceptancePercentage').setValidators([Validators.required]);
+      
+    } else {
+      this.fg.get('subLavelRadio').setValidators([Validators.required]);
+      // this.fg.get('acceptancePercentage')?.clearValidators();
+    }
+    this.fg.get('subLavelRadio')?.updateValueAndValidity();
+    this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
+    this.fg.get('acceptancePercentage')?.updateValueAndValidity();
+    // subLavelRadio
+    // this.fg.get('sourceFolderPathTwo').setValidators([Validators.required]);
+    // this.fg.get('selectColumnAttribute')?.clearValidators();
+    // this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
     
   }
 
   public onChangeSubLevel(value: string): void {
+    this.fg.get('selectColumnAttribute')?.clearValidators();
     this.fg.controls.selectColumnAttribute.setValue('');
     this.fg.controls.acceptancePercentage.setValue(0);
     this.selectedSubLevel = value;
-    if (value == "Multiple Column"){
-      this.fg.get('selectColumnAttribute').setValidators([Validators.maxLength(5)]);
-    } else {
+    console.log("sub level -", value);
+
+    if (value == 'Duplicate Row') {
       this.fg.get('selectColumnAttribute')?.clearValidators();
     }
+
+    if (value == 'Column') {
+      console.log("...", this.selectedMainRuleType);
+      this.selectedSubColumn = "in the Duplicate - Column Value Rule Type";
+      
+      this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
+    }
+    
+    if (value == "Multiple Column"){
+      // this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
+      this.fg.get('selectColumnAttribute').setValidators([Validators.required, Validators.minLength(2), Validators.maxLength(5)]);
+    }
+
+    if (value == 'Row count check') {
+      this.fg.get('selectColumnAttribute')?.clearValidators();
+    }
+
+    if (value == 'Sum of column value') {
+      this.selectedSubColumn = "under Data Completeness Rule";
+      this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
+    }
+
+    if (value == 'Table level') {
+      this.fg.get('selectColumnAttribute')?.clearValidators();
+    }
+
+    if (value == 'Column level') {
+      this.selectedSubColumn = "in the Data Profiler Rule at Column Level";
+      this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
+    }
+
     this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
 
     if (value == "Sum of column value" || value === "Column level") {
@@ -466,9 +603,9 @@ export class DataQualityCreateComponent implements OnInit {
   // }
 
   public saveRuleFunction(): void {
-    const value = this.fg.get('ruleName').value;
-    const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-    this.fg.get('ruleName').setValue(titleCaseValue);
+    // const value = this.fg.get('ruleName').value;
+    // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    // this.fg.get('ruleName').setValue(titleCaseValue);
     if (this.fg.controls.sourceAndTarget.value) {
       this.saveRulePayload = {
         ruleName:this.fg.controls.ruleName.value,

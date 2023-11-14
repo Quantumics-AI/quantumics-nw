@@ -148,6 +148,13 @@
                                                 {{item.connectionName}}
                                             </option>
                                         </select>
+                                        <div *ngIf="fg.get('sourceDataConnection').invalid && fg.get('sourceDataConnection').dirty || fg.get('sourceDataConnection').touched">
+                                            <div class="text-error fs-12" *ngIf="fg.get('sourceDataConnection').hasError('required')">
+                                                <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                Select Data Connection is mandatory
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                 </div>
     
@@ -161,6 +168,12 @@
                                                 {{item}}
                                             </option>
                                         </select>
+                                        <div *ngIf="fg.get('sourceBucketOne').invalid && fg.get('sourceBucketOne').dirty || fg.get('sourceBucketOne').touched">
+                                            <div class="text-error fs-12" *ngIf="fg.get('sourceBucketOne').hasError('required')">
+                                                <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                Select Bucket is mandatory
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
     
@@ -170,7 +183,13 @@
                                         <div class="custom-file">
                                             <input type="text" formControlName="sourceFolderPath" [(ngModel)]="selectedSourcePathOne"
                                             class="form-control input-design br-r-0" 
-                                            id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne">
+                                            id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne" readonly>
+                                            <div class="err-div" *ngIf="fg.get('sourceFolderPath').invalid && fg.get('sourceFolderPath').dirty || fg.get('sourceFolderPath').touched">
+                                                <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPath').hasError('required')">
+                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                    Choose File is mandatory
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="input-group-append">
                                             <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
@@ -209,6 +228,12 @@
                                                         {{item.connectionName}}
                                                     </option>
                                                 </select>
+                                                <div *ngIf="fg.get('sourceDataConnection').invalid && fg.get('sourceDataConnection').dirty || fg.get('sourceDataConnection').touched">
+                                                    <div class="text-error fs-12" *ngIf="fg.get('sourceDataConnection').hasError('required')">
+                                                        <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                        Select Data Connection is mandatory
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="form-group">
@@ -220,13 +245,25 @@
                                                         {{item}}
                                                     </option>
                                                 </select>
+                                                <div *ngIf="fg.get('sourceBucketOne').invalid && fg.get('sourceBucketOne').dirty || fg.get('sourceBucketOne').touched">
+                                                    <div class="text-error fs-12" *ngIf="fg.get('sourceBucketOne').hasError('required')">
+                                                        <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                        Select Bucket is mandatory
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="input-group mr">
                                                 <div class="custom-file">
                                                     <input type="text" formControlName="sourceFolderPath" [(ngModel)]="selectedSourcePathOne"
                                                     class="form-control input-design br-r-0" 
-                                                    id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne">
+                                                    id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne" readonly>
+                                                    <div class="err-div" *ngIf="fg.get('sourceFolderPath').invalid && fg.get('sourceFolderPath').dirty || fg.get('sourceFolderPath').touched">
+                                                        <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPath').hasError('required')">
+                                                            <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                            Choose File is mandatory
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="input-group-append">
                                                     <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
@@ -266,6 +303,12 @@
                                                         {{item.connectionName}}
                                                     </option>
                                                 </select>
+                                                <div *ngIf="fg.get('sourceDataConnectionTwo').invalid && fg.get('sourceDataConnectionTwo').dirty || fg.get('sourceDataConnectionTwo').touched">
+                                                    <div class="text-error fs-12" *ngIf="fg.get('sourceDataConnectionTwo').hasError('required')">
+                                                        <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                        Select Data Connection is mandatory
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="form-group">
@@ -277,12 +320,25 @@
                                                         {{item}}
                                                     </option>
                                                 </select>
+                                                <div *ngIf="fg.get('sourceBucketTwo').invalid && fg.get('sourceBucketTwo').dirty || fg.get('sourceBucketTwo').touched">
+                                                    <div class="text-error fs-12" *ngIf="fg.get('sourceBucketTwo').hasError('required')">
+                                                        <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                        Select Bucket is mandatory
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="input-group mr">
                                                 <div class="custom-file">
                                                     <input type="text" formControlName="sourceFolderPathTwo" class="form-control input-design br-r-0" 
-                                                    id="inputGroupFile04" placeholder="No file chosen" [(ngModel)]="selectedSourcePathTwo" [title]="selectedSourcePathTwo">
+                                                    id="inputGroupFile04" placeholder="No file chosen" [(ngModel)]="selectedSourcePathTwo" 
+                                                    [title]="selectedSourcePathTwo" readonly>
+                                                    <div class="err-div" *ngIf="fg.get('sourceFolderPathTwo').invalid && fg.get('sourceFolderPathTwo').dirty || fg.get('sourceFolderPathTwo').touched">
+                                                        <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPathTwo').hasError('required')">
+                                                            <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                            Choose File is mandatory
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="input-group-append">
                                                     <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
@@ -304,7 +360,9 @@
                     <p class="rule-t p2">Rule Types*:</p>
 
                     <ng-container *ngFor="let item of ruleTypesData; let i = index;">
-                        <div class="form-group">
+                        <div class="form-group" 
+                        [ngClass]="{'mr-t-40': item.ruleTypeName == 'Duplicate Value' && fg.get('selectColumnAttribute').hasError('required'),
+                            'mr-t-0': selectedMainRuleType == 'Duplicate Value'}">
                           <div class="form-check form-check-inline">
                             <input
                               class="form-check-input cp"
@@ -321,7 +379,9 @@
                             <ng-container *ngIf="selectedMainRuleType != 'Null Value'; else nullValue">
                                 <!-- Sub-level radio buttons -->
                                 <div *ngFor="let level of item.level; let j = index;">
-                                    <div class="form-group dif">
+                                    <div class="form-group dif"
+                                    [ngClass]="{'mr-b-55': level.levelName == 'Column' && fg.get('selectColumnAttribute').hasError('required'),
+                                    'mr-b-10': selectedSubLevel != 'Column'}">
                                         <div class="form-check form-check-inline">
                                             <input
                                                 class="form-check-input cp"
@@ -338,12 +398,15 @@
                                             <div *ngIf="!level.columnLevel">
                                                 <ng-container *ngIf="selectedSubLevel != 'Table Level'">
                                                     <div class="dif">
-                                                        <input type="text" pattern="^[0-9]*$" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                        formControlName="acceptancePercentage" autocomplete="off">
+                                                        <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                        formControlName="acceptancePercentage" (input)="validateInput($event)">
                                                         <span class="pr">%</span>
                                                     </div>
                                                     <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12">
                                                         Please enter a number between 0 and 20
+                                                    </div>
+                                                    <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12">
+                                                        Please enter value inside Acceptance Percentage Field
                                                     </div>
                                                 </ng-container>
                                                 
@@ -352,13 +415,24 @@
                                             <div *ngIf="level.columnLevel" class="dif">
                                                 <!-- for single column -->
                                                 <ng-container  *ngIf="selectedSubLevel != 'Multiple Column'">
-                                                    <select id="ab" class="form-control input-design in-text mr-r-20" 
-                                                    formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                                        <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                        <option *ngFor="let i of columnDataType" [value]="i.columnName">
-                                                            {{i.columnName}}
-                                                        </option>
-                                                    </select>
+                                                    <div class="dif">
+                                                        <div style="position: relative; display: flex;">
+                                                            <select id="ab" class="form-control input-design in-text mr-r-20" 
+                                                            formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                                <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                                <option *ngFor="let i of columnDataType" [value]="i.columnName">
+                                                                    {{i.columnName}}
+                                                                </option>
+                                                            </select>
+                                                            <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
+                                                                <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
+                                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                                    Please choose Column {{selectedSubColumn}}
+                                                                </div>
+                                                            <!-- </div> -->
+                                                        </div>
+                                                    </div>
+                                                    
                                                 </ng-container>
                                                 
 
@@ -382,6 +456,15 @@
                                                             <div *ngIf="fg.get('selectColumnAttribute').hasError('maxlength')" class="text-error fs-12 err-div">
                                                                 Please select up to 5 columns for comparison.
                                                             </div>
+                                                            <div *ngIf="fg.get('selectColumnAttribute').hasError('minlength')" class="text-error fs-12 err-div-acc">
+                                                                Please choose atleast 2 columns in the Duplicate-Multiple Column Value Rule Type
+                                                            </div>
+                                                            <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
+                                                                <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
+                                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                                    Please choose Column in the Duplicate - Multiple Column Value Rule Type
+                                                                </div>
+                                                            <!-- </div> -->
                                                         </div>
                                                         
                                                     </div>
@@ -393,12 +476,15 @@
                                                 <ng-container *ngIf="selectedSubLevel != 'Column level'">
                                                     <div class="dif">
                                                         <div style="position: relative; display: flex;">
-                                                            <input type="text" pattern="^[0-9]*$" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                            formControlName="acceptancePercentage" autocomplete="off">
+                                                            <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                            formControlName="acceptancePercentage" (input)="validateInput($event)">
                                                             <span class="pr">%</span>
                                                         
                                                             <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
                                                                 Please enter a number between 0 and 20.
+                                                            </div>
+                                                            <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12 err-div-acc">
+                                                                Please enter value inside Acceptance Percentage Field
                                                             </div>
                                                         </div>
                                                     </div>
@@ -412,29 +498,44 @@
                             </ng-container>
                             <ng-template #nullValue>
                                 <div class="form-group mr-b-0 dif">
-                                
-                                    <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
-                                    [(ngModel)]="selectedNullName" placeholder="Select Attributes">
-                                        <option [value]="undefined" disabled selected> Select Attributes </option>
-                                        <option *ngFor="let i of columnDataType" [value]="i.columnName">
-                                            {{i.columnName}}
-                                        </option>
-                                    </select>
                                     <div class="dif">
                                         <div style="position: relative; display: flex;">
-                                            <input type="text" pattern="^[0-9]*$" class="form-control input-design" placeholder="Acceptance Percentage"
-                                            formControlName="acceptancePercentage" autocomplete="off">
+                                            <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
+                                            [(ngModel)]="selectedNullName" placeholder="Select Attributes">
+                                                <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                <option *ngFor="let i of columnDataType" [value]="i.columnName">
+                                                    {{i.columnName}}
+                                                </option>
+                                            </select>
+                                            <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
+                                                <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
+                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                    Please choose column in the Null Value rule type
+                                                </div>
+                                            <!-- </div> -->
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dif">
+                                        <div style="position: relative; display: flex;">
+                                            <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                            formControlName="acceptancePercentage" (input)="validateInput($event)">
                                             <span class="pr">%</span>
-                                        
-                                        
-                                            <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div">
+
+                                            <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div left-12">
                                                 Please enter a number between 0 and 20.
+                                            </div>
+                                            <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12 err-div left-12">
+                                                Please enter value inside Acceptance Percentage Field
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </ng-template>
-                            
+                            <div class="text-error fs-12" *ngIf="fg.get('subLavelRadio').hasError('required')">
+                                <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                Please choose appropriate option Under {{selectedMainRuleType}} Check
+                            </div>
                           </div>
                         </div>
                       </ng-container>

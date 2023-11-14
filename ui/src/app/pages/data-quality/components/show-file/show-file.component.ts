@@ -15,6 +15,7 @@ export class ShowFileComponent implements OnInit {
   @Input() fileContent: any;
   @Input() columnType: any;
   @Input() rowCount: number;
+  @Input() totalRowCount: any;
 
   public projectId: number;
   userId: number;

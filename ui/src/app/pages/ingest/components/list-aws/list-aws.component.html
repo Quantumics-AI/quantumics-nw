@@ -28,7 +28,8 @@
                                     <img src="assets/img/govern/search.svg">
                                 </span>
                             </div>
-                            <input type="text" id="searchTerm" [(ngModel)]="searchTerm.connectionName" class="form-control search-input br-bx-n h36"
+                            <input type="text" id="searchTerm" [(ngModel)]="searchTerm.connectionName" 
+                            class="form-control search-input br-bx-n h36 z-0"
                                 placeholder="Enter Connection Name" aria-label="Username" aria-describedby="basic-addon1"
                                 (ngModelChange)="searchInput($event)">
                             <div class="input-group-append">
@@ -40,7 +41,7 @@
                     </div>
                 </div>
                 <div class="card-body pd-0">
-                    <div class="table-responsive br-r">
+                    <div class="table-responsive br-r list-height">
                         <table class="table m-0 table-fixed table-striped">
                             <thead class="thead-light">
                                 <tr class="fixed-th">
@@ -100,7 +101,7 @@
                                         </td>
                                     </tr>
                                 </ng-container>
-                                <tr style="background-color: white !important;"
+                                <tr class="h-405" style="background-color: white !important;"
                                     *ngIf="searchNull">
                                     <td colspan="5">
                                         <div class="text-center s-div">

@@ -66,6 +66,7 @@ export class DataQualityListComponent implements OnInit {
   searchInvalidClass: string = 'search-disable-btn';
   public searchNull: boolean = false;
   public totalNumberOfRules: number;
+  public selectedStatus: string = 'Active';
 
   constructor(
     private readonly router: Router,
@@ -94,7 +95,8 @@ export class DataQualityListComponent implements OnInit {
   }
 
   public getRules(): void {
-    this.loading = true;
+    // this.loading = true;
+    this.selectedStatus = 'Active';
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
     
       this.loading = false;
@@ -102,16 +104,6 @@ export class DataQualityListComponent implements OnInit {
       this.ruleCount =  response?.result?.content;
       this.paginationData = response?.result;
       this.totalNumberOfRules = response?.result?.totalElements;
-      // this.pageSize = this.paginationData.size;
-      // this.endIndex = this.pageSize;
-      // if (this.dataQualityList.length > 1) {
-      //   this.dataQualityList.sort((val1, val2) => {
-      //     return (
-      //       (new Date(val2.createdDate) as any) -
-      //       (new Date(val1.createdDate) as any)
-      //     );
-      //   });
-      // }
       
     }, (error) => {
       this.loading = false;
@@ -119,12 +111,14 @@ export class DataQualityListComponent implements OnInit {
   }
 
   public searchRule(): void {
+    this.selectedStatus = 'Search'
     this.buttonDisabled = true;
+    this.pageNumebr = 1;
     this.ruleCreationService.getSearchRule(this.userId, this.projectId, this.searchString, this.pageNumebr, this.pageLength).subscribe((response) => {
-      // debugger
-      console.log(response);
+      
       if (response.code === 400) {
         this.searchNull = true;
+        this.totalNumberOfRules = 0;
       } 
       if(response.code === 200){
         this.searchNull = false;
@@ -301,8 +295,10 @@ export class DataQualityListComponent implements OnInit {
     // Set the selected value as the name property or to null if both checkboxes are not selected
     if (this.ruleFilter.every(filter => !filter.selected)) {
       this.ruleStatus = 'Active';
+      this.selectedStatus = 'Active';
     } else {
       this.ruleStatus = selectedFilter.name;
+      this.selectedStatus = selectedFilter.name;
     }
     this.getStatusRules();
   }
@@ -337,38 +333,18 @@ export class DataQualityListComponent implements OnInit {
   searchInput(str) {
     this.searchString = str;
     this.buttonDisabled = str.trim() === '';
+    this.searchNull = false;
+    this.getRules();
+    
     if (str.length == 0) {
       this.searchDiv = false;
       // this.isSearch = false;
+      this.searchNull = false;
+      this.selectedStatus = 'Active';
       this.getRules();
     } else {
       this.searchDiv = true;
     }
-  }
-
-  convertToUKTime(createdDate: number): string {
-    // Convert createdDate from IST to UK time
-    const date = new Date(createdDate);
-    
-    const ukTimeZone = 'Europe/London'; // Timezone for the United Kingdom
-    
-    // Format the date in the desired format
-    this.timezone = {
-      timeZone: ukTimeZone,
-      year: '2-digit',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    };
-
-    // Use a custom format for the day without leading zero
-    const ukDate = new Intl.DateTimeFormat('en-GB', this.timezone).format(date);
-    const parts = ukDate.split('/');
-    const formattedDate = parts.map((part, index) => (index === 0 ? part.slice(1) : part)).join('-');
-
-    return formattedDate;
   }
 
   convertToUKTimeZone(timestamp: number) {

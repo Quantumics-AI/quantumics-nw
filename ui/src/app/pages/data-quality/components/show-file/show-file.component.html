@@ -7,7 +7,15 @@
     <button class="btn btn-outline-success cancel-b connectionBtns"
     [ngClass]="{'validBtn': !validBtn}" (click)="target()">Target</button>
 </div> -->
-<p class="pd p2">No. of rows: {{rowCount}}</p>
+<div class="pd p1 mr-b-0 dif">Total Number Of Rows: <span *ngIf="totalRowCount">{{totalRowCount}}</span>
+    <div *ngIf="!totalRowCount" class="spinner-center mr-l-10">
+        <div class="spinner-border text-primary wh-1rem" role="status">
+            
+        </div>
+        <div class="up">Counting Rows...</div>
+    </div>
+</div>
+<p class="pd-l-20 p1 mr-b-0">No. of Rows Displayed: {{rowCount}}</p>
 <div class="table-responsive br-r table-h">
     <table class="table m-0 table-fixed table-striped">
         <thead class="thead-light">
