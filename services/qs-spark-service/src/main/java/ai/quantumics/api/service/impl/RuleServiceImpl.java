@@ -79,12 +79,10 @@ public class RuleServiceImpl implements RuleService {
 		final Map<String, Object> response = new HashMap<>();
 		log.info("Invoking saveRule  API {}", ruleDetails.toString());
 		try {
-
 			String targetFeedName = null;
 			String targetFileName = null;
 			String targetBucketName = null;
 			String targetFilePattern = null;
-
 			if(ruleDetails.isSourceAndTarget()) {
 				DataSourceDetails targetDetails = ruleDetails.getTargetData();
 				if(targetDetails == null){
@@ -92,8 +90,7 @@ public class RuleServiceImpl implements RuleService {
 					response.put("message", "Target details can't be null");
 					return ResponseEntity.ok().body(response);
 				}
-				targetFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
-                //targetFilePattern = targetDetails.getFilePattern();
+                targetFilePattern = targetDetails.getFilePattern();
 				if(targetFilePattern == null){
 					response.put("code", HttpStatus.SC_BAD_REQUEST);
 					response.put("message", "Target file pattern can't be null");
@@ -139,24 +136,19 @@ public class RuleServiceImpl implements RuleService {
 				targetFeedName = PatternUtils.getValueAtIndex(targetFilePathList, targetFeedNameIndex);
 				String targetDate = PatternUtils.getValueAtIndex(targetFilePathList, targetDateIndex);
 				targetFileName = PatternUtils.getValueAtIndex(targetFilePathList, targetFileNameIndex);
-
 			}
-
 			DataSourceDetails sourceDatails = ruleDetails.getSourceData();
 			if(sourceDatails == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source details can't be null");
 				return ResponseEntity.ok().body(response);
 			}
-
-            String sourceFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
-			//String sourceFilePattern = sourceDatails.getFilePattern();
+			String sourceFilePattern = sourceDatails.getFilePattern();
 			if(sourceFilePattern == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source file pattern can't be null");
 				return ResponseEntity.ok().body(response);
 			}
-
 			String filePath = sourceDatails.getFilePath();
 			if(filePath == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
