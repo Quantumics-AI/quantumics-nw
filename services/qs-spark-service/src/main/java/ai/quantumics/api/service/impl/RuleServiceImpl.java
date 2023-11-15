@@ -19,6 +19,7 @@ import ai.quantumics.api.service.RuleService;
 import ai.quantumics.api.service.RuleTypeService;
 import ai.quantumics.api.service.UserServiceV2;
 import ai.quantumics.api.util.DbSessionUtil;
+import ai.quantumics.api.util.PatternUtils;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
 import ai.quantumics.api.vo.RuleTypeDetails;
@@ -37,7 +38,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ai.quantumics.api.constants.DatasourceConstants.DDMMYYYY;
 import static ai.quantumics.api.constants.DatasourceConstants.ERROR_FETCHING_RULE;
+import static ai.quantumics.api.constants.DatasourceConstants.FEED_NAME;
+import static ai.quantumics.api.constants.DatasourceConstants.FILENAME;
+import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN;
+import static ai.quantumics.api.constants.DatasourceConstants.INDEX_NOT_FOUND;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
 
@@ -73,6 +79,128 @@ public class RuleServiceImpl implements RuleService {
 		final Map<String, Object> response = new HashMap<>();
 		log.info("Invoking saveRule  API {}", ruleDetails.toString());
 		try {
+
+			String targetFeedName = null;
+			String targetFileName = null;
+			String targetBucketName = null;
+			String targetFilePattern = null;
+
+			if(ruleDetails.isSourceAndTarget()) {
+				DataSourceDetails targetDetails = ruleDetails.getTargetData();
+				if(targetDetails == null){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", "Target details can't be null");
+					return ResponseEntity.ok().body(response);
+				}
+				targetFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
+                //targetFilePattern = targetDetails.getFilePattern();
+				if(targetFilePattern == null){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", "Target file pattern can't be null");
+					return ResponseEntity.ok().body(response);
+				}
+				String filePath = targetDetails.getFilePath();
+				if(filePath == null){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", "Target file path can't be null");
+					return ResponseEntity.ok().body(response);
+				}
+				targetBucketName = targetDetails.getBucketName();
+				String targetFilePath = "s3://" + targetBucketName + "/" + filePath;
+
+				// Split strings
+				String[] targetFilePatternList = targetFilePattern.split("/");
+				String[] targetFilePathList = targetFilePath.split("/");
+				// Check if both arrays have the same size
+				if (targetFilePatternList.length != targetFilePathList.length) {
+					log.info(FILE_NOT_ALIGN);
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", FILE_NOT_ALIGN);
+					return ResponseEntity.ok().body(response);
+				}
+				int targetFeedNameIndex = PatternUtils.getIndex(targetFilePatternList,FEED_NAME);
+				if(targetFeedNameIndex == -1){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", INDEX_NOT_FOUND);
+					return ResponseEntity.ok().body(response);
+				}
+				int targetDateIndex = PatternUtils.getIndex(targetFilePatternList,DDMMYYYY);
+				if(targetDateIndex == -1){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", INDEX_NOT_FOUND);
+					return ResponseEntity.ok().body(response);
+				}
+				int targetFileNameIndex = PatternUtils.getIndex(targetFilePatternList,FILENAME);
+				if(targetFileNameIndex == -1){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", INDEX_NOT_FOUND);
+					return ResponseEntity.ok().body(response);
+				}
+				targetFeedName = PatternUtils.getValueAtIndex(targetFilePathList, targetFeedNameIndex);
+				String targetDate = PatternUtils.getValueAtIndex(targetFilePathList, targetDateIndex);
+				targetFileName = PatternUtils.getValueAtIndex(targetFilePathList, targetFileNameIndex);
+
+			}
+
+			DataSourceDetails sourceDatails = ruleDetails.getSourceData();
+			if(sourceDatails == null){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Source details can't be null");
+				return ResponseEntity.ok().body(response);
+			}
+
+            String sourceFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
+			//String sourceFilePattern = sourceDatails.getFilePattern();
+			if(sourceFilePattern == null){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "Source file pattern can't be null");
+				return ResponseEntity.ok().body(response);
+			}
+
+			String filePath = sourceDatails.getFilePath();
+			if(filePath == null){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", "File path can't be null");
+				return ResponseEntity.ok().body(response);
+			}
+
+			String sourceBucketName = sourceDatails.getBucketName();
+			String sourceFilePath = "s3://" + sourceBucketName + "/" + filePath;
+
+			// Split strings
+			String[] sourceFilePatternList = sourceFilePattern.split("/");
+			String[] sourceFilePathList = sourceFilePath.split("/");
+
+			// Check if both arrays have the same size
+			if (sourceFilePatternList.length != sourceFilePathList.length) {
+				log.info(FILE_NOT_ALIGN);
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", FILE_NOT_ALIGN);
+				return ResponseEntity.ok().body(response);
+			}
+
+			int sourceFeedNameIndex = PatternUtils.getIndex(sourceFilePatternList,FEED_NAME);
+			if(sourceFeedNameIndex == -1){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", INDEX_NOT_FOUND);
+				return ResponseEntity.ok().body(response);
+			}
+			int sourceDateIndex = PatternUtils.getIndex(sourceFilePatternList,DDMMYYYY);
+			if(sourceDateIndex == -1){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", INDEX_NOT_FOUND);
+				return ResponseEntity.ok().body(response);
+			}
+			int sourceFileNameIndex = PatternUtils.getIndex(sourceFilePatternList,FILENAME);
+			if(sourceFileNameIndex == -1){
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", INDEX_NOT_FOUND);
+				return ResponseEntity.ok().body(response);
+			}
+			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, sourceFeedNameIndex);
+			String sourceDate = PatternUtils.getValueAtIndex(sourceFilePathList, sourceDateIndex);
+			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, sourceFileNameIndex);
+
 			dbUtil.changeSchema("public");
 			final Projects project = projectService.getProject(projectId, ruleDetails.getUserId());
 			if(project == null) {
@@ -100,6 +228,10 @@ public class RuleServiceImpl implements RuleService {
 			if(ruleDetails.isSourceAndTarget()) {
 				qsRule.setTargetData(gson.toJson(ruleDetails.getTargetData()));
 				qsRule.setTargetDatasourceId(ruleDetails.getTargetData().getDataSourceId());
+				qsRule.setTargetFilePattern(targetFilePattern);
+				qsRule.setTargetBucketName(targetBucketName);
+				qsRule.setTargetFeedName(targetFeedName);
+				qsRule.setTargetFileName(targetFileName);
 			}
 			qsRule.setRuleDetails(gson.toJson(ruleDetails.getRuleDetails()));
 			qsRule.setUserId(ruleDetails.getUserId());
@@ -109,6 +241,10 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			qsRule.setSourceDatasourceId(ruleDetails.getSourceData().getDataSourceId());
+			qsRule.setSourceFilePattern(sourceFilePattern);
+			qsRule.setSourceBucketName(sourceBucketName);
+			qsRule.setSourceFeedName(sourceFeedName);
+			qsRule.setSourceFileName(sourceFileName);
 			ruleRepository.save(qsRule);
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Data saved successfully");

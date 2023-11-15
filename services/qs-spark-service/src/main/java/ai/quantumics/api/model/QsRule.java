@@ -37,4 +37,12 @@ public class QsRule {
   private String modifiedBy;
   private int sourceDatasourceId;
   private int targetDatasourceId;
+  private String sourceFilePattern;
+  private String sourceBucketName;
+  private String sourceFeedName;
+  private String sourceFileName;
+  private String targetFilePattern;
+  private String targetBucketName;
+  private String targetFeedName;
+  private String targetFileName;
 }
