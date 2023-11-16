@@ -91,7 +91,7 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-			String sourceFilePattern = ruleDetails.getSourceData().getFilePattern();
+			String sourceFilePattern = sourceDatails.getFilePattern();
 			if(sourceFilePattern == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source file pattern can't be null");
