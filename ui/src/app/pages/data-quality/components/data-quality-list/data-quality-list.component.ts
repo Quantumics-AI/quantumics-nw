@@ -67,6 +67,7 @@ export class DataQualityListComponent implements OnInit {
   public searchNull: boolean = false;
   public totalNumberOfRules: number;
   public selectedStatus: string = 'Active';
+  public isActive: boolean;
 
   constructor(
     private readonly router: Router,
@@ -101,6 +102,8 @@ export class DataQualityListComponent implements OnInit {
     
       this.loading = false;
       this.dataQualityList = response?.result?.content;
+      const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
+      this.isActive = !hasInactiveOrDeleted;
       this.ruleCount =  response?.result?.content;
       this.paginationData = response?.result;
       this.totalNumberOfRules = response?.result?.totalElements;
@@ -123,6 +126,8 @@ export class DataQualityListComponent implements OnInit {
       if(response.code === 200){
         this.searchNull = false;
         this.dataQualityList = response?.result?.content;
+        const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
+        this.isActive = !hasInactiveOrDeleted;
         this.ruleCount =  response?.result?.content;
         this.paginationData = response?.result;
         this.totalNumberOfRules = response?.result?.totalElements;
@@ -308,6 +313,8 @@ export class DataQualityListComponent implements OnInit {
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
       
       this.dataQualityList = response?.result?.content;
+      const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
+      this.isActive = !hasInactiveOrDeleted;
       this.paginationData = response?.result;
       this.totalNumberOfRules = response?.result?.totalElements;
       this.loading = false;

@@ -67,7 +67,7 @@
                                 <thead class="thead-light">
                                     <tr class="fixed-th">
                                         <th class="pd-l-24"><label class="mr-b-0">
-                                            <input *ngIf="ruleStatus == 'Active'" type="checkbox" [(ngModel)]="selectAllChecked" (change)="selectRuleAll($event)"></label>
+                                            <input *ngIf="isActive" type="checkbox" [(ngModel)]="selectAllChecked" (change)="selectRuleAll($event)"></label>
                                         </th>
                                         <th class="pd-l-24">Rule Name</th>
                                         <th class="pd-l-24">
