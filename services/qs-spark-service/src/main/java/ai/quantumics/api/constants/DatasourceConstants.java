@@ -8,6 +8,9 @@
 
 package ai.quantumics.api.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class DatasourceConstants {
 
   public static final String DATA_SOURCE_EXIST = "Entered Connection Name is already used.Please enter a different name";
@@ -31,6 +34,14 @@ public class DatasourceConstants {
   public static final String RULE_NAME_NOT_EXIST = "No Rule found";
   public static final String ERROR_FETCHING_RULE = "Error while Fetching rule :  ";
   public static final String DATA_SOURCE_UPDATED = "Connection updated successfully";
+  public static final String FILE_NOT_ALIGN_WITH_PATTERN = "Please check, the selected file is not align with the File Pattern";
+  public static final String FEED_NAME = "FEED_NAME";
+  public static final String DDMMYYYY = "DDMMYYYY";
+  public static final String FILENAME = "FILENAME";
+  public static final String BUCKETNAME = "BUCKET_NAME";
+  public static final List<String> EXPECTED_IN_FILE_PATTERN = Arrays.asList("BUCKET_NAME", "FEED_NAME", "DDMMYYYY", "FILENAME");
+  public static final String INDEX_NOT_FOUND = "Index not found";
+
   private DatasourceConstants() {}
 
 }

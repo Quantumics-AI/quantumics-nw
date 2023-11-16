@@ -13,4 +13,5 @@ public class DataSourceDetails {
     private int dataSourceId;
     private String bucketName;
     private String filePath;
+    private String filePattern;
 }
