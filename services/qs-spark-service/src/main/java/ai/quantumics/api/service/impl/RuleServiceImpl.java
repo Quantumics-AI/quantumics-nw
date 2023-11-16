@@ -43,7 +43,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.ERROR_FETCHING_RUL
 import static ai.quantumics.api.constants.DatasourceConstants.EXPECTED_IN_FILE_PATTERN;
 import static ai.quantumics.api.constants.DatasourceConstants.FEED_NAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILENAME;
-import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN;
+import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN_WITH_PATTERN;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
 
@@ -119,15 +119,15 @@ public class RuleServiceImpl implements RuleService {
 			String[] sourceFilePathList = sourceFilePath.split("/");
 			// Check if both arrays have the same size
 			if (sourceFilePatternList.length != sourceFilePathList.length) {
-				log.info(FILE_NOT_ALIGN);
+				log.info(FILE_NOT_ALIGN_WITH_PATTERN);
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
-				response.put("message", FILE_NOT_ALIGN);
+				response.put("message", FILE_NOT_ALIGN_WITH_PATTERN);
 				return ResponseEntity.ok().body(response);
 			}
 
             // Find the indices of expected elements
 			Map<String, Integer> indices = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
-			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get("BUCKET_NAME"));
+			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(BUCKETNAME));
 			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FEED_NAME));
 			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FILENAME));
 
@@ -165,9 +165,9 @@ public class RuleServiceImpl implements RuleService {
 				String[] targetFilePathList = targetFilePath.split("/");
 				// Check if both arrays have the same size
 				if (targetFilePatternList.length != targetFilePathList.length) {
-					log.info(FILE_NOT_ALIGN);
+					log.info(FILE_NOT_ALIGN_WITH_PATTERN);
 					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", FILE_NOT_ALIGN);
+					response.put("message", FILE_NOT_ALIGN_WITH_PATTERN);
 					return ResponseEntity.ok().body(response);
 				}
 				// Find the indices of expected elements
