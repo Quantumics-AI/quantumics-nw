@@ -91,7 +91,7 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-			String sourceFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
+			String sourceFilePattern = sourceDatails.getFilePattern();
 			if(sourceFilePattern == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source file pattern can't be null");
@@ -132,7 +132,7 @@ public class RuleServiceImpl implements RuleService {
 					response.put("message", "Target details can't be null");
 					return ResponseEntity.ok().body(response);
 				}
-				targetFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
+				targetFilePattern = ruleDetails.getSourceData().getFilePattern();
 				if(targetFilePattern == null){
 					response.put("code", HttpStatus.SC_BAD_REQUEST);
 					response.put("message", "Target file pattern can't be null");
