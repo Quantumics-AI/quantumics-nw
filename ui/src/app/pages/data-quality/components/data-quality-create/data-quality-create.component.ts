@@ -475,7 +475,7 @@ export class DataQualityCreateComponent implements OnInit {
 
     if (value == "Sum of column value" || value === "Column level") {
       if (this.columnDataType) {
-        this.columnDataType = this.columnDataType.filter(item => item.dataType === "int" || item.dataType === "float");
+        this.columnDataType = this.columnDataType.filter(item => item.dataType === "int" || item.dataType === "float" || item.dataType === "double");
       } 
     } else {
       this.columnDataType = JSON.parse(sessionStorage?.getItem('columnData'));
