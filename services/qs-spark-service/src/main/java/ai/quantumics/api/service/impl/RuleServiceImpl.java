@@ -91,7 +91,7 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-			String sourceFilePattern = sourceDatails.getFilePattern();
+			String sourceFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
 			if(sourceFilePattern == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source file pattern can't be null");
@@ -125,12 +125,6 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-            // Find the indices of expected elements
-			Map<String, Integer> indices = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
-			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(BUCKETNAME));
-			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FEED_NAME));
-			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FILENAME));
-
 			if(ruleDetails.isSourceAndTarget()) {
 				DataSourceDetails targetDetails = ruleDetails.getTargetData();
 				if(targetDetails == null){
@@ -138,7 +132,7 @@ public class RuleServiceImpl implements RuleService {
 					response.put("message", "Target details can't be null");
 					return ResponseEntity.ok().body(response);
 				}
-				targetFilePattern = ruleDetails.getSourceData().getFilePattern();
+				targetFilePattern = "s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME";
 				if(targetFilePattern == null){
 					response.put("code", HttpStatus.SC_BAD_REQUEST);
 					response.put("message", "Target file pattern can't be null");
@@ -191,6 +185,12 @@ public class RuleServiceImpl implements RuleService {
 
 				return ResponseEntity.ok().body(response);
 			}
+
+			// Find the indices of expected elements
+			Map<String, Integer> indices = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
+			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(BUCKETNAME));
+			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FEED_NAME));
+			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FILENAME));
 
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Gson gson = new Gson();
