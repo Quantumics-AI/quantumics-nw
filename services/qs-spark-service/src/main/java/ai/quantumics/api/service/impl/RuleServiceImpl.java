@@ -387,9 +387,9 @@ public class RuleServiceImpl implements RuleService {
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Pageable paging = PageRequest.of(page-1, pageSize);
 			if(CollectionUtils.isEmpty(status)) {
-				qsRule = ruleRepository.findByRuleNameStartingWithIgnoreCaseOrRuleNameEndingWithIgnoreCase(ruleName, ruleName, paging);
+				qsRule = ruleRepository.findByRuleNameContainingIgnoreCase(ruleName, paging);
 			}else{
-				qsRule = ruleRepository.findByStatusInAndRuleNameStartingWithIgnoreCaseOrStatusInAndRuleNameEndingWithIgnoreCase(status,ruleName, status, ruleName, paging);
+				qsRule = ruleRepository.findByStatusInAndRuleNameContainingIgnoreCase(status, ruleName, paging);
 			}
 
 			if(qsRule.isEmpty()){
