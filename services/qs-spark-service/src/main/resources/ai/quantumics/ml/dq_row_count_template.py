@@ -6,7 +6,7 @@ import json
 import os
 
 # Initialize a Spark session
-spark = SparkSession.builder.appName("EDI-DQ-RULE).getOrCreate()
+spark = SparkSession.builder.appName("EDI-DQ-RULE").getOrCreate()
 
 bucket1 = $SOURCE_BUCKET
 filepath1 = $SOURCE_PATH

@@ -125,12 +125,6 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-            // Find the indices of expected elements
-			Map<String, Integer> indices = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
-			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(BUCKETNAME));
-			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FEED_NAME));
-			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FILENAME));
-
 			if(ruleDetails.isSourceAndTarget()) {
 				DataSourceDetails targetDetails = ruleDetails.getTargetData();
 				if(targetDetails == null){
@@ -191,6 +185,12 @@ public class RuleServiceImpl implements RuleService {
 
 				return ResponseEntity.ok().body(response);
 			}
+
+			// Find the indices of expected elements
+			Map<String, Integer> indices = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
+			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(BUCKETNAME));
+			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FEED_NAME));
+			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FILENAME));
 
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Gson gson = new Gson();
