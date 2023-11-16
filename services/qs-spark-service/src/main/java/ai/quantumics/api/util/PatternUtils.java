@@ -1,5 +1,12 @@
 package ai.quantumics.api.util;
 
+import ai.quantumics.api.model.ElementData;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import static ai.quantumics.api.constants.DatasourceConstants.INDEX_NOT_FOUND;
 
 public class PatternUtils {
@@ -20,5 +27,49 @@ public class PatternUtils {
         } else {
             return INDEX_NOT_FOUND;
         }
+    }
+
+    public static List<String> findMissingElements(List<String> expectedElements, String[] targetFilePatternList) {
+        List<String> missingElements = new ArrayList<>(expectedElements);
+
+        for (String part : targetFilePatternList) {
+            missingElements.remove(part);
+        }
+        return missingElements;
+    }
+
+    public static List<ElementData> findPresentElements(List<String> expectedElements, String[] targetFilePatternList) {
+        List<ElementData> presentElements = new ArrayList<>();
+
+        for (int i = 0; i < targetFilePatternList.length; i++) {
+            String part = targetFilePatternList[i];
+            if (expectedElements.contains(part)) {
+                presentElements.add(new ElementData(part, i));
+            }
+        }
+
+        return presentElements;
+    }
+
+    public static Map<String, Integer> findIndicesOfElements(List<String> expectedElements, String[] targetFilePatternList) {
+        Map<String, Integer> indices = new LinkedHashMap<>();
+
+        for (String expectedElement : expectedElements) {
+            int index = indexOfElement(targetFilePatternList, expectedElement);
+            if (index != -1) {
+                indices.put(expectedElement, index);
+            }
+        }
+
+        return indices;
+    }
+
+    private static int indexOfElement(String[] array, String element) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equals(element)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

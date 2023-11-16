@@ -38,12 +38,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ai.quantumics.api.constants.DatasourceConstants.DDMMYYYY;
+import static ai.quantumics.api.constants.DatasourceConstants.BUCKETNAME;
 import static ai.quantumics.api.constants.DatasourceConstants.ERROR_FETCHING_RULE;
+import static ai.quantumics.api.constants.DatasourceConstants.EXPECTED_IN_FILE_PATTERN;
 import static ai.quantumics.api.constants.DatasourceConstants.FEED_NAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILENAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN;
-import static ai.quantumics.api.constants.DatasourceConstants.INDEX_NOT_FOUND;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
 
@@ -83,67 +83,15 @@ public class RuleServiceImpl implements RuleService {
 			String targetFileName = null;
 			String targetBucketName = null;
 			String targetFilePattern = null;
-			if(ruleDetails.isSourceAndTarget()) {
-				DataSourceDetails targetDetails = ruleDetails.getTargetData();
-				if(targetDetails == null){
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", "Target details can't be null");
-					return ResponseEntity.ok().body(response);
-				}
-                targetFilePattern = targetDetails.getFilePattern();
-				if(targetFilePattern == null){
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", "Target file pattern can't be null");
-					return ResponseEntity.ok().body(response);
-				}
-				String filePath = targetDetails.getFilePath();
-				if(filePath == null){
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", "Target file path can't be null");
-					return ResponseEntity.ok().body(response);
-				}
-				targetBucketName = targetDetails.getBucketName();
-				String targetFilePath = "s3://" + targetBucketName + "/" + filePath;
 
-				// Split strings
-				String[] targetFilePatternList = targetFilePattern.split("/");
-				String[] targetFilePathList = targetFilePath.split("/");
-				// Check if both arrays have the same size
-				if (targetFilePatternList.length != targetFilePathList.length) {
-					log.info(FILE_NOT_ALIGN);
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", FILE_NOT_ALIGN);
-					return ResponseEntity.ok().body(response);
-				}
-				int targetFeedNameIndex = PatternUtils.getIndex(targetFilePatternList,FEED_NAME);
-				if(targetFeedNameIndex == -1){
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", INDEX_NOT_FOUND);
-					return ResponseEntity.ok().body(response);
-				}
-				int targetDateIndex = PatternUtils.getIndex(targetFilePatternList,DDMMYYYY);
-				if(targetDateIndex == -1){
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", INDEX_NOT_FOUND);
-					return ResponseEntity.ok().body(response);
-				}
-				int targetFileNameIndex = PatternUtils.getIndex(targetFilePatternList,FILENAME);
-				if(targetFileNameIndex == -1){
-					response.put("code", HttpStatus.SC_BAD_REQUEST);
-					response.put("message", INDEX_NOT_FOUND);
-					return ResponseEntity.ok().body(response);
-				}
-				targetFeedName = PatternUtils.getValueAtIndex(targetFilePathList, targetFeedNameIndex);
-				String targetDate = PatternUtils.getValueAtIndex(targetFilePathList, targetDateIndex);
-				targetFileName = PatternUtils.getValueAtIndex(targetFilePathList, targetFileNameIndex);
-			}
 			DataSourceDetails sourceDatails = ruleDetails.getSourceData();
 			if(sourceDatails == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source details can't be null");
 				return ResponseEntity.ok().body(response);
 			}
-			String sourceFilePattern = sourceDatails.getFilePattern();
+
+			String sourceFilePattern = ruleDetails.getSourceData().getFilePattern();
 			if(sourceFilePattern == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source file pattern can't be null");
@@ -155,14 +103,20 @@ public class RuleServiceImpl implements RuleService {
 				response.put("message", "File path can't be null");
 				return ResponseEntity.ok().body(response);
 			}
-
-			String sourceBucketName = sourceDatails.getBucketName();
-			String sourceFilePath = "s3://" + sourceBucketName + "/" + filePath;
+			String sourceFilePath = "s3://" + sourceDatails.getBucketName() + "/" + filePath;
 
 			// Split strings
 			String[] sourceFilePatternList = sourceFilePattern.split("/");
-			String[] sourceFilePathList = sourceFilePath.split("/");
+			// Check for the presence of elements
+			List<String> missingElements = PatternUtils.findMissingElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
 
+			// Output the results
+			if (!missingElements.isEmpty()) {
+				response.put("code", HttpStatus.SC_BAD_REQUEST);
+				response.put("message", missingElements + " are missing in the file pattern");
+				return ResponseEntity.ok().body(response);
+			}
+			String[] sourceFilePathList = sourceFilePath.split("/");
 			// Check if both arrays have the same size
 			if (sourceFilePatternList.length != sourceFilePathList.length) {
 				log.info(FILE_NOT_ALIGN);
@@ -171,28 +125,57 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-			int sourceFeedNameIndex = PatternUtils.getIndex(sourceFilePatternList,FEED_NAME);
-			if(sourceFeedNameIndex == -1){
-				response.put("code", HttpStatus.SC_BAD_REQUEST);
-				response.put("message", INDEX_NOT_FOUND);
-				return ResponseEntity.ok().body(response);
-			}
-			int sourceDateIndex = PatternUtils.getIndex(sourceFilePatternList,DDMMYYYY);
-			if(sourceDateIndex == -1){
-				response.put("code", HttpStatus.SC_BAD_REQUEST);
-				response.put("message", INDEX_NOT_FOUND);
-				return ResponseEntity.ok().body(response);
-			}
-			int sourceFileNameIndex = PatternUtils.getIndex(sourceFilePatternList,FILENAME);
-			if(sourceFileNameIndex == -1){
-				response.put("code", HttpStatus.SC_BAD_REQUEST);
-				response.put("message", INDEX_NOT_FOUND);
-				return ResponseEntity.ok().body(response);
-			}
-			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, sourceFeedNameIndex);
-			String sourceDate = PatternUtils.getValueAtIndex(sourceFilePathList, sourceDateIndex);
-			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, sourceFileNameIndex);
+            // Find the indices of expected elements
+			Map<String, Integer> indices = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, sourceFilePatternList);
+			String sourceBucketName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get("BUCKET_NAME"));
+			String sourceFeedName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FEED_NAME));
+			String sourceFileName = PatternUtils.getValueAtIndex(sourceFilePathList, indices.get(FILENAME));
 
+			if(ruleDetails.isSourceAndTarget()) {
+				DataSourceDetails targetDetails = ruleDetails.getTargetData();
+				if(targetDetails == null){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", "Target details can't be null");
+					return ResponseEntity.ok().body(response);
+				}
+				targetFilePattern = ruleDetails.getSourceData().getFilePattern();
+				if(targetFilePattern == null){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", "Target file pattern can't be null");
+					return ResponseEntity.ok().body(response);
+				}
+				String selectedFilePath = targetDetails.getFilePath();
+				if(selectedFilePath == null){
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", "Target file path can't be null");
+					return ResponseEntity.ok().body(response);
+				}
+				String targetFilePath = "s3://" + targetDetails.getBucketName() + "/" + selectedFilePath;
+                // Split strings
+				String[] targetFilePatternList = targetFilePattern.split("/");
+				// Check for the presence of elements
+				List<String> missingElementsTarget = PatternUtils.findMissingElements(EXPECTED_IN_FILE_PATTERN, targetFilePatternList);
+
+				// Output the results
+				if (!missingElementsTarget.isEmpty()) {
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", missingElements + " are missing in the file pattern");
+					return ResponseEntity.ok().body(response);
+				}
+				String[] targetFilePathList = targetFilePath.split("/");
+				// Check if both arrays have the same size
+				if (targetFilePatternList.length != targetFilePathList.length) {
+					log.info(FILE_NOT_ALIGN);
+					response.put("code", HttpStatus.SC_BAD_REQUEST);
+					response.put("message", FILE_NOT_ALIGN);
+					return ResponseEntity.ok().body(response);
+				}
+				// Find the indices of expected elements
+				Map<String, Integer> indicesTarget = PatternUtils.findIndicesOfElements(EXPECTED_IN_FILE_PATTERN, targetFilePatternList);
+				targetBucketName = PatternUtils.getValueAtIndex(targetFilePathList, indicesTarget.get(BUCKETNAME));
+				targetFeedName = PatternUtils.getValueAtIndex(targetFilePathList, indicesTarget.get(FEED_NAME));
+				targetFileName = PatternUtils.getValueAtIndex(targetFilePathList, indicesTarget.get(FILENAME));
+			}
 			dbUtil.changeSchema("public");
 			final Projects project = projectService.getProject(projectId, ruleDetails.getUserId());
 			if(project == null) {

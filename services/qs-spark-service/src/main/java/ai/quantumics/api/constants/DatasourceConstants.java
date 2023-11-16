@@ -8,6 +8,9 @@
 
 package ai.quantumics.api.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class DatasourceConstants {
 
   public static final String DATA_SOURCE_EXIST = "Entered Connection Name is already used.Please enter a different name";
@@ -35,6 +38,8 @@ public class DatasourceConstants {
   public static final String FEED_NAME = "FEED_NAME";
   public static final String DDMMYYYY = "DDMMYYYY";
   public static final String FILENAME = "FILENAME";
+  public static final String BUCKETNAME = "BUCKET_NAME";
+  public static final List<String> EXPECTED_IN_FILE_PATTERN = Arrays.asList("BUCKET_NAME", "FEED_NAME", "DDMMYYYY", "FILENAME");
   public static final String INDEX_NOT_FOUND = "Index not found";
 
   private DatasourceConstants() {}
