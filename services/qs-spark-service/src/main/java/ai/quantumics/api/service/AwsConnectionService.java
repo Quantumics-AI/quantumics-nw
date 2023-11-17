@@ -4,6 +4,7 @@ import ai.quantumics.api.exceptions.DatasourceNotFoundException;
 import ai.quantumics.api.exceptions.InvalidAccessTypeException;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
+import ai.quantumics.api.res.BucketDetails;
 import ai.quantumics.api.vo.BucketFileContent;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -33,4 +34,5 @@ public interface AwsConnectionService {
 
     BucketFileContent getContent(String bucketName, String file);
     List<AwsDatasourceResponse> searchConnection(String datasourceName);
+    List<BucketDetails> getBucketRegions();
 }

@@ -15,6 +15,7 @@ import ai.quantumics.api.repo.AwsConnectionRepo;
 import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
+import ai.quantumics.api.res.BucketDetails;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
@@ -57,6 +58,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ai.quantumics.api.constants.DatasourceConstants.CLIENT_NAME_NOT_CONFIGURED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
 import static ai.quantumics.api.constants.DatasourceConstants.CORREPTED_FILE;
@@ -66,10 +68,16 @@ import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_UPDATED;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET_REGIONS;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+import static ai.quantumics.api.constants.DatasourceConstants.NATWEST;
+import static ai.quantumics.api.constants.DatasourceConstants.NOT_WELL_FORMATTED;
+import static ai.quantumics.api.constants.DatasourceConstants.NO_IMPLEMENTATION_AVAILABLE;
+import static ai.quantumics.api.constants.DatasourceConstants.POUND_DELIMITTER;
+import static ai.quantumics.api.constants.DatasourceConstants.QUANTUMICS;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
 @Slf4j
@@ -93,6 +101,14 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Value("${qs.aws.config.buckets}")
     private String configBucketNames;
 
+    @Value("${qs.client.name}")
+    private String clientName;
+
+    @Value("${qs.aws.quantumics.bucket.region}")
+    private String quantumicsBucketRegionNames;
+
+    @Value("${qs.aws.natwest.bucket.region}")
+    private String natwestBucketRegionNames;
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
@@ -336,6 +352,42 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             response.add(createResponse(datasource));
         });
         return response;
+    }
+
+    @Override
+    public List<BucketDetails> getBucketRegions() {
+        if(StringUtils.isEmpty(clientName)) {
+            throw new BadRequestException(CLIENT_NAME_NOT_CONFIGURED);
+        }
+        switch (clientName) {
+            case QUANTUMICS:
+                List<String> qsBucketRegions = Arrays.asList(quantumicsBucketRegionNames.split(DELIMITER));
+                if(CollectionUtils.isEmpty(qsBucketRegions) || StringUtils.isEmpty(qsBucketRegions.get(0))) {
+                    throw new BadRequestException(EMPTY_BUCKET_REGIONS);
+                }
+                return parseBucketRegions(qsBucketRegions);
+            case NATWEST:
+                List<String> nwBucketRegions = Arrays.asList(natwestBucketRegionNames.split(DELIMITER));
+                if(CollectionUtils.isEmpty(nwBucketRegions) || StringUtils.isEmpty(nwBucketRegions.get(0))) {
+                    throw new BadRequestException(EMPTY_BUCKET_REGIONS);
+                }
+                return parseBucketRegions(nwBucketRegions);
+            default:
+                throw new BadRequestException(String.format(NO_IMPLEMENTATION_AVAILABLE, clientName));
+        }
+    }
+
+    private static List<BucketDetails> parseBucketRegions(List<String> bucketRegions) {
+        List<BucketDetails> formattedBuckets = new ArrayList<>();
+        for (String bucketRegion : bucketRegions) {
+            String[] parts = bucketRegion.split(POUND_DELIMITTER);
+            if (parts.length == 2) {
+                formattedBuckets.add(new BucketDetails(parts[0], parts[1]));
+            }else{
+                throw new BadRequestException(NOT_WELL_FORMATTED);
+            }
+        }
+        return formattedBuckets;
     }
     private String getFoldersAndFilePathHierarchy(List<S3ObjectSummary> objectSummaries) throws IOException {
         log.info("Getting folder and file path hierarchy of S3ObjectSummary {}", objectSummaries);
