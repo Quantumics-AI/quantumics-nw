@@ -1015,6 +1015,8 @@ BEGIN
 	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
 	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Zero Row Check', null);
 
 	--- Table Creation completed..
 
