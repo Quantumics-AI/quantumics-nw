@@ -1,7 +1,5 @@
 package ai.quantumics.api.util;
 
-import ai.quantumics.api.model.ElementData;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,19 +34,6 @@ public class PatternUtils {
             missingElements.remove(part);
         }
         return missingElements;
-    }
-
-    public static List<ElementData> findPresentElements(List<String> expectedElements, String[] targetFilePatternList) {
-        List<ElementData> presentElements = new ArrayList<>();
-
-        for (int i = 0; i < targetFilePatternList.length; i++) {
-            String part = targetFilePatternList[i];
-            if (expectedElements.contains(part)) {
-                presentElements.add(new ElementData(part, i));
-            }
-        }
-
-        return presentElements;
     }
 
     public static Map<String, Integer> findIndicesOfElements(List<String> expectedElements, String[] targetFilePatternList) {
