@@ -87,6 +87,8 @@ export class DataQualityCreateComponent implements OnInit {
   public alreadyExist: boolean = false;
   public statusBody: any = ["Active","Inactive"];
   public selectedSubColumn: string;
+  public patternPath: string;
+  public isPattern: boolean;
 
   constructor(
     private fb: FormBuilder,
@@ -99,6 +101,7 @@ export class DataQualityCreateComponent implements OnInit {
     private cdr: ChangeDetectorRef) {
       this.formData = JSON.parse(sessionStorage.getItem('formData'));
       this.selectedPath = sessionStorage.getItem('SelectedPath');
+      this.patternPath = sessionStorage.getItem('selectedPattern');
       this.selectedFile = sessionStorage.getItem('selectedFile');
       this.selectedSource = sessionStorage.getItem('source');
       this.filecheck = JSON.parse(sessionStorage.getItem('check'));
@@ -130,12 +133,14 @@ export class DataQualityCreateComponent implements OnInit {
       sourceDataConnection: new FormControl('', Validators.required),
       sourceBucketOne: new FormControl('', Validators.required),
       sourceFolderPath: new FormControl('', Validators.required),
+      sourcePatternPath: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
       //
       sourceDataSourceTwo: new FormControl('aws', Validators.required),
       subDataSourceTwo: new FormControl('s3', Validators.required),
       sourceDataConnectionTwo: new FormControl('', Validators.required),
       sourceBucketTwo: new FormControl('', Validators.required),
       sourceFolderPathTwo: new FormControl('', Validators.required),
+      sourcePatternPathTwo: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
       //types
       ruleType: new FormControl('', Validators.required),
       subLavelRadio: new FormControl('', Validators.required),
@@ -171,12 +176,14 @@ export class DataQualityCreateComponent implements OnInit {
         this.fg.get('sourceDataConnectionTwo')?.clearValidators();
         this.fg.get('sourceBucketTwo')?.clearValidators();
         this.fg.get('sourceFolderPathTwo')?.clearValidators();
+        this.fg.get('sourcePatternPathTwo')?.clearValidators();
 
         this.fg.get('sourceDataSourceTwo')?.updateValueAndValidity();
         this.fg.get('subDataSourceTwo')?.updateValueAndValidity();
         this.fg.get('sourceDataConnectionTwo')?.updateValueAndValidity();
         this.fg.get('sourceBucketTwo')?.updateValueAndValidity();
         this.fg.get('sourceFolderPathTwo')?.updateValueAndValidity();
+        this.fg.get('sourcePatternPathTwo')?.updateValueAndValidity();
       }
       this.fg.controls.sourceDataConnection.setValue(this.formData?.sourceDataConnection);
       this.fg.controls.sourceBucketOne.setValue(this.formData?.sourceBucketOne);
@@ -185,10 +192,14 @@ export class DataQualityCreateComponent implements OnInit {
         if (this.selectedSource == 'source-1') {
           this.fg.controls.sourceFolderPath.setValue(this.selectedPath);
           this.fg.controls.sourceFolderPathTwo.setValue(this.formData?.sourceFolderPathTwo);
+          // this.fg.controls.sourcePatternPath.setValue(this.patternPath);
+          // this.fg.controls.sourcePatternPathTwo.setValue(this.formData?.sourcePatternPathTwo);
   
         } else {
           this.fg.controls.sourceFolderPath.setValue(this.formData?.sourceFolderPath);
-          this.fg.controls.sourceFolderPathTwo.setValue(this.selectedPath); 
+          this.fg.controls.sourceFolderPathTwo.setValue(this.selectedPath);
+          // this.fg.controls.sourcePatternPathTwo.setValue(this.patternPath);
+          // this.fg.controls.sourcePatternPath.setValue(this.formData?.sourcePatternPath);
         }
       } else {
         this.fg.controls.sourceFolderPath.setValue(this.formData?.sourceFolderPath);
@@ -330,12 +341,14 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.get('sourceDataConnectionTwo').setValidators([Validators.required]);
       this.fg.get('sourceBucketTwo').setValidators([Validators.required]);
       this.fg.get('sourceFolderPathTwo').setValidators([Validators.required]);
+      this.fg.get('sourcePatternPathTwo').setValidators([Validators.required]);
     } else {
       this.fg.get('sourceDataSourceTwo')?.clearValidators();
       this.fg.get('subDataSourceTwo')?.clearValidators();
       this.fg.get('sourceDataConnectionTwo')?.clearValidators();
       this.fg.get('sourceBucketTwo')?.clearValidators();
       this.fg.get('sourceFolderPathTwo')?.clearValidators();
+      this.fg.get('sourcePatternPathTwo')?.clearValidators();
     }
     
     this.fg.get('sourceDataSourceTwo')?.updateValueAndValidity();
@@ -343,6 +356,7 @@ export class DataQualityCreateComponent implements OnInit {
     this.fg.get('sourceDataConnectionTwo')?.updateValueAndValidity();
     this.fg.get('sourceBucketTwo')?.updateValueAndValidity();
     this.fg.get('sourceFolderPathTwo')?.updateValueAndValidity();
+    this.fg.get('sourcePatternPathTwo')?.updateValueAndValidity();
 
     // sourceDataSource: new FormControl('aws', Validators.required),
     //   subDataSourceOne: new FormControl('s3', Validators.required),
@@ -616,14 +630,16 @@ export class DataQualityCreateComponent implements OnInit {
             subDataSourceType: this.fg.controls.subDataSourceOne.value,
             dataSourceId: +this.fg.controls.sourceDataConnection.value,
             bucketName: this.fg.controls.sourceBucketOne.value,
-            filePath : this.fg.controls.sourceFolderPath.value
+            filePath : this.fg.controls.sourceFolderPath.value,
+            filePattern: this.fg.controls.sourcePatternPath.value
         },
         targetData: {
           dataSourceType: this.fg.controls.sourceDataSourceTwo.value,
           subDataSourceType: this.fg.controls.subDataSourceTwo.value,
           dataSourceId: +this.fg.controls.sourceDataConnectionTwo.value,
           bucketName: this.fg.controls.sourceBucketTwo.value,
-          filePath : this.fg.controls.sourceFolderPathTwo.value
+          filePath : this.fg.controls.sourceFolderPathTwo.value,
+          filePattern: this.fg.controls.sourcePatternPathTwo.value
         },
         ruleDetails:{
             ruleTypeName : this.fg.controls.ruleType.value,
@@ -649,7 +665,8 @@ export class DataQualityCreateComponent implements OnInit {
               subDataSourceType: this.fg.controls.subDataSourceOne.value,
               dataSourceId: +this.fg.controls.sourceDataConnection.value,
               bucketName: this.fg.controls.sourceBucketOne.value,
-              filePath : this.fg.controls.sourceFolderPath.value
+              filePath : this.fg.controls.sourceFolderPath.value,
+              filePattern: this.fg.controls.sourcePatternPath.value
           },
           ruleDetails:{
               ruleTypeName : this.fg.controls.ruleType.value,
@@ -673,7 +690,8 @@ export class DataQualityCreateComponent implements OnInit {
               subDataSourceType: this.fg.controls.subDataSourceOne.value,
               dataSourceId: +this.fg.controls.sourceDataConnection.value,
               bucketName: this.fg.controls.sourceBucketOne.value,
-              filePath : this.fg.controls.sourceFolderPath.value
+              filePath : this.fg.controls.sourceFolderPath.value,
+              filePattern: this.fg.controls.sourcePatternPath.value
           },
           ruleDetails:{
               ruleTypeName : this.fg.controls.ruleType.value,
@@ -692,8 +710,16 @@ export class DataQualityCreateComponent implements OnInit {
     }
 
     this.ruleCreationService.saveRule(this.userId, this.projectId, this.saveRulePayload).subscribe((response) => {
-      this.snakbar.open(response.message);
-      this.router.navigate([`projects/${this.projectId}/data-quality`]);
+      if(response.code == 400){
+        this.snakbar.open(response.message);
+        if (response.message == "Please check, the selected file is not align with the File Pattern") {
+          this.isPattern = true;
+        }
+      } else {
+        this.snakbar.open(response.message);
+        this.router.navigate([`projects/${this.projectId}/data-quality`]);
+      }
+      
     }, (error) => {
       this.snakbar.open(error);
     });

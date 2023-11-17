@@ -176,24 +176,44 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">Region Name*</label>
+                                        <input type="text" class="form-control input-design" placeholder="eu-west-2" 
+                                        formControlName="region" #region readonly>
+                                    </div>
+                                </div> -->
     
                                 <div class="col-12">
-
-                                    <div class="input-group mr">
-                                        <div class="custom-file">
-                                            <input type="text" formControlName="sourceFolderPath" [(ngModel)]="selectedSourcePathOne"
-                                            class="form-control input-design br-r-0" 
-                                            id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne" readonly>
-                                            <div class="err-div" *ngIf="fg.get('sourceFolderPath').invalid && fg.get('sourceFolderPath').dirty || fg.get('sourceFolderPath').touched">
-                                                <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPath').hasError('required')">
-                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                    Choose File is mandatory
+                                    <div class="form-group">
+                                        <label for="filePath" class="p2">File Path*</label>
+                                        <div class="input-group mr">
+                                            <div class="custom-file">
+                                                <input type="text" formControlName="sourceFolderPath" [(ngModel)]="selectedSourcePathOne"
+                                                class="form-control input-design br-r-0" 
+                                                id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne" readonly>
+                                                <div class="err-div" *ngIf="fg.get('sourceFolderPath').invalid && fg.get('sourceFolderPath').dirty || fg.get('sourceFolderPath').touched">
+                                                    <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPath').hasError('required')">
+                                                        <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                        File path is mandatory
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
+                                                (click)="browseSourceOne('source-1')" [disabled]="!selectedBucketOne">Choose File</button>
+                                            </div>
                                         </div>
-                                        <div class="input-group-append">
-                                            <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
-                                            (click)="browseSourceOne('source-1')" [disabled]="!selectedBucketOne">Choose File</button>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">File Pattern*</label>
+                                        <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                        formControlName="sourcePatternPath" #patternPath readonly>
+                                        <div class="text-error fs-12" *ngIf="isPattern"> 
+                                            Please check, the selected file is not aligned with the File Pattern
                                         </div>
                                     </div>
                                 </div>
@@ -253,22 +273,38 @@
                                                 </div>
                                             </div>
 
-                                            <div class="input-group mr">
-                                                <div class="custom-file">
-                                                    <input type="text" formControlName="sourceFolderPath" [(ngModel)]="selectedSourcePathOne"
-                                                    class="form-control input-design br-r-0" 
-                                                    id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne" readonly>
-                                                    <div class="err-div" *ngIf="fg.get('sourceFolderPath').invalid && fg.get('sourceFolderPath').dirty || fg.get('sourceFolderPath').touched">
-                                                        <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPath').hasError('required')">
-                                                            <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                            Choose File is mandatory
+                                            <!-- <div class="form-group">
+                                                <label for="inputName" class="p2">Region Name*</label>
+                                                <input type="text" class="form-control input-design" placeholder="eu-west-2" 
+                                                formControlName="region" #region readonly>
+                                            </div> -->
+                                            <div class="form-group">
+                                                <label for="filePath" class="p2">File Path*</label>
+                                                <div class="input-group mr">
+                                                
+                                                    <div class="custom-file">
+                                                        <input type="text" formControlName="sourceFolderPath" [(ngModel)]="selectedSourcePathOne"
+                                                        class="form-control input-design br-r-0" 
+                                                        id="inputGroupFile04" placeholder="No file chosen" [title]="selectedSourcePathOne" readonly>
+                                                        <div class="err-div" *ngIf="fg.get('sourceFolderPath').invalid && fg.get('sourceFolderPath').dirty || fg.get('sourceFolderPath').touched">
+                                                            <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPath').hasError('required')">
+                                                                <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                                File path is mandatory
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
+                                                        (click)="browseSourceOne('source-1')" [disabled]="!selectedBucketOne">Choose File</button>
+                                                    </div>
                                                 </div>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
-                                                    (click)="browseSourceOne('source-1')" [disabled]="!selectedBucketOne">Choose File</button>
-                                                </div>
+                                            </div>
+                                            
+
+                                            <div class="form-group">
+                                                <label for="inputName" class="p2">File Pattern*</label>
+                                                <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                                formControlName="sourcePatternPath" #patternPath readonly>
                                             </div>
 
                                         </div>
@@ -328,22 +364,37 @@
                                                 </div>
                                             </div>
 
-                                            <div class="input-group mr">
-                                                <div class="custom-file">
-                                                    <input type="text" formControlName="sourceFolderPathTwo" class="form-control input-design br-r-0" 
-                                                    id="inputGroupFile04" placeholder="No file chosen" [(ngModel)]="selectedSourcePathTwo" 
-                                                    [title]="selectedSourcePathTwo" readonly>
-                                                    <div class="err-div" *ngIf="fg.get('sourceFolderPathTwo').invalid && fg.get('sourceFolderPathTwo').dirty || fg.get('sourceFolderPathTwo').touched">
-                                                        <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPathTwo').hasError('required')">
-                                                            <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                            Choose File is mandatory
+                                            <!-- <div class="form-group">
+                                                <label for="inputName" class="p2">Region Name*</label>
+                                                <input type="text" class="form-control input-design" placeholder="eu-west-2" 
+                                                formControlName="regionTwo" #regionTwo readonly>
+                                            </div> -->
+                                            <div class="form-group">
+                                                <label for="filePath" class="p2">File Path*</label>
+                                                <div class="input-group mr">
+                                                    <div class="custom-file">
+                                                        <input type="text" formControlName="sourceFolderPathTwo" class="form-control input-design br-r-0" 
+                                                        id="inputGroupFile04" placeholder="No file chosen" [(ngModel)]="selectedSourcePathTwo" 
+                                                        [title]="selectedSourcePathTwo" readonly>
+                                                        <div class="err-div" *ngIf="fg.get('sourceFolderPathTwo').invalid && fg.get('sourceFolderPathTwo').dirty || fg.get('sourceFolderPathTwo').touched">
+                                                            <div class="text-error fs-12" *ngIf="fg.get('sourceFolderPathTwo').hasError('required')">
+                                                                <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                                File path is mandatory
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
+                                                        (click)="browseSourceTwo('source-2')" [disabled]="!selectedBucketTwo">Choose File</button>
+                                                    </div>
                                                 </div>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
-                                                    (click)="browseSourceTwo('source-2')" [disabled]="!selectedBucketTwo">Choose File</button>
-                                                </div>
+                                            </div>
+                                            
+
+                                            <div class="form-group">
+                                                <label for="inputName" class="p2">File Pattern*</label>
+                                                <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                                formControlName="sourcePatternPathTwo" #patternPathTwo readonly>
                                             </div>
                                         </div>
                                     </div>
@@ -542,7 +593,8 @@
                     <div class="mt-40">
                         <div class="text-center">
                             <button type="button" class="btn btn-outline-success connectionBtns"
-                                (click)="saveRuleFunction();" [ngClass]="{'validBtn': !fg.invalid}" [disabled]="fg.invalid || alreadyExist">Save</button>
+                                (click)="saveRuleFunction();" [ngClass]="{'validBtn': !fg.invalid}" 
+                                [disabled]="fg.invalid || alreadyExist || isPattern">Save</button>
                         </div>
                     </div>
                 </div>

@@ -67,6 +67,7 @@ export class BrowseFileComponent implements OnInit {
   public bucketName: string;
   public selectedFile: string;
   public filePath: string;
+  public patternPath: string;
 
   constructor(
     private router: Router,
@@ -190,8 +191,15 @@ export class BrowseFileComponent implements OnInit {
     }
 
     // console.log('show table', file.fileName , 'open nodes:', this.openNodes );
-    // console.log('path',this.openNodes.join('/') );
+    console.log('path',this.openNodes.join('/') );
+    const stringD = `s3://${this.bucketName}/${this.openNodes.join('/')}`;
+    console.log("PatternPath:", stringD);
+
     this.filePath = this.openNodes.join('/');
+
+    // set pattern path 
+    // pattern format - s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME
+    this.patternPath = `s3://${this.bucketName}/${this.filePath}`;
     // myArray.join('/')
     this.getFileData();
     this.getRowCount();

@@ -16,6 +16,7 @@ export class ShowFileComponent implements OnInit {
   @Input() columnType: any;
   @Input() rowCount: number;
   @Input() totalRowCount: any;
+  @Input() patternPath: string;
 
   public projectId: number;
   userId: number;
@@ -75,6 +76,7 @@ export class ShowFileComponent implements OnInit {
     }
     sessionStorage.setItem('selectedFile', this.file);
     sessionStorage.setItem('SelectedPath', this.filePath);
+    sessionStorage.setItem('selectedPattern', this.patternPath);
     sessionStorage.setItem('check', 'true');
     this.router.navigate([`projects/${this.projectId}/data-quality/create`]);
   }
