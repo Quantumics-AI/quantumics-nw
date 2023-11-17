@@ -41,7 +41,7 @@ public class DatasourceConstants {
   public static final String BUCKETNAME = "BUCKET_NAME";
   public static final List<String> EXPECTED_IN_FILE_PATTERN = Arrays.asList("BUCKET_NAME", "FEED_NAME", "DDMMYYYY", "FILENAME");
   public static final String INDEX_NOT_FOUND = "Index not found";
-  public static final String CLIENT_NAME_NOT_CONFIGURED = "Client name not configured. Please configure client name";
+  public static final String CLIENT_NAME_NOT_CONFIGURED = "Client name is not configured. Please configure client name";
   public static final String QUANTUMICS = "QUANTUMICS";
   public static final String NATWEST = "NATWEST";
   public static final String POUND_DELIMITTER = "#";
