@@ -91,7 +91,7 @@ public class RuleServiceImpl implements RuleService {
 				return ResponseEntity.ok().body(response);
 			}
 
-			String sourceFilePattern = sourceDatails.getFilePattern();
+			String sourceFilePattern = ruleDetails.getSourceData().getFilePattern();
 			if(sourceFilePattern == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "Source file pattern can't be null");
@@ -138,7 +138,7 @@ public class RuleServiceImpl implements RuleService {
 					response.put("message", "Target details can't be null");
 					return ResponseEntity.ok().body(response);
 				}
-				targetFilePattern = ruleDetails.getSourceData().getFilePattern();
+				targetFilePattern = ruleDetails.getTargetData().getFilePattern();
 				if(targetFilePattern == null){
 					response.put("code", HttpStatus.SC_BAD_REQUEST);
 					response.put("message", "Target file pattern can't be null");
@@ -387,9 +387,9 @@ public class RuleServiceImpl implements RuleService {
 			dbUtil.changeSchema(project.getDbSchemaName());
 			Pageable paging = PageRequest.of(page-1, pageSize);
 			if(CollectionUtils.isEmpty(status)) {
-				qsRule = ruleRepository.findByRuleNameContainingIgnoreCase(ruleName, paging);
+				qsRule = ruleRepository.findByRuleNameContainingIgnoreCaseOrderByCreatedDateDesc(ruleName, paging);
 			}else{
-				qsRule = ruleRepository.findByStatusInAndRuleNameContainingIgnoreCase(status, ruleName, paging);
+				qsRule = ruleRepository.findByStatusInAndRuleNameContainingIgnoreCaseOrderByCreatedDateDesc(status, ruleName, paging);
 			}
 
 			if(qsRule.isEmpty()){
