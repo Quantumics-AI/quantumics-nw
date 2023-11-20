@@ -21,6 +21,7 @@ import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
@@ -109,6 +110,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Value("${qs.aws.natwest.bucket.region}")
     private String natwestBucketRegionNames;
+
+    @Value("${qs.cloud.region}")
+    private String cloudRegion;
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
@@ -253,8 +257,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String testConnection(AwsDatasourceRequest request) {
-        awsS3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType().trim(), request.getRegion());
-        awsAdapter.createS3BucketClient(request.getBucketName());
+        AmazonS3 s3Client = awsS3Client;
+        String region = request.getRegion();
+        try {
+            if(!region.equals(awsS3Client.getRegionName())){
+                s3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType().trim(), region);
+            }
+            //s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+            HeadBucketRequest bucketLocationRequest =  new HeadBucketRequest(request.getBucketName());
+            s3Client.headBucket(bucketLocationRequest);
+            log.info("Connection established success");
+        }catch(Exception e){
+            log.info(e.getMessage());
+            throw new BadRequestException(CONNECTION_FAILED);
+        }
         return CONNECTION_SUCCESSFUL;
     }
     public String testsConnection(AwsDatasourceRequest request) {
