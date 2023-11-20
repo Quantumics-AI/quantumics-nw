@@ -257,7 +257,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsAdapter.createS3BucketClient(request.getBucketName());
         return CONNECTION_SUCCESSFUL;
     }
-    public String testConnection1(String accessMethod) {
+    public String testsConnection(AwsDatasourceRequest request) {
         if(isUseConfigBuckets) {
             if(StringUtils.isEmpty(configBucketNames)) {
                 throw new BadRequestException(EMPTY_BUCKET);
@@ -272,7 +272,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             }
         } else {
             try {
-                amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod, "region");
+                amazonS3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType(), request.getRegion());
                 amazonS3Client.listBuckets();
             } catch(Exception e){
                     log.info(e.getMessage());

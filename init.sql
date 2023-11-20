@@ -931,7 +931,7 @@ BEGIN
         sub_data_source varchar(255) NOT NULL,
         access_type varchar(255) NOT NULL,
         bucket_name varchar(255) NOT NULL,
-		region varchar(20) NOT NULL,
+        region varchar(20) NOT NULL,
         user_id int4 NOT NULL,
         project_id int4 NOT NULL,
         active boolean default true,
