@@ -46,12 +46,9 @@
                                         <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/db-connectors/pgsql-img.svg"> -->
                                         AWS
                                     </p>
-                                    
-                                </div>
-                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"> -->
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
-                                            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
                                             Connection Name*
                                         </label>
                                         <input type="text" class="form-control input-design" id="sourceName" #source
@@ -60,8 +57,6 @@
                                             (focus)="f.open()" (input)="checkIfNameExists(); source.value.length > 0 ? f.close() : f.open()" 
                                             (blur)="f.close()" triggers="manual" #f="ngbPopover" [ngbPopover]="popFolderContent"
                                             popoverClass="folder-pophover" placement="bottom">
-                                        <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">Connection name must be
-                                                between 3 and 50 characters long.</small> -->
                                         <div *ngIf="fg.get('dataSourceName').invalid && fg.get('dataSourceName').dirty || fg.get('dataSourceName').touched">
                                             <div class="text-error" *ngIf="fg.get('dataSourceName').hasError('required')">
                                                 <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
@@ -85,7 +80,7 @@
                                             Minimum length is 10 characters.
                                         </div> -->
                                     </div>
-
+    
                                     <ng-template #popFolderContent>
                                         <div class="col-12">
                                             <ul>
@@ -98,8 +93,34 @@
                                             </ul>
                                         </div>
                                     </ng-template>
-                                </div>
-                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <!-- </div> -->
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">Select Bucket*</label>
+                                        <select class="form-control input-design" #bck formControlName="bucket"
+                                        [(ngModel)]="selectedBucket" (change)="onSelectBucket(bck.value)">
+                                            <option value="" [value]="undefined" disabled selected>Select data connection</option>
+                                            <option *ngFor="let item of bucketList" [value]="item.name" >
+                                                {{item.name}}
+                                            </option>
+                                        </select>
+                                        <div *ngIf="fg.get('bucket').invalid && fg.get('bucket').dirty || fg.get('bucket').touched">
+                                            <div class="text-error fs-12" *ngIf="fg.get('bucket').hasError('required')">
+                                                <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                Select Bucket is mandatory
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">
+                                            <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
+                                            Selected Region*
+                                        </label>
+                                        <input type="text" class="form-control input-design" id="regionName" #regionName
+                                            formControlName="region" placeholder="Region name" [value]="'eu-west-2'" readonly>
+                                    </div>
+                                    
+                                    <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"> -->
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
                                             <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
@@ -109,7 +130,9 @@
                                             formControlName="subDataSource" autocomplete="off" placeholder="Sub data source name" [value]="'S3'">
                                         
                                     </div>
+                                    <!-- </div> -->
                                 </div>
+                                
                                 <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
@@ -130,7 +153,7 @@
                                         (click)="checkExistName()">Test Connection</button>
 
                                         <button type="button" class="btn btn-outline-success connectionBtns mr-l-10" [ngClass]="{'validBtn': connection}" 
-                                        [disabled]="!connection" (click)="continue()">Connect</button>
+                                        [disabled]="!connection" (click)="continue()">Create</button>
                                     </div>
                                     
                                 </div>

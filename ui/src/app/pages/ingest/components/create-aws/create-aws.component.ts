@@ -52,6 +52,8 @@ export class CreateAwsComponent {
   public connectionData: any;
   public pageSize: number = 1;
   public pageLength: number = 100;
+  public selectedBucket: string;
+  public bucketList: any;
 
   constructor(
     private fb: FormBuilder,
@@ -81,19 +83,31 @@ export class CreateAwsComponent {
     this.fg = this.fb.group({
       dataSourceName: ['', [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
       connectionType: [{ value: 'PROFILE', disabled: true }],
+      bucket: ['', [Validators.required]],
+      region: ['', [Validators.required]],
       subDataSource: [{ value: 'S3', disabled: true }, Validators.required],
       // roleName: ['Shivraj', Validators.required]
     });
 
     this.getAccessTypes();
     // this.getAwsList()
+    this.getBucketData();
   }
 
   ngAfterViewInit(): void {
-    if (this.connectionData) {
-      this.fg.controls.dataSourceName.setValue(this.connectionData.connectionName);
-      this.connection = true;
-    }
+    // if (this.connectionData) {
+    //   this.fg.controls.dataSourceName.setValue(this.connectionData.connectionName);
+    //   this.connection = true;
+    // }
+  }
+
+  public getBucketData(): void {
+    this.sourceDataService.getBucketData(this.userId, this.projectId).subscribe((res) => {
+      console.log("==", res);
+      this.bucketList = res;
+    }, (error) => {
+      this.snakbar.open(error);
+    });
   }
 
   // public getAwsList(): void {
@@ -159,14 +173,16 @@ export class CreateAwsComponent {
     
   }
 
+  public onSelectBucket(str: string): void {
+    const selectedRegion = this.bucketList.find(i => i.name == str);
+    this.fg.controls.region.setValue(selectedRegion?.region);
+  }
+
 
   public getAccessTypes(): void {
     this.sourceDataService.getAccessTypes().subscribe((res) => {
-      console.log(res);
       this.accessData = res;
-      console.log(this.accessData);
       this.transformData();
-      
     }, (error) => {
 
     });
@@ -224,44 +240,6 @@ export class CreateAwsComponent {
 
   }
 
-
-
-  public continue(): void {
-    const name = this.fg.get('dataSourceName').value;
-    this.sourceDataService.getIsExistConnection(this.userId, this.projectId, name, this.pageSize, this.pageLength).subscribe((response) => {
-      
-      console.log(response.isExist);
-      if(response.isExist){
-        this.alreadyExist = true;
-        this.connection = false;
-        
-      } else {
-        this.alreadyExist = false;
-        this.connection = true;
-        this.connectionParams = {
-          projectId: this.projectId,
-          userId: this.userId,
-          connectionName: this.fg.controls.dataSourceName.value,
-          accessType: this.fg.controls.connectionType.value,
-          subDataSource: this.fg.controls.subDataSource.value,
-          bucketName: '',
-        } as AwsData;
-        sessionStorage.setItem('awsData', JSON.stringify(this.connectionParams));
-        this.router.navigate([`projects/${this.projectId}/ingest/select-source-target`]);
-      }
-      
-      // if (response.isExist) {
-      //   this.alreadyExist = true;
-      // } else {
-      //   this.alreadyExist = false;
-      // }
-      
-    }, (error) => {
-
-    });
-    
-  }
-
   public testConnection(): void {
 
     // const role_data = {
@@ -278,12 +256,12 @@ export class CreateAwsComponent {
       connectionName: this.fg.controls.dataSourceName.value,
       accessType: this.fg.controls.connectionType.value,
       subDataSource: this.fg.controls.subDataSource.value,
-      bucketName: '',
+      bucketName: this.fg.controls.bucket.value,
+      region: this.fg.controls.region.value
     } as AwsData;
     console.log(this.connectionParams);
 
     this.sourceDataService.testConnection(this.userId,this.projectId, this.connectionParams).subscribe((response) => {
-      console.log("--", response);
       
       sessionStorage.setItem('awsData', JSON.stringify(this.connectionParams));
       this.snakbar.open(response.message);
@@ -292,6 +270,43 @@ export class CreateAwsComponent {
       this.snakbar.open(error);
       this.connection = false;
     });
+    
+  }
+
+  public continue(): void {
+    // const name = this.fg.get('dataSourceName').value;
+    // this.sourceDataService.getIsExistConnection(this.userId, this.projectId, name, this.pageSize, this.pageLength).subscribe((response) => {
+      
+    //   console.log(response.isExist);
+    //   if(response.isExist){
+    //     this.alreadyExist = true;
+    //     this.connection = false;
+        
+    //   } else {
+    //     this.alreadyExist = false;
+    //     this.connection = true;
+    //     this.connectionParams = {
+    //       projectId: this.projectId,
+    //       userId: this.userId,
+    //       connectionName: this.fg.controls.dataSourceName.value,
+    //       accessType: this.fg.controls.connectionType.value,
+    //       subDataSource: this.fg.controls.subDataSource.value,
+    //       bucketName: '',
+    //     } as AwsData;
+    //     sessionStorage.setItem('awsData', JSON.stringify(this.connectionParams));
+    //     this.router.navigate([`projects/${this.projectId}/ingest/select-source-target`]);
+    //   }
+      
+    // }, (error) => {
+
+    // });
+    this.sourceDataService.saveSourceData(this.connectionParams).subscribe((response) => {
+      console.log("API", response);
+      this.snakbar.open("New connection created successfully");
+      this.router.navigate([`projects/${this.projectId}/ingest/aws`]);
+    }, (error) => {
+      this.snakbar.open(error);
+    })
     
   }
 

@@ -127,4 +127,9 @@ export class SourceDataService {
   public getIsExistConnection(projectId: number, userId: number, connectionName: string,  pageNumber: number, sizeLength: number): Observable<any> {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/getConnectionByName/${projectId}/${userId}/${connectionName}?page=${pageNumber}&size=${sizeLength}`);
   }
+
+  // bucket list with region
+  public getBucketData(userId: number, projectId: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/bucketregions/${userId}/${projectId}`);
+  }
 }
