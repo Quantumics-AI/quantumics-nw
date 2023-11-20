@@ -110,9 +110,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Value("${qs.aws.natwest.bucket.region}")
     private String natwestBucketRegionNames;
-
-    @Value("${qs.cloud.region}")
-    private String cloudRegion;
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
@@ -257,15 +254,15 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String testConnection(AwsDatasourceRequest request) {
-        AmazonS3 s3Client = awsS3Client;
+        amazonS3Client = awsS3Client;
         String region = request.getRegion();
         try {
             if(!region.equals(awsS3Client.getRegionName())){
-                s3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType().trim(), region);
+                amazonS3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType().trim(), region);
             }
             //s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
             HeadBucketRequest bucketLocationRequest =  new HeadBucketRequest(request.getBucketName());
-            s3Client.headBucket(bucketLocationRequest);
+            amazonS3Client.headBucket(bucketLocationRequest);
             log.info("Connection established success");
         }catch(Exception e){
             log.info(e.getMessage());
@@ -311,7 +308,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
         //AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
-        S3Object s3Object = awsS3Client.getObject(bucketName, file);
+        S3Object s3Object = amazonS3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
@@ -451,7 +448,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
-        ListObjectsV2Result result = awsS3Client.listObjectsV2(request);
+        ListObjectsV2Result result = amazonS3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             listObjects(bucketName, commonPrefix, objectSummaries);
