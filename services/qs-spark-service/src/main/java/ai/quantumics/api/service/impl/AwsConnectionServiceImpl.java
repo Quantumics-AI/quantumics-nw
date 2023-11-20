@@ -279,30 +279,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         }
         return CONNECTION_SUCCESSFUL;
     }
-    public String testsConnection(AwsDatasourceRequest request) {
-        if(isUseConfigBuckets) {
-            if(StringUtils.isEmpty(configBucketNames)) {
-                throw new BadRequestException(EMPTY_BUCKET);
-            }
-            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
-            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
-                throw new BadRequestException(EMPTY_BUCKET);
-            }
-            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
-            if(s3Client == null) {
-                throw new BadRequestException(CONNECTION_FAILED);
-            }
-        } else {
-            try {
-                amazonS3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType(), request.getRegion());
-                amazonS3Client.listBuckets();
-            } catch(Exception e){
-                    log.info(e.getMessage());
-                    throw new BadRequestException(CONNECTION_FAILED);
-                }
-        }
-        return CONNECTION_SUCCESSFUL;
-    }
 
     @Override
     public BucketFileContent getContent(String bucketName, String file) {
@@ -316,7 +292,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
-        //AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         S3Object s3Object = amazonS3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
@@ -467,7 +442,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     private void listObjects(String bucketName, String prefix, List<S3ObjectSummary> objectSummaries) {
-        //AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
