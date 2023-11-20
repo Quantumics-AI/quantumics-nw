@@ -252,7 +252,12 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public String testConnection(String accessMethod) {
+    public String testConnection(AwsDatasourceRequest request) {
+        awsS3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType().trim(), request.getRegion());
+        awsAdapter.createS3BucketClient(request.getBucketName());
+        return CONNECTION_SUCCESSFUL;
+    }
+    public String testConnection1(String accessMethod) {
         if(isUseConfigBuckets) {
             if(StringUtils.isEmpty(configBucketNames)) {
                 throw new BadRequestException(EMPTY_BUCKET);
@@ -267,7 +272,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             }
         } else {
             try {
-                amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
+                amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod, "region");
                 amazonS3Client.listBuckets();
             } catch(Exception e){
                     log.info(e.getMessage());
@@ -289,8 +294,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
-        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
-        S3Object s3Object = s3Client.getObject(bucketName, file);
+        //AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
+        S3Object s3Object = awsS3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
@@ -426,11 +431,11 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     private void listObjects(String bucketName, String prefix, List<S3ObjectSummary> objectSummaries) {
-        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
+        //AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
-        ListObjectsV2Result result = s3Client.listObjectsV2(request);
+        ListObjectsV2Result result = awsS3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             listObjects(bucketName, commonPrefix, objectSummaries);
@@ -451,6 +456,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsDatasource.setSubDataSource(awsDatasourceRequest.getSubDataSource());
         awsDatasource.setAccessType(awsDatasourceRequest.getAccessType());
         awsDatasource.setBucketName(awsDatasourceRequest.getBucketName().trim());
+        awsDatasource.setRegion(awsDatasourceRequest.getRegion());
         awsDatasource.setCreatedBy(userName);
         awsDatasource.setCreatedDate(DateTime.now().toDate());
         awsDatasource.setActive(true);

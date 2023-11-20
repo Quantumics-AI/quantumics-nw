@@ -26,6 +26,9 @@ public class AWSDatasource {
 	@Column(name = "bucket_name")
 	private String bucketName;
 
+	@Column(name = "region")
+	private String region;
+
 	private int userId;
 	private int projectId;
 	private boolean active;

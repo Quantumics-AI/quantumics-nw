@@ -30,7 +30,7 @@ public interface AwsConnectionService {
 
     String getFoldersAndFilePath(String bucketName) throws IOException;
 
-    String testConnection(String accessMethod);
+    String testConnection(AwsDatasourceRequest awsDatasourceRequest);
 
     BucketFileContent getContent(String bucketName, String file);
     List<AwsDatasourceResponse> searchConnection(String datasourceName);
