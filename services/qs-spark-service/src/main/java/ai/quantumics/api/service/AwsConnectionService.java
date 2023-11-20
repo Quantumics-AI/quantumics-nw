@@ -35,4 +35,5 @@ public interface AwsConnectionService {
     BucketFileContent getContent(String bucketName, String file);
     List<AwsDatasourceResponse> searchConnection(String datasourceName);
     List<BucketDetails> getBucketRegions();
+    List<String> getRegions();
 }

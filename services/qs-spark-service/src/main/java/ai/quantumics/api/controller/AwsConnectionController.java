@@ -220,6 +220,16 @@ public class AwsConnectionController {
         return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
     }
 
+    @GetMapping("/regions/{userId}/{projectId}")
+    public ResponseEntity<List<String>> getRegions(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getRegions());
+    }
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
         HashMap<String, Object> genericResponse = new HashMap<>();
         genericResponse.put("code", code.value());
