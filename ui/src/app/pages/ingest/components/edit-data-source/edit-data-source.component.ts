@@ -49,6 +49,7 @@ export class EditDataSourceComponent implements OnInit {
       // roleName:[{ value: this.rolename, disabled: true }],
       subDataSource: [{ value: this.sourceData.subDataSource, disabled: true }, Validators.required],
       bucketName:[{ value: this.sourceData.bucketName, disabled: true }],
+      region: [{ value: this.sourceData.region, disabled: true }]
     })
   }
 
@@ -183,7 +184,8 @@ export class EditDataSourceComponent implements OnInit {
       accessType: this.sourceData.accessType,
       // connectionData: this.sourceData.connectionData,
       subDataSource: this.fg.controls.subDataSource.value,
-      bucketName: this.fg.controls.bucketName.value
+      bucketName: this.fg.controls.bucketName.value,
+      region: this.fg.controls.region.value,
     }
 
     this.sourceDataService.updateSourceData(this.awsId, request).subscribe((response) => {
