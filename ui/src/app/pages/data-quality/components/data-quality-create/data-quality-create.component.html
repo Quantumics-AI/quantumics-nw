@@ -176,13 +176,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- <div class="col-12">
+                                <div class="col-12">
                                     <div class="form-group">
                                         <label for="inputName" class="p2">Region Name*</label>
-                                        <input type="text" class="form-control input-design" placeholder="eu-west-2" 
+                                        <input type="text" class="form-control input-design" placeholder="Region name" 
                                         formControlName="region" #region readonly>
                                     </div>
-                                </div> -->
+                                </div>
     
                                 <div class="col-12">
                                     <div class="form-group">
@@ -273,11 +273,11 @@
                                                 </div>
                                             </div>
 
-                                            <!-- <div class="form-group">
+                                            <div class="form-group">
                                                 <label for="inputName" class="p2">Region Name*</label>
-                                                <input type="text" class="form-control input-design" placeholder="eu-west-2" 
+                                                <input type="text" class="form-control input-design" placeholder="Region name" 
                                                 formControlName="region" #region readonly>
-                                            </div> -->
+                                            </div>
                                             <div class="form-group">
                                                 <label for="filePath" class="p2">File Path*</label>
                                                 <div class="input-group mr">
@@ -364,11 +364,12 @@
                                                 </div>
                                             </div>
 
-                                            <!-- <div class="form-group">
+                                            <div class="form-group">
                                                 <label for="inputName" class="p2">Region Name*</label>
-                                                <input type="text" class="form-control input-design" placeholder="eu-west-2" 
+                                                <input type="text" class="form-control input-design" placeholder="Region name" 
                                                 formControlName="regionTwo" #regionTwo readonly>
-                                            </div> -->
+                                            </div>
+
                                             <div class="form-group">
                                                 <label for="filePath" class="p2">File Path*</label>
                                                 <div class="input-group mr">
@@ -426,147 +427,168 @@
                             <label class="form-check-label p2" for="inlineRadio1">{{ item.ruleTypeName }}</label>
                           </div>
                           <div *ngIf="selectedMainRuleType === item.ruleTypeName" class="mr-l-60">
-                            <!-- for not null value -->
-                            <ng-container *ngIf="selectedMainRuleType != 'Null Value'; else nullValue">
-                                <!-- Sub-level radio buttons -->
-                                <div *ngFor="let level of item.level; let j = index;">
-                                    <div class="form-group dif"
-                                    [ngClass]="{'mr-b-55': level.levelName == 'Column' && fg.get('selectColumnAttribute').hasError('required'),
-                                    'mr-b-10': selectedSubLevel != 'Column'}">
-                                        <div class="form-check form-check-inline">
-                                            <input
-                                                class="form-check-input cp"
-                                                type="radio"
-                                                [(ngModel)]="selectedSubLevel"
-                                                (change)="onChangeSubLevel(level.levelName)"
-                                                [value]="level.levelName"
-                                                formControlName="subLavelRadio"
-                                            />
-                                            <label class="form-check-label p2" for="inlineRadio1">{{ level.levelName }}</label>
-                                        </div>
-                                        <!-- Conditionally display input and select elements based on columnLevel -->
-                                        <ng-container *ngIf="selectedSubLevel === level.levelName">
-                                            <div *ngIf="!level.columnLevel">
-                                                <ng-container *ngIf="selectedSubLevel != 'Table Level'">
-                                                    <div class="dif">
-                                                        <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                        formControlName="acceptancePercentage" (input)="validateInput($event)">
-                                                        <span class="pr">%</span>
-                                                    </div>
-                                                    <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12">
-                                                        Please enter a number between 0 and 20
-                                                    </div>
-                                                    <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12">
-                                                        Please enter value inside Acceptance Percentage Field
-                                                    </div>
-                                                </ng-container>
-                                                
+                            <!-- For not Zero Row Check -->
+                            <ng-container *ngIf="selectedMainRuleType != 'Zero Row Check'; else zeroRow">
+                                <!-- for not null value -->
+                                <ng-container *ngIf="selectedMainRuleType != 'Null Value'; else nullValue">
+                                    <!-- Sub-level radio buttons -->
+                                    <div *ngFor="let level of item.level; let j = index;">
+                                        <div class="form-group dif"
+                                        [ngClass]="{'mr-b-55': level.levelName == 'Column' && fg.get('selectColumnAttribute').hasError('required'),
+                                        'mr-b-10': selectedSubLevel != 'Column'}">
+                                            <div class="form-check form-check-inline">
+                                                <input
+                                                    class="form-check-input cp"
+                                                    type="radio"
+                                                    [(ngModel)]="selectedSubLevel"
+                                                    (change)="onChangeSubLevel(level.levelName)"
+                                                    [value]="level.levelName"
+                                                    formControlName="subLavelRadio"
+                                                />
+                                                <label class="form-check-label p2" for="inlineRadio1">{{ level.levelName }}</label>
                                             </div>
-                                            
-                                            <div *ngIf="level.columnLevel" class="dif">
-                                                <!-- for single column -->
-                                                <ng-container  *ngIf="selectedSubLevel != 'Multiple Column'">
-                                                    <div class="dif">
-                                                        <div style="position: relative; display: flex;">
-                                                            <select id="ab" class="form-control input-design in-text mr-r-20" 
-                                                            formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                                                <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                                <option *ngFor="let i of columnDataType" [value]="i.columnName">
-                                                                    {{i.columnName}}
-                                                                </option>
-                                                            </select>
-                                                            <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
-                                                                <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
-                                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                                    Please choose Column {{selectedSubColumn}}
-                                                                </div>
-                                                            <!-- </div> -->
-                                                        </div>
-                                                    </div>
-                                                    
-                                                </ng-container>
-                                                
-
-                                                <!-- for multi column  -->
-                                                <ng-container *ngIf="selectedSubLevel === 'Multiple Column'" >
-                                                    <div class="dif">
-                                                        <div style="position: relative; display: flex;">
-                                                            <ng-select id="dpt" class="custom mr-r-20 wid" formControlName="selectColumnAttribute" 
-                                                                [multiple]="true" placeholder="Select Attributes" bindLabel="name" groupBy="item" 
-                                                                [selectableGroup]="true" bindValue="id" [(ngModel)]="selectedAttributeName"
-                                                                [closeOnSelect]="false" [items]="columnData">
-
-                                                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-                                                                    <input id="item-{{index}}" type="checkbox" [(ngModel)]="item$.selected" [ngModelOptions]="{ standalone : true }"/> 
-                                                                    <span [title]="item" class="mr-l-8">{{item}}</span>
-                                                                </ng-template>
-                                                            </ng-select>
-                                                            <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">
-                                                                Please select up to 5 columns for comparison.
-                                                            </small> -->
-                                                            <div *ngIf="fg.get('selectColumnAttribute').hasError('maxlength')" class="text-error fs-12 err-div">
-                                                                Please select up to 5 columns for comparison.
-                                                            </div>
-                                                            <div *ngIf="fg.get('selectColumnAttribute').hasError('minlength')" class="text-error fs-12 err-div-acc">
-                                                                Please choose atleast 2 columns in the Duplicate-Multiple Column Value Rule Type
-                                                            </div>
-                                                            <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
-                                                                <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
-                                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                                    Please choose Column in the Duplicate - Multiple Column Value Rule Type
-                                                                </div>
-                                                            <!-- </div> -->
-                                                        </div>
-                                                        
-                                                    </div>
-                                                    
-                                                </ng-container>
-                                                <!-- <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                    formControlName="acceptancePercentage" autocomplete="off">
-                                                <span class="pr">%</span> -->
-                                                <ng-container *ngIf="selectedSubLevel != 'Column level'">
-                                                    <div class="dif">
-                                                        <div style="position: relative; display: flex;">
+                                            <!-- Conditionally display input and select elements based on columnLevel -->
+                                            <ng-container *ngIf="selectedSubLevel === level.levelName">
+                                                <div *ngIf="!level.columnLevel">
+                                                    <ng-container *ngIf="selectedSubLevel != 'Table Level'">
+                                                        <div class="dif">
                                                             <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
                                                             formControlName="acceptancePercentage" (input)="validateInput($event)">
                                                             <span class="pr">%</span>
-                                                        
-                                                            <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
-                                                                Please enter a number between 0 and 20.
-                                                            </div>
-                                                            <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12 err-div-acc">
-                                                                Please enter value inside Acceptance Percentage Field
+                                                        </div>
+                                                        <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12">
+                                                            Please enter a number between 0 and 20
+                                                        </div>
+                                                        <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12">
+                                                            Please enter value inside Acceptance Percentage Field
+                                                        </div>
+                                                    </ng-container>
+                                                    
+                                                </div>
+                                                
+                                                <div *ngIf="level.columnLevel" class="dif">
+                                                    <!-- for single column -->
+                                                    <ng-container  *ngIf="selectedSubLevel != 'Multiple Column'">
+                                                        <div class="dif">
+                                                            <div style="position: relative; display: flex;">
+                                                                <select id="ab" class="form-control input-design in-text mr-r-20" 
+                                                                formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                                    <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                                    <option *ngFor="let i of columnDataType" [value]="i.columnName">
+                                                                        {{i.columnName}}
+                                                                    </option>
+                                                                </select>
+                                                                <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
+                                                                    <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
+                                                                        <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                                        Please choose Column {{selectedSubColumn}}
+                                                                    </div>
+                                                                <!-- </div> -->
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </ng-container>
-                                                
-                                                
-                                            </div>
-                                        </ng-container>
-                                    </div>
-                                </div>
-                            </ng-container>
-                            <ng-template #nullValue>
-                                <div class="form-group mr-b-0 dif">
-                                    <div class="dif">
-                                        <div style="position: relative; display: flex;">
-                                            <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
-                                            [(ngModel)]="selectedNullName" placeholder="Select Attributes">
-                                                <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                <option *ngFor="let i of columnDataType" [value]="i.columnName">
-                                                    {{i.columnName}}
-                                                </option>
-                                            </select>
-                                            <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
-                                                <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
-                                                    <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                    Please choose column in the Null Value rule type
+                                                        
+                                                    </ng-container>
+                                                    
+
+                                                    <!-- for multi column  -->
+                                                    <ng-container *ngIf="selectedSubLevel === 'Multiple Column'" >
+                                                        <div class="dif">
+                                                            <div style="position: relative; display: flex;">
+                                                                <ng-select id="dpt" class="custom mr-r-20 wid" formControlName="selectColumnAttribute" 
+                                                                    [multiple]="true" placeholder="Select Attributes" bindLabel="name" groupBy="item" 
+                                                                    [selectableGroup]="true" bindValue="id" [(ngModel)]="selectedAttributeName"
+                                                                    [closeOnSelect]="false" [items]="columnData">
+
+                                                                    <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                                                        <input id="item-{{index}}" type="checkbox" [(ngModel)]="item$.selected" [ngModelOptions]="{ standalone : true }"/> 
+                                                                        <span [title]="item" class="mr-l-8">{{item}}</span>
+                                                                    </ng-template>
+                                                                </ng-select>
+                                                                <!-- <small id="workspaceNameHelp" class="form-text body-text-muted">
+                                                                    Please select up to 5 columns for comparison.
+                                                                </small> -->
+                                                                <div *ngIf="fg.get('selectColumnAttribute').hasError('maxlength')" class="text-error fs-12 err-div">
+                                                                    Please select up to 5 columns for comparison.
+                                                                </div>
+                                                                <div *ngIf="fg.get('selectColumnAttribute').hasError('minlength')" class="text-error fs-12 err-div-acc">
+                                                                    Please choose atleast 2 columns in the Duplicate-Multiple Column Value Rule Type
+                                                                </div>
+                                                                <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
+                                                                    <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
+                                                                        <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                                        Please choose Column in the Duplicate - Multiple Column Value Rule Type
+                                                                    </div>
+                                                                <!-- </div> -->
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        
+                                                    </ng-container>
+                                                    <!-- <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                        formControlName="acceptancePercentage" autocomplete="off">
+                                                    <span class="pr">%</span> -->
+                                                    <ng-container *ngIf="selectedSubLevel != 'Column level'">
+                                                        <div class="dif">
+                                                            <div style="position: relative; display: flex;">
+                                                                <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                                formControlName="acceptancePercentage" (input)="validateInput($event)">
+                                                                <span class="pr">%</span>
+                                                            
+                                                                <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
+                                                                    Please enter a number between 0 and 20.
+                                                                </div>
+                                                                <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12 err-div-acc">
+                                                                    Please enter value inside Acceptance Percentage Field
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                    
+                                                    
                                                 </div>
-                                            <!-- </div> -->
+                                            </ng-container>
                                         </div>
                                     </div>
-                                    
+                                </ng-container>
+                                <ng-template #nullValue>
+                                    <div class="form-group mr-b-0 dif">
+                                        <div class="dif">
+                                            <div style="position: relative; display: flex;">
+                                                <select id="cd" class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
+                                                [(ngModel)]="selectedNullName" placeholder="Select Attributes">
+                                                    <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                    <option *ngFor="let i of columnDataType" [value]="i.columnName">
+                                                        {{i.columnName}}
+                                                    </option>
+                                                </select>
+                                                <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
+                                                    <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
+                                                        <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
+                                                        Please choose column in the Null Value rule type
+                                                    </div>
+                                                <!-- </div> -->
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="dif">
+                                            <div style="position: relative; display: flex;">
+                                                <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                formControlName="acceptancePercentage" (input)="validateInput($event)">
+                                                <span class="pr">%</span>
+
+                                                <div *ngIf="fg.get('acceptancePercentage').hasError('invalidPercentage')" class="text-error fs-12 err-div left-12">
+                                                    Please enter a number between 0 and 20.
+                                                </div>
+                                                <div *ngIf="fg.get('acceptancePercentage').hasError('emptyPercentage')" class="text-error fs-12 err-div left-12">
+                                                    Please enter value inside Acceptance Percentage Field
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>                                
+                            </ng-container>
+                            <ng-template #zeroRow>
+                                <!-- <div class="form-group mr-b-0 dif">
                                     <div class="dif">
                                         <div style="position: relative; display: flex;">
                                             <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
@@ -581,8 +603,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </ng-template>
+                            
                             <div class="text-error fs-12" *ngIf="fg.get('subLavelRadio').hasError('required')">
                                 <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
                                 Please choose appropriate option Under {{selectedMainRuleType}} Check

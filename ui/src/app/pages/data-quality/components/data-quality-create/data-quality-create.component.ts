@@ -132,6 +132,7 @@ export class DataQualityCreateComponent implements OnInit {
       subDataSourceOne: new FormControl('s3', Validators.required),
       sourceDataConnection: new FormControl('', Validators.required),
       sourceBucketOne: new FormControl('', Validators.required),
+      region: new FormControl (''),
       sourceFolderPath: new FormControl('', Validators.required),
       sourcePatternPath: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
       //
@@ -139,6 +140,7 @@ export class DataQualityCreateComponent implements OnInit {
       subDataSourceTwo: new FormControl('s3', Validators.required),
       sourceDataConnectionTwo: new FormControl('', Validators.required),
       sourceBucketTwo: new FormControl('', Validators.required),
+      regionTwo: new FormControl (''),
       sourceFolderPathTwo: new FormControl('', Validators.required),
       sourcePatternPathTwo: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
       //types
@@ -434,6 +436,12 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.get('subLavelRadio').setValidators([Validators.required]);
       // this.fg.get('acceptancePercentage')?.clearValidators();
     }
+
+    if (value === 'Zero Row Check') {
+      this.fg.get('subLavelRadio')?.clearValidators();
+      this.fg.get('selectColumnAttribute')?.clearValidators();
+    }
+
     this.fg.get('subLavelRadio')?.updateValueAndValidity();
     this.fg.get('selectColumnAttribute')?.updateValueAndValidity();
     this.fg.get('acceptancePercentage')?.updateValueAndValidity();
@@ -588,6 +596,7 @@ export class DataQualityCreateComponent implements OnInit {
     const connectionBucket = this.dataConnectionList.find(e => e.id == +id);
     this.bucketSourceOne.push(connectionBucket.bucketName);
     this.fg.controls.sourceBucketOne.setValue(connectionBucket.bucketName);
+    this.fg.controls.region.setValue(connectionBucket.region);
   }
 
   public onSelectDataConnections2(id: string): void {
@@ -598,6 +607,7 @@ export class DataQualityCreateComponent implements OnInit {
     const connectionBucket = this.dataConnectionList.find(e => e.id == id);
     this.bucketSourceTwo.push(connectionBucket.bucketName);
     this.fg.controls.sourceBucketTwo.setValue(connectionBucket.bucketName);
+    this.fg.controls.regionTwo.setValue(connectionBucket.region);
   }
 
   public onSelectBucketOne(d: string): void {
