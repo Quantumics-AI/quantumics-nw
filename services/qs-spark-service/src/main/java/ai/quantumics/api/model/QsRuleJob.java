@@ -8,9 +8,16 @@
 
 package ai.quantumics.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -31,6 +38,7 @@ public class QsRuleJob {
   private int batchJobId;
   private int userId;
   private boolean active;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yy")
   private LocalDate businessDate;
   private Date jobSubmittedDate;
   private Date jobFinishedDate;
