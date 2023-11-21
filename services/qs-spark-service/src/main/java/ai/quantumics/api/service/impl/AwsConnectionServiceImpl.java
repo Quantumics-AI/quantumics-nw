@@ -91,7 +91,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AmazonS3 awsS3Client;
     @Autowired
     private AwsCustomConfiguration awsCustomConfiguration;
-    //private AmazonS3 amazonS3Client;
     @Autowired
     private AwsAdapter awsAdapter;
     @Autowired
@@ -252,7 +251,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Override
     public String testConnection(AwsDatasourceRequest request) {
-        //amazonS3Client = awsS3Client;
         String region = request.getRegion();
         try {
             if(!region.equals(awsS3Client.getRegionName())){
