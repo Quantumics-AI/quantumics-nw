@@ -132,4 +132,9 @@ export class SourceDataService {
   public getBucketData(userId: number, projectId: number): Observable<any> {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/bucketregions/${userId}/${projectId}`);
   }
+
+  // region list
+  public getRegionList(userId: number, projectId: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/regions/${userId}/${projectId}`);
+  }
 }

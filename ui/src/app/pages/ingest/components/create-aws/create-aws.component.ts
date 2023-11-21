@@ -54,6 +54,7 @@ export class CreateAwsComponent {
   public pageLength: number = 100;
   public selectedBucket: string;
   public bucketList: any;
+  public regionList: any;
 
   constructor(
     private fb: FormBuilder,
@@ -91,7 +92,8 @@ export class CreateAwsComponent {
 
     this.getAccessTypes();
     // this.getAwsList()
-    this.getBucketData();
+    // this.getBucketData();
+    this.getRegionList();
   }
 
   ngAfterViewInit(): void {
@@ -103,13 +105,21 @@ export class CreateAwsComponent {
 
   public getBucketData(): void {
     this.sourceDataService.getBucketData(this.userId, this.projectId).subscribe((res) => {
-      console.log("==", res);
       this.bucketList = res;
     }, (error) => {
       this.snakbar.open(error);
     });
   }
 
+  public getRegionList(): void {
+    this.sourceDataService.getRegionList(this.userId, this.projectId).subscribe((res) => {
+      console.log("==", res);
+      this.regionList = res;
+    }, (error) => {
+      this.snakbar.open(error);
+    });
+  
+  }
   // public getAwsList(): void {
   //   this.loading = true;
   //   this.sourceDataService.getSourceData(+this.projectId, this.userId).subscribe((response) => {
@@ -153,6 +163,7 @@ export class CreateAwsComponent {
   }
 
   checkIfNameExists() {
+    this.connection = false;
     if(this.fg.get('dataSourceName').value.length <= 0){
       this.alreadyExist = false;
     }
@@ -173,11 +184,16 @@ export class CreateAwsComponent {
     
   }
 
-  public onSelectBucket(str: string): void {
-    const selectedRegion = this.bucketList.find(i => i.name == str);
-    this.fg.controls.region.setValue(selectedRegion?.region);
+  public onSelectRegion(str: string): void {
+    this.connection = false;
+    // const selectedRegion = this.bucketList.find(i => i.name == str);
+    // this.fg.controls.region.setValue(selectedRegion?.region);
   }
 
+
+  checkBucket() {
+    this.connection = false;
+  }
 
   public getAccessTypes(): void {
     this.sourceDataService.getAccessTypes().subscribe((res) => {
@@ -213,6 +229,7 @@ export class CreateAwsComponent {
   modelChangeDataSourceName(str) {
     // const re = /^[a-zA-Z0-9_]+$/;
     this.alreadyExist = false;
+    this.connection = false;
     if (this.fg.controls.dataSourceName.value != "") {
 
       const validCapital = String(str).match(/^([A-Z])/);
