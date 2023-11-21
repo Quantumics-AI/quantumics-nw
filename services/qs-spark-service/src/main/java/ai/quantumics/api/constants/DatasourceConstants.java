@@ -41,13 +41,17 @@ public class DatasourceConstants {
   public static final String BUCKETNAME = "BUCKET_NAME";
   public static final List<String> EXPECTED_IN_FILE_PATTERN = Arrays.asList("BUCKET_NAME", "FEED_NAME", "DDMMYYYY", "FILENAME");
   public static final String INDEX_NOT_FOUND = "Index not found";
-  public static final String CLIENT_NAME_NOT_CONFIGURED = "Client name not configured. Please configure client name";
+  public static final String CLIENT_NAME_NOT_CONFIGURED = "Client name is not configured. Please configure client name";
   public static final String QUANTUMICS = "QUANTUMICS";
   public static final String NATWEST = "NATWEST";
   public static final String POUND_DELIMITTER = "#";
   public static final String EMPTY_BUCKET_REGIONS = "Buckets Regions are empty";
   public static final String NOT_WELL_FORMATTED = "Buckets Regions are not well formatted";
   public static final String NO_IMPLEMENTATION_AVAILABLE = "No implementation available for client: %s";
+  public static final String EMPTY_REGIONS = "Regions are empty";
+  public static final String REGION_PROPERTY_KEY = "qs.aws.%s.region";
+  public static final String REGION_PROPERTY_MISSING = "Region property is missing";
+  public static final String COMMA_DELIMITER = ",";
   private DatasourceConstants() {}
 
 }

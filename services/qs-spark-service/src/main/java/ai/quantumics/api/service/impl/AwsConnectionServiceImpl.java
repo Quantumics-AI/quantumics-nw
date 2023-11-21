@@ -21,6 +21,7 @@ import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
@@ -40,6 +41,7 @@ import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,6 +61,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.CLIENT_NAME_NOT_CONFIGURED;
+import static ai.quantumics.api.constants.DatasourceConstants.COMMA_DELIMITER;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
 import static ai.quantumics.api.constants.DatasourceConstants.CORREPTED_FILE;
@@ -68,16 +71,15 @@ import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_UPDATED;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
-import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET_REGIONS;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
+import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_REGIONS;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
-import static ai.quantumics.api.constants.DatasourceConstants.NATWEST;
 import static ai.quantumics.api.constants.DatasourceConstants.NOT_WELL_FORMATTED;
-import static ai.quantumics.api.constants.DatasourceConstants.NO_IMPLEMENTATION_AVAILABLE;
 import static ai.quantumics.api.constants.DatasourceConstants.POUND_DELIMITTER;
-import static ai.quantumics.api.constants.DatasourceConstants.QUANTUMICS;
+import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_KEY;
+import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_MISSING;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
 @Slf4j
@@ -94,6 +96,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     private AwsAdapter awsAdapter;
     @Autowired
     private RuleRepository ruleRepository;
+    @Autowired
+    private Environment environment;
 
     @Value("${qs.aws.use.config.buckets}")
     private boolean isUseConfigBuckets;
@@ -104,11 +108,8 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Value("${qs.client.name}")
     private String clientName;
 
-    @Value("${qs.aws.quantumics.bucket.region}")
-    private String quantumicsBucketRegionNames;
-
-    @Value("${qs.aws.natwest.bucket.region}")
-    private String natwestBucketRegionNames;
+    @Value("${qs.aws.config.regions}")
+    private String configRegionNames;
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
@@ -252,27 +253,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public String testConnection(String accessMethod) {
-        if(isUseConfigBuckets) {
-            if(StringUtils.isEmpty(configBucketNames)) {
-                throw new BadRequestException(EMPTY_BUCKET);
+    public String testConnection(AwsDatasourceRequest request) {
+        amazonS3Client = awsS3Client;
+        String region = request.getRegion();
+        try {
+            if(!region.equals(awsS3Client.getRegionName())){
+                amazonS3Client = awsCustomConfiguration.amazonS3Client(request.getAccessType().trim(), region);
             }
-            List<String> buckets = Arrays.asList(configBucketNames.split(DELIMITER));
-            if(CollectionUtils.isEmpty(buckets) || StringUtils.isEmpty(buckets.get(0))) {
-                throw new BadRequestException(EMPTY_BUCKET);
-            }
-            AmazonS3 s3Client = awsAdapter.createS3BucketClient(buckets.get(0));
-            if(s3Client == null) {
-                throw new BadRequestException(CONNECTION_FAILED);
-            }
-        } else {
-            try {
-                amazonS3Client = awsCustomConfiguration.amazonS3Client(accessMethod);
-                amazonS3Client.listBuckets();
-            } catch(Exception e){
-                    log.info(e.getMessage());
-                    throw new BadRequestException(CONNECTION_FAILED);
-                }
+            //s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+            HeadBucketRequest bucketLocationRequest =  new HeadBucketRequest(request.getBucketName());
+            amazonS3Client.headBucket(bucketLocationRequest);
+            log.info("Connection established success");
+        }catch(Exception e){
+            log.info(e.getMessage());
+            throw new BadRequestException(CONNECTION_FAILED);
         }
         return CONNECTION_SUCCESSFUL;
     }
@@ -289,8 +283,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
-        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
-        S3Object s3Object = s3Client.getObject(bucketName, file);
+        S3Object s3Object = amazonS3Client.getObject(bucketName, file);
         S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
@@ -355,28 +348,20 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public List<BucketDetails> getBucketRegions() {
+    public List<String> getRegions() {
         if(StringUtils.isEmpty(clientName)) {
             throw new BadRequestException(CLIENT_NAME_NOT_CONFIGURED);
         }
-        switch (clientName) {
-            case QUANTUMICS:
-                List<String> qsBucketRegions = Arrays.asList(quantumicsBucketRegionNames.split(DELIMITER));
-                if(CollectionUtils.isEmpty(qsBucketRegions) || StringUtils.isEmpty(qsBucketRegions.get(0))) {
-                    throw new BadRequestException(EMPTY_BUCKET_REGIONS);
-                }
-                return parseBucketRegions(qsBucketRegions);
-            case NATWEST:
-                List<String> nwBucketRegions = Arrays.asList(natwestBucketRegionNames.split(DELIMITER));
-                if(CollectionUtils.isEmpty(nwBucketRegions) || StringUtils.isEmpty(nwBucketRegions.get(0))) {
-                    throw new BadRequestException(EMPTY_BUCKET_REGIONS);
-                }
-                return parseBucketRegions(nwBucketRegions);
-            default:
-                throw new BadRequestException(String.format(NO_IMPLEMENTATION_AVAILABLE, clientName));
+        String regionList = environment.getProperty(String.format(REGION_PROPERTY_KEY, clientName.toLowerCase()));
+        if (regionList == null) {
+            throw new BadRequestException(REGION_PROPERTY_MISSING);
         }
+        List<String> regions = Arrays.asList(regionList.split(COMMA_DELIMITER));
+        if(CollectionUtils.isEmpty(regions) || StringUtils.isEmpty(regions.get(0))) {
+            throw new BadRequestException(EMPTY_REGIONS);
+        }
+        return regions;
     }
-
     private static List<BucketDetails> parseBucketRegions(List<String> bucketRegions) {
         List<BucketDetails> formattedBuckets = new ArrayList<>();
         for (String bucketRegion : bucketRegions) {
@@ -426,11 +411,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     private void listObjects(String bucketName, String prefix, List<S3ObjectSummary> objectSummaries) {
-        AmazonS3 s3Client = awsAdapter.createS3BucketClient(bucketName);
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
-        ListObjectsV2Result result = s3Client.listObjectsV2(request);
+        ListObjectsV2Result result = amazonS3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
             listObjects(bucketName, commonPrefix, objectSummaries);
@@ -451,6 +435,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         awsDatasource.setSubDataSource(awsDatasourceRequest.getSubDataSource());
         awsDatasource.setAccessType(awsDatasourceRequest.getAccessType());
         awsDatasource.setBucketName(awsDatasourceRequest.getBucketName().trim());
+        awsDatasource.setRegion(awsDatasourceRequest.getRegion());
         awsDatasource.setCreatedBy(userName);
         awsDatasource.setCreatedDate(DateTime.now().toDate());
         awsDatasource.setActive(true);

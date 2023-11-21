@@ -12,6 +12,7 @@ public class AwsDatasourceResponse {
     private String subDataSource;
     private String accessType;
     private String bucketName;
+    private String region;
     private Date createdDate;
     private Date modifiedDate;
 }

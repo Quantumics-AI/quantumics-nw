@@ -5,6 +5,7 @@ export interface AwsData {
     accessType: string;
     subDataSource: string;
     bucketName: string;
+    region: string;
 }
 
 export interface RoleData {

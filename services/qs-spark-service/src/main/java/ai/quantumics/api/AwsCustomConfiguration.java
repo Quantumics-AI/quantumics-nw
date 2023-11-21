@@ -96,41 +96,41 @@ public class AwsCustomConfiguration {
 
   @Bean
   public AmazonS3 awsS3Client() {
-    return amazonS3Client(accessMethod);
+    return amazonS3Client(accessMethod, cloudRegion);
   }
 
-  public AmazonS3 amazonS3Client(String accessMethod) {
+  public AmazonS3 amazonS3Client(String accessMethod, String region) {
     if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
-      return createAmazonS3(accessKey, secretKey);
+      return createAmazonS3(accessKey, secretKey, region);
     } else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
-      return createAmazonRoleS3();
+      return createAmazonRoleS3(region);
     } else if(accessMethod.equals(AwsAccessType.PROFILE.getAccessType())) {
-      return createAmazonProfileS3();
+      return createAmazonProfileS3(region);
     } else {
       throw new InvalidAccessTypeException(INVALID_ACCESS_TYPE);
     }
   }
 
-  public AmazonS3 createAmazonS3(String accessKey, String secretKey) {
+  public AmazonS3 createAmazonS3(String accessKey, String secretKey, String region) {
     final BasicAWSCredentials awsS3Credentials = new BasicAWSCredentials(accessKey, secretKey);
 
     ClientConfiguration config = new ClientConfiguration();
     config.setMaxConnections(2000);
     return AmazonS3ClientBuilder.standard()
-            .withRegion(cloudRegion)
+            .withRegion(region)
             .withClientConfiguration(config)
             .withCredentials(new AWSStaticCredentialsProvider(awsS3Credentials))
             .build();
   }
 
-  public AmazonS3 createAmazonRoleS3() {
+  public AmazonS3 createAmazonRoleS3(String region) {
 
     AWSCredentialsProvider credentialsProvider = getAwsCredentialsProvider();
 
     // Create an Amazon S3 client using the assumed role's credentials.
     AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(cloudRegion) // Set your desired region
+            .withRegion(region) // Set your desired region
             .build();
     return s3Client;
   }
@@ -150,13 +150,13 @@ public class AwsCustomConfiguration {
     return credentialsProvider;
   }
 
-  public AmazonS3 createAmazonProfileS3() {
+  public AmazonS3 createAmazonProfileS3(String region) {
     // Create an S3 client using the default AWS credentials provider chain.
     // The credentials provider chain will automatically use the IAM role attached to the EC2 instance.
     log.info("Default Region {} ",AmazonS3ClientBuilder.defaultClient().getRegionName());
     return AmazonS3ClientBuilder
             .standard()
-            .withRegion(cloudRegion)
+            .withRegion(region)
             .withCredentials(DefaultAWSCredentialsProviderChain.getInstance()).build();
   }
 

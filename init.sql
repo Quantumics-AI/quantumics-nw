@@ -931,6 +931,7 @@ BEGIN
         sub_data_source varchar(255) NOT NULL,
         access_type varchar(255) NOT NULL,
         bucket_name varchar(255) NOT NULL,
+        region varchar(20) NOT NULL,
         user_id int4 NOT NULL,
         project_id int4 NOT NULL,
         active boolean default true,
@@ -1015,6 +1016,8 @@ BEGIN
 	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
 	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Zero Row Check', null);
 
 	--- Table Creation completed..
 
