@@ -7,7 +7,6 @@ import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.req.AwsDatasourceRequest;
 import ai.quantumics.api.res.AwsDatasourceResponse;
-import ai.quantumics.api.res.BucketDetails;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.ValidatorUtils;
@@ -177,7 +176,7 @@ public class AwsConnectionController {
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest.getAccessType().trim()));
+        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest));
     }
 
     @GetMapping("/content/{userId}/{projectId}")
@@ -208,18 +207,16 @@ public class AwsConnectionController {
 
     }
 
-    @GetMapping("/bucketregions/{userId}/{projectId}")
-    public ResponseEntity<List<BucketDetails>> getBucketRegions(@PathVariable(value = "userId") final int userId,
-                                                                       @PathVariable(value = "projectId") final int projectId) {
+    @GetMapping("/regions/{userId}/{projectId}")
+    public ResponseEntity<List<String>> getRegions(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId) {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        List<BucketDetails> bucketsName = awsConnectionService.getBucketRegions();
-        return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getRegions());
     }
-
     private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
         HashMap<String, Object> genericResponse = new HashMap<>();
         genericResponse.put("code", code.value());

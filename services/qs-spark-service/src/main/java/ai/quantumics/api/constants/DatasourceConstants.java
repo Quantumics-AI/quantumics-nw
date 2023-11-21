@@ -48,6 +48,10 @@ public class DatasourceConstants {
   public static final String EMPTY_BUCKET_REGIONS = "Buckets Regions are empty";
   public static final String NOT_WELL_FORMATTED = "Buckets Regions are not well formatted";
   public static final String NO_IMPLEMENTATION_AVAILABLE = "No implementation available for client: %s";
+  public static final String EMPTY_REGIONS = "Regions are empty";
+  public static final String REGION_PROPERTY_KEY = "qs.aws.%s.region";
+  public static final String REGION_PROPERTY_MISSING = "Region property is missing";
+  public static final String COMMA_DELIMITER = ",";
   private DatasourceConstants() {}
 
 }

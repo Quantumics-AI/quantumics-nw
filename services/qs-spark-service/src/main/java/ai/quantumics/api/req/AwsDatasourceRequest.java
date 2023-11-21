@@ -17,5 +17,8 @@ public class AwsDatasourceRequest {
     private String subDataSource;
     @NotNull(message="Access Type is mandatory")
     private String accessType;
+    @NotNull(message="Bucket name is mandatory")
     private String bucketName;
+    @NotNull(message="Region is mandatory")
+    private String region;
 }
