@@ -101,10 +101,12 @@
                                                     <span title="{{dataQuality?.ruleName }}">{{dataQuality?.ruleName }}</span>
                                                 </td>
                                                 <td class="text-over">
-                                                    <span *ngIf="dataQuality?.ruleDetails?.ruleTypeName != 'Null Value'" title="{{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}">
+                                                    <span *ngIf="dataQuality?.ruleDetails?.ruleTypeName != 'Null Value' && dataQuality?.ruleDetails?.ruleTypeName != 'Zero Row Check'" 
+                                                    title="{{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}">
                                                         {{dataQuality?.ruleDetails?.ruleTypeName}} - {{dataQuality?.ruleDetails?.ruleLevel?.levelName}}
                                                     </span>
-                                                    <span *ngIf="dataQuality?.ruleDetails?.ruleTypeName == 'Null Value'" title="{{dataQuality?.ruleDetails?.ruleTypeName}}">
+                                                    <span *ngIf="dataQuality?.ruleDetails?.ruleTypeName == 'Null Value' || dataQuality?.ruleDetails?.ruleTypeName == 'Zero Row Check'" 
+                                                    title="{{dataQuality?.ruleDetails?.ruleTypeName}}">
                                                         {{dataQuality?.ruleDetails?.ruleTypeName}}
                                                     </span> 
                                                 </td>

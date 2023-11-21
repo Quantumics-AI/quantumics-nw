@@ -202,7 +202,7 @@ export class BrowseFileComponent implements OnInit {
     this.patternPath = `s3://${this.bucketName}/${this.filePath}`;
     // myArray.join('/')
     this.getFileData();
-    this.getRowCount();
+    // this.getRowCount();
     
   }
 
@@ -213,6 +213,12 @@ export class BrowseFileComponent implements OnInit {
       this.fileContent = res.content;
       this.columnType = res.columnDatatype;
       this.rowCount = res?.rowCount;
+      
+      if (this.rowCount == 500) {
+        this.getRowCount();
+      } else {
+        this.totalRowCount = this.rowCount;
+      }
       
       this.isShowTable = !this.isShowTable;
       // this.filePath = "";
