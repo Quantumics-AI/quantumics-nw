@@ -111,6 +111,7 @@ public class QsConstants {
   public static final String ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/row_count_template.py";
   public static final String DQ_COLUMN_SUM_TEMPLATE_NAME = "ai/quantumics/ml/dq_sum_of_column_template.py";
   public static final String DQ_NULL_VALUE_TEMPLATE_NAME = "ai/quantumics/ml/dq_null_value_template.py";
+  public static final String DQ_ZERO_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/dq_zero_row_count_template.py";
   public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/dq_duplicate_value_row_template.py";
   public static final String DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME = "ai/quantumics/ml/dq_duplicate_value_column_template.py";
   public static final String DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/dq_data_profile_table_level_template.py";
@@ -134,6 +135,7 @@ public class QsConstants {
   public static final String TABLE_LEVEL = "Table Level";
   public static final String COLUMN_LEVEL = "Column level";
   public static final String NULL_VALUE = "Null Value";
+  public static final String ZERO_ROW_CHECK = "Zero Row Check";
   public static final String DUPLICATE_VALUE = "Duplicate Value";
   public static final String DUPLICATE_ROW = "Duplicate Row";
   public static final String DUPLICATE_COLUMN_VALUE = "Column";

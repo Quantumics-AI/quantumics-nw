@@ -108,8 +108,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     @Value("${qs.client.name}")
     private String clientName;
 
-    @Value("${qs.aws.config.regions}")
-    private String configRegionNames;
     @Override
     public AwsDatasourceResponse saveConnectionInfo(AwsDatasourceRequest awsDatasourceRequest, String userName) throws InvalidAccessTypeException {
 
