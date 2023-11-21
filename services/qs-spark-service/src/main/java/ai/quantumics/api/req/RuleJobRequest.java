@@ -10,5 +10,6 @@ import java.util.List;
 public class RuleJobRequest {
 
   private List<Integer> ruleIds;
+  private String businessDate;
   
 }

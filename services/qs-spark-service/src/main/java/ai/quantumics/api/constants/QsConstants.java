@@ -8,12 +8,15 @@
 
 package ai.quantumics.api.constants;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -69,6 +72,7 @@ public class QsConstants {
   public static final String ENG_DB = "_eng" + db + "_";
   
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+  public static final String LOCAL_DATE_FORMAT = "dd-MM-yy";
   public static final String ADMIN_ROLE = "Admin";
   
   public static final String FILTERROWS = "filterRows";
@@ -275,5 +279,22 @@ public class QsConstants {
     format1.setTimeZone(QsConstants.utc);
     Date newDate = format1.parse(date);
     return newDate;
+  }
+
+  public static LocalDate convertToLocalDate(String dateString) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT);
+    LocalDate localDate = LocalDate.now();
+    if(StringUtils.isNotEmpty(dateString)) {
+      localDate = LocalDate.parse(dateString, formatter);
+    }
+    return localDate;
+  }
+
+  public static String convertToDDMMYYYY(LocalDate date) {
+    // Define the desired date format
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+
+    // Format the LocalDate object to a String
+    return date.format(formatter);
   }
 }

@@ -12,6 +12,7 @@ package ai.quantumics.api.controller;
 import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.RuleJobRequest;
+import ai.quantumics.api.req.RunRuleJobRequest;
 import ai.quantumics.api.service.RuleJobService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +52,19 @@ public class RuleJobController {
           @PathVariable(value = "projectId") final int projectId)
           throws Exception {
     return ruleJobService.runRuleJob(ruleJobRequest, userId, projectId);
+  }
+
+  @ApiOperation(value = "rulejob", response = Json.class)
+  @PostMapping("/batch/run")
+  @ApiResponses(
+          value = {
+                  @ApiResponse(code = 200, message = "OKAY"),
+                  @ApiResponse(code = 409, message = "Failure message")
+          })
+  public ResponseEntity<Object> runBatchRuleJob(
+          @RequestBody final RunRuleJobRequest ruleJobRequest)
+          throws Exception {
+    return ruleJobService.runBatchRuleJob(ruleJobRequest);
   }
 
   @ApiOperation(value = "rulejob", response = Json.class)
