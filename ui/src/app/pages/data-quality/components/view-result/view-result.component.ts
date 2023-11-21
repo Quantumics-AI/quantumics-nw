@@ -23,6 +23,7 @@ export class ViewResultComponent implements OnInit {
   public duplicateRule: string = "Duplicate Value";
   public dataComplete: string = 'Data Completeness';
   public dataProfiler: string = 'Data Profiler';
+  public zeroRowCheck: string = 'Zero Row Check';
   public sourceFileName: string;
   public targetFileName: string;
   constructor(

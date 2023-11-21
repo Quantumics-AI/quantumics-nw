@@ -190,6 +190,7 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.controls.sourceDataConnection.setValue(this.formData?.sourceDataConnection);
       this.fg.controls.sourceBucketOne.setValue(this.formData?.sourceBucketOne);
       this.bucketSourceOne.push(this.formData?.sourceBucketOne);
+      this.fg.controls.region.setValue(this.formData?.region);
       if (this.filecheck) {
         if (this.selectedSource == 'source-1') {
           this.fg.controls.sourceFolderPath.setValue(this.selectedPath);
@@ -210,6 +211,7 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.controls.sourceDataConnectionTwo.setValue(this.formData?.sourceDataConnectionTwo);
       this.fg.controls.sourceBucketTwo.setValue(this.formData?.sourceBucketTwo);
       this.bucketSourceTwo.push(this.formData?.sourceBucketTwo);
+      this.fg.controls.regionTwo.setValue(this.formData?.regionTwo);
       this.checkExistName();
     } else {
     }
@@ -640,6 +642,7 @@ export class DataQualityCreateComponent implements OnInit {
             subDataSourceType: this.fg.controls.subDataSourceOne.value,
             dataSourceId: +this.fg.controls.sourceDataConnection.value,
             bucketName: this.fg.controls.sourceBucketOne.value,
+            region: this.fg.controls.region.value,
             filePath : this.fg.controls.sourceFolderPath.value,
             filePattern: this.fg.controls.sourcePatternPath.value
         },
@@ -648,6 +651,7 @@ export class DataQualityCreateComponent implements OnInit {
           subDataSourceType: this.fg.controls.subDataSourceTwo.value,
           dataSourceId: +this.fg.controls.sourceDataConnectionTwo.value,
           bucketName: this.fg.controls.sourceBucketTwo.value,
+          region: this.fg.controls.regionTwo.value,
           filePath : this.fg.controls.sourceFolderPathTwo.value,
           filePattern: this.fg.controls.sourcePatternPathTwo.value
         },
@@ -675,6 +679,7 @@ export class DataQualityCreateComponent implements OnInit {
               subDataSourceType: this.fg.controls.subDataSourceOne.value,
               dataSourceId: +this.fg.controls.sourceDataConnection.value,
               bucketName: this.fg.controls.sourceBucketOne.value,
+              region: this.fg.controls.region.value,
               filePath : this.fg.controls.sourceFolderPath.value,
               filePattern: this.fg.controls.sourcePatternPath.value
           },
@@ -700,6 +705,7 @@ export class DataQualityCreateComponent implements OnInit {
               subDataSourceType: this.fg.controls.subDataSourceOne.value,
               dataSourceId: +this.fg.controls.sourceDataConnection.value,
               bucketName: this.fg.controls.sourceBucketOne.value,
+              region: this.fg.controls.region.value,
               filePath : this.fg.controls.sourceFolderPath.value,
               filePattern: this.fg.controls.sourcePatternPath.value
           },

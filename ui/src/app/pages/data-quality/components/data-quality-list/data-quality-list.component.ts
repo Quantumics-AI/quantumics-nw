@@ -11,6 +11,7 @@ import { SnackbarService } from 'src/app/core/services/snackbar.service';
 import { ViewRunningRulesComponent } from '../view-running-rules/view-running-rules.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
 import { RuleFilter, RuleListFilter } from '../../models/rule-filter.model';
+import { BusinessDateComponent } from '../business-date/business-date.component';
 
 @Component({
   selector: 'app-data-quality-list',
@@ -68,6 +69,7 @@ export class DataQualityListComponent implements OnInit {
   public totalNumberOfRules: number;
   public selectedStatus: string = 'Active';
   public isActive: boolean;
+  public selectedBusinessDate: any;
 
   constructor(
     private readonly router: Router,
@@ -274,18 +276,40 @@ export class DataQualityListComponent implements OnInit {
     });
     this.anyCheckboxSelected = false;
     this.selectAllChecked = false;
-    this.loading = true;
+    // this.loading = true;
     const req = {
       ruleIds : this.ruleId
     }
-    this.ruleCreationService.runRule(this.userId, this.projectId, req).subscribe((response) => {
-      this.loading = false;
+    
+    const modalRef = this.modalService.open(BusinessDateComponent, { size: 'md modal-dialog-centered', scrollable: false});
+    modalRef.componentInstance.userId = this.userId;
+    modalRef.componentInstance.projectId = this.projectId;
+    modalRef.componentInstance.ruleIds = req;
+
+
+    modalRef.result.then((result) => {
       this.ruleId = [];
-      this.snakbar.open(response.message, '', 7000);
-      
     }, (error) => {
-      this.loading = false;
+      
     });
+    // this.dataQualityList.map(dataQuality => {
+    //   dataQuality.selected = false;
+    // });
+    // this.anyCheckboxSelected = false;
+    // this.selectAllChecked = false;
+    // this.loading = true;
+    // const req = {
+    //   ruleIds : this.ruleId
+    // }
+
+    // this.ruleCreationService.runRule(this.userId, this.projectId, req).subscribe((response) => {
+    //   this.loading = false;
+    //   this.ruleId = [];
+    //   this.snakbar.open(response.message, '', 7000);
+      
+    // }, (error) => {
+    //   this.loading = false;
+    // });
   }
 
   public changeFilter(event: any, selectedFilter: RuleFilter): void {

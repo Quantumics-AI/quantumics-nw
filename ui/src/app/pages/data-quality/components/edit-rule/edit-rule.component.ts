@@ -107,13 +107,17 @@ export class EditRuleComponent implements OnInit {
       subDataSourceOne: new FormControl({ value: 's3', disabled: true }),
       sourceDataConnection: new FormControl({ value: '', disabled: true }),
       sourceBucketOne: new FormControl({ value: '', disabled: true }),
+      region: new FormControl({ value: '', disabled: true }),
       sourceFolderPath: new FormControl({ value: '', disabled: true }),
+      sourcePatternPath: new FormControl({ value: 's3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', disabled: true }),
       //
       sourceDataSourceTwo: new FormControl({ value: 'aws', disabled: true }),
       subDataSourceTwo: new FormControl({ value: 's3', disabled: true }),
       sourceDataConnectionTwo: new FormControl({ value: '', disabled: true }),
       sourceBucketTwo: new FormControl({ value: '', disabled: true }),
+      regionTwo: new FormControl({ value: '', disabled: true }),
       sourceFolderPathTwo: new FormControl({ value: '', disabled: true }),
+      sourcePatternPathTwo: new FormControl({ value: 's3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', disabled: true }),
       //types
       ruleType: new FormControl({ value: '', disabled: true }),
       subLavelRadio: new FormControl({ value: '', disabled: true }),
@@ -148,6 +152,7 @@ export class EditRuleComponent implements OnInit {
         this.fg.controls.sourceBucketOne.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.selectedBucketOne = this.fetchEditRule?.sourceData.bucketName;
         this.bucketSourceOne.push(this.fetchEditRule?.sourceData.bucketName);
+        this.fg.controls.region.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.fg.controls.sourceFolderPath.setValue(this.fetchEditRule?.sourceData.filePath);
         //source-2
         this.selectedDataConnections2 = this.fetchEditRule?.targetData.dataSourceId;
@@ -155,12 +160,14 @@ export class EditRuleComponent implements OnInit {
         this.fg.controls.sourceBucketTwo.setValue(this.fetchEditRule?.targetData.bucketName);
         this.selectedBucketTwo = this.fetchEditRule?.targetData.bucketName;
         this.bucketSourceTwo.push(this.fetchEditRule?.targetData.bucketName);
+        this.fg.controls.regionTwo.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.fg.controls.sourceFolderPathTwo.setValue(this.fetchEditRule?.targetData.filePath);
       } else {
         //source
         this.fg.controls.sourceDataConnection.setValue(this.fetchEditRule?.sourceData.dataSourceId);
         this.fg.controls.sourceBucketOne.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.bucketSourceOne.push(this.fetchEditRule?.sourceData.bucketName);
+        this.fg.controls.region.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.fg.controls.sourceFolderPath.setValue(this.fetchEditRule?.sourceData.filePath);
       }
       this.getRuleTypeList();
@@ -459,14 +466,18 @@ export class EditRuleComponent implements OnInit {
             subDataSourceType: this.fg.controls.subDataSourceOne.value,
             dataSourceId: +this.fg.controls.sourceDataConnection.value,
             bucketName: this.fg.controls.sourceBucketOne.value,
-            filePath : this.fg.controls.sourceFolderPath.value
+            region: this.fg.controls.region.value,
+            filePath : this.fg.controls.sourceFolderPath.value,
+            filePattern: this.fg.controls.sourcePatternPath.value
         },
         targetData: {
           sourceDataType: this.fg.controls.sourceDataSourceTwo.value,
           subDataSourceType: this.fg.controls.subDataSourceTwo.value,
           dataSourceId: +this.fg.controls.sourceDataConnectionTwo.value,
           bucketName: this.fg.controls.sourceBucketTwo.value,
-          filePath : this.fg.controls.sourceFolderPathTwo.value
+          region: this.fg.controls.regionTwo.value,
+          filePath : this.fg.controls.sourceFolderPathTwo.value,
+          filePattern: this.fg.controls.sourcePatternPathTwo.value
         },
         ruleDetails:{
             ruleTypeName : this.fg.controls.ruleType.value,
@@ -494,7 +505,9 @@ export class EditRuleComponent implements OnInit {
               subDataSourceType: this.fg.controls.subDataSourceOne.value,
               dataSourceId: +this.fg.controls.sourceDataConnection.value,
               bucketName: this.fg.controls.sourceBucketOne.value,
-              filePath : this.fg.controls.sourceFolderPath.value
+              region: this.fg.controls.region.value,
+              filePath : this.fg.controls.sourceFolderPath.value,
+              filePattern: this.fg.controls.sourcePatternPath.value
           },
           ruleDetails:{
               ruleTypeName : this.fg.controls.ruleType.value,
@@ -520,7 +533,9 @@ export class EditRuleComponent implements OnInit {
               subDataSourceType: this.fg.controls.subDataSourceOne.value,
               dataSourceId: +this.fg.controls.sourceDataConnection.value,
               bucketName: this.fg.controls.sourceBucketOne.value,
-              filePath : this.fg.controls.sourceFolderPath.value
+              region: this.fg.controls.region.value,
+              filePath : this.fg.controls.sourceFolderPath.value,
+              filePattern: this.fg.controls.sourcePatternPath.value
           },
           ruleDetails:{
               ruleTypeName : this.fg.controls.ruleType.value,

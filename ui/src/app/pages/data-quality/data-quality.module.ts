@@ -21,6 +21,7 @@ import { StatusDeleteConfirmationComponent } from './components/status-delete-co
 import { FilterPipeModule } from 'ngx-filter-pipe';
 import { FilterPipe, FilterDatabasePipe } from './pipes/filter.pipe';
 import { RuleLogsComponent } from './components/rule-logs/rule-logs.component';
+import { BusinessDateComponent } from './components/business-date/business-date.component';
 
 @NgModule({
     declarations: [
@@ -39,7 +40,8 @@ import { RuleLogsComponent } from './components/rule-logs/rule-logs.component';
         StatusDeleteConfirmationComponent,
         FilterPipe,
         FilterDatabasePipe,
-        RuleLogsComponent
+        RuleLogsComponent,
+        BusinessDateComponent
     ],
     imports: [
         CommonModule,

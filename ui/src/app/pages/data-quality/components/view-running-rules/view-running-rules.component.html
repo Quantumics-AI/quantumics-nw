@@ -39,6 +39,7 @@
                                     </th>
                                     <th class="pd-l-24">Submitted Date</th>
                                     <th class="pd-l-24">Finished Date</th>
+                                    <th class="pd-l-24">Business Date</th>
                                     <th class="pd-l-24">Result</th>
                                     <th class="pd-l-24">Action</th>
                                 </tr>
@@ -48,6 +49,8 @@
                                     <td>
                                         <input type="checkbox" (change)="selectRule($event, view)" [checked]="view.isChecked" 
                                         *ngIf="view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess'">
+                                        <input type="checkbox" (change)="selectReRule($event, view)" [checked]="isSelected(view.jobId)" 
+                                        *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'">
                                         <span class="mr-l-10">{{view?.ruleName}}</span>
                                         
                                     </td>
@@ -62,6 +65,7 @@
                                         <!-- {{view?.jobFinishedDate | date: 'dd-MM-yy, hh:mm a'}} -->
                                         {{convertToUKTimeZone(view?.jobFinishedDate)}}
                                     </td>
+                                    <td>{{view?.businessDate}}</td>
                                     <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'MisMatch'}">
                                         {{ view?.jobOutput ? parseJobOutput(view?.jobOutput) : '' }}
                                     </td>
@@ -104,10 +108,13 @@
                 </div>
             </ng-template>
         </div>
-        <div class="btn-div text-center" *ngIf="runningList.length">
+        <div class="btn-div text-center">
             <!-- <button class="btn btn-design mr-r-20" (click)="back()">Okay</button> -->
-            <button class="btn btn-design" *ngIf="cancelBtn" (click)="cancelInprocess()"
+            <button class="btn btn-design mr-r-20" *ngIf="cancelBtn" (click)="cancelInprocess()"
             [disabled]="selectedJobIds.length === 0">Cancel</button>
+
+            <button class="btn btn-design" *ngIf="reRunStatus" (click)="reRunRuleFunction()"
+            [disabled]="selectedReRunJobIds.length === 0">Re-run Rule</button>
         </div>
     </div>
 </app-loader>

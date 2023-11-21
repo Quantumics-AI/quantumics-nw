@@ -164,6 +164,14 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="inputName" class="p2">Region Name*</label>
+                                            <input type="text" class="form-control input-design" placeholder="Region name" 
+                                            formControlName="region" #region readonly>
+                                        </div>
+                                    </div>
         
                                     <div class="col-12">
     
@@ -175,6 +183,14 @@
                                             <div class="input-group-append">
                                                 <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" (click)="browseTable()" disabled>Choose file</button>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="inputName" class="p2">File Pattern*</label>
+                                            <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                            formControlName="sourcePatternPath" #patternPath readonly>
+                                            
                                         </div>
                                     </div>
                                 </ng-container>
@@ -220,6 +236,12 @@
                                                         </option>
                                                     </select>
                                                 </div>
+
+                                                <div class="form-group">
+                                                    <label for="inputName" class="p2">Region Name*</label>
+                                                    <input type="text" class="form-control input-design" placeholder="Region name" 
+                                                    formControlName="region" #region readonly>
+                                                </div>
     
                                                 <div class="input-group mr">
                                                     <div class="custom-file">
@@ -230,6 +252,13 @@
                                                         <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
                                                         (click)="browseTable()" disabled>Choose file</button>
                                                     </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="inputName" class="p2">File Pattern*</label>
+                                                    <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                                    formControlName="sourcePatternPath" #patternPath readonly>
+                                                    
                                                 </div>
     
                                             </div>
@@ -276,6 +305,12 @@
                                                         </option>
                                                     </select>
                                                 </div>
+
+                                                <div class="form-group">
+                                                    <label for="inputName" class="p2">Region Name*</label>
+                                                    <input type="text" class="form-control input-design" placeholder="Region name" 
+                                                    formControlName="regionTwo" #region readonly>
+                                                </div>
     
                                                 <div class="input-group mr">
                                                     <div class="custom-file">
@@ -286,6 +321,13 @@
                                                         <button class="btn btn-design pos-u br-l-0 br-r-8" type="button" 
                                                         (click)="browseTable()" disabled>Choose file</button>
                                                     </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="inputName" class="p2">File Pattern*</label>
+                                                    <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                                    formControlName="sourcePatternPathTwo" #patternPath readonly>
+                                                    
                                                 </div>
                                             </div>
                                         </div>
@@ -315,80 +357,95 @@
                                 <label class="form-check-label p2" for="inlineRadio1">{{ item.ruleTypeName }}</label>
                               </div>
                               <div *ngIf="selectedMainRuleType === item.ruleTypeName" class="mr-l-60">
+                                <!-- For not Zero Row Check -->
+                                <ng-container *ngIf="selectedMainRuleType != 'Zero Row Check'; else zeroRow">
                                 <!-- for not null value -->
-                                <ng-container *ngIf="selectedMainRuleType != 'Null Value'; else nullValue">
-                                    <!-- Sub-level radio buttons -->
-                                    <div *ngFor="let level of item.level; let j = index;">
-                                        <div class="form-group dif">
-                                            <div class="form-check form-check-inline">
-                                                <input
-                                                    class="form-check-input cp"
-                                                    type="radio"
-                                                    [(ngModel)]="selectedSubLevel"
-                                                    (change)="onChangeSubLevel(level.levelName)"
-                                                    [value]="level.levelName"
-                                                    formControlName="subLavelRadio"
-                                                    
-                                                />
-                                                <label class="form-check-label p2" for="inlineRadio1">{{ level.levelName }}</label>
+                                    <ng-container *ngIf="selectedMainRuleType != 'Null Value'; else nullValue">
+                                        <!-- Sub-level radio buttons -->
+                                        <div *ngFor="let level of item.level; let j = index;">
+                                            <div class="form-group dif">
+                                                <div class="form-check form-check-inline">
+                                                    <input
+                                                        class="form-check-input cp"
+                                                        type="radio"
+                                                        [(ngModel)]="selectedSubLevel"
+                                                        (change)="onChangeSubLevel(level.levelName)"
+                                                        [value]="level.levelName"
+                                                        formControlName="subLavelRadio"
+                                                        
+                                                    />
+                                                    <label class="form-check-label p2" for="inlineRadio1">{{ level.levelName }}</label>
+                                                </div>
+                                                <!-- Conditionally display input and select elements based on columnLevel -->
+                                                <ng-container *ngIf="selectedSubLevel === level.levelName">
+                                                    <div *ngIf="!level.columnLevel" class="dif">
+                                                        <ng-container *ngIf="selectedSubLevel != 'Table Level'">
+                                                            <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                            formControlName="percentage" autocomplete="off">
+                                                            <span class="pr">%</span>
+                                                        </ng-container>
+                                                    </div>
+                                                    <div *ngIf="level.columnLevel" class="dif">
+                                                        <!-- for single column -->
+                                                        <select *ngIf="selectedSubLevel != 'Multiple Column'" class="form-control input-design in-text mr-r-20" 
+                                                        formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                            <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                            <option *ngFor="let i of completenessData" [value]="i">
+                                                                {{i}}
+                                                            </option>
+                                                        </select>
+        
+                                                        <!-- for multi column  -->
+                                                        <ng-select *ngIf="selectedSubLevel === 'Multiple Column'" id="dpt" class="custom mr-r-20"
+                                                            formControlName="selectColumnAttribute" [multiple]="true"
+                                                            placeholder="Select Attributes" 
+                                                            bindLabel="name" groupBy="item" [selectableGroup]="true"
+                                                            bindValue="id" [(ngModel)]="selectedMultipleAttributeName"
+                                                            [closeOnSelect]="false" [items]="completenessData">
+        
+                                                            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                                                <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
+                                                            </ng-template>
+                                                        </ng-select>
+        
+                                                        <ng-container *ngIf="selectedSubLevel != 'Column level'">
+                                                            <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                            formControlName="percentage" autocomplete="off">
+                                                            <span class="pr">%</span>
+                                                        </ng-container>
+                                        
+                                                        
+                                                    </div>
+                                                </ng-container>
                                             </div>
-                                            <!-- Conditionally display input and select elements based on columnLevel -->
-                                            <ng-container *ngIf="selectedSubLevel === level.levelName">
-                                                <div *ngIf="!level.columnLevel" class="dif">
-                                                    <ng-container *ngIf="selectedSubLevel != 'Table Level'">
-                                                        <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                        formControlName="percentage" autocomplete="off">
-                                                        <span class="pr">%</span>
-                                                    </ng-container>
-                                                </div>
-                                                <div *ngIf="level.columnLevel" class="dif">
-                                                    <!-- for single column -->
-                                                    <select *ngIf="selectedSubLevel != 'Multiple Column'" class="form-control input-design in-text mr-r-20" 
-                                                    formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                                        <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                        <option *ngFor="let i of completenessData" [value]="i">
-                                                            {{i}}
-                                                        </option>
-                                                    </select>
-    
-                                                    <!-- for multi column  -->
-                                                    <ng-select *ngIf="selectedSubLevel === 'Multiple Column'" id="dpt" class="custom mr-r-20"
-                                                        formControlName="selectColumnAttribute" [multiple]="true"
-                                                        placeholder="Select Attributes" 
-                                                        bindLabel="name" groupBy="item" [selectableGroup]="true"
-                                                        bindValue="id" [(ngModel)]="selectedMultipleAttributeName"
-                                                        [closeOnSelect]="false" [items]="completenessData">
-    
-                                                        <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-                                                            <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
-                                                        </ng-template>
-                                                    </ng-select>
-    
-                                                    <ng-container *ngIf="selectedSubLevel != 'Column level'">
-                                                        <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                        formControlName="percentage" autocomplete="off">
-                                                        <span class="pr">%</span>
-                                                    </ng-container>
-                                    
-                                                    
-                                                </div>
-                                            </ng-container>
                                         </div>
-                                    </div>
+                                    </ng-container>
+                                    <ng-template #nullValue>
+                                        <div class="form-group mr-b-0 dif">
+                                            <select class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
+                                            [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                <option *ngFor="let i of completenessData" [value]="i">
+                                                    {{i}}
+                                                </option>
+                                            </select>
+                                            <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                            formControlName="percentage" autocomplete="off">
+                                        </div>
+                                    </ng-template>
                                 </ng-container>
-                                <ng-template #nullValue>
-                                    <div class="form-group mr-b-0 dif">
-                                        <select class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
-                                        [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                            <option [value]="undefined" disabled selected> Select Attributes </option>
-                                            <option *ngFor="let i of completenessData" [value]="i">
-                                                {{i}}
-                                            </option>
-                                        </select>
-                                        <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                        formControlName="percentage" autocomplete="off">
-                                    </div>
+                                <ng-template #zeroRow>
+                                    <!-- <div class="form-group mr-b-0 dif">
+                                        <div class="dif">
+                                            <div style="position: relative; display: flex;">
+                                                <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                formControlName="percentage">
+                                                <span class="pr">%</span>
+                                            </div>
+                                        </div>
+                                    </div> -->
                                 </ng-template>
+                                
                                 
                               </div>
                             </div>

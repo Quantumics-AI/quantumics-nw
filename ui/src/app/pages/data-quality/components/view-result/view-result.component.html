@@ -17,6 +17,18 @@
                 <!-- <p class="p1 fs-16 mt-3">{{output?.source % 1 === 0 ? output.source : output.source.toFixed(2)}}</p> -->
             </div>
         </ng-container>
+
+        <ng-container *ngIf="output.ruleTypeName == zeroRowCheck">
+            <div class="rd">
+                <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
+            </div>
+            <div class="text-center">
+                <p class="p2 fs-16 mr-b-0">Source</p>
+                <small class="form-text body-text-muted">({{sourceFileName}})</small>
+                <p class="p1 fs-16 mt-3">{{output?.source}}</p>
+                <!-- <p class="p1 fs-16 mt-3">{{output?.source % 1 === 0 ? output.source : output.source.toFixed(2)}}</p> -->
+            </div>
+        </ng-container>
         <ng-container *ngIf="output.ruleTypeName == dataComplete">
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>

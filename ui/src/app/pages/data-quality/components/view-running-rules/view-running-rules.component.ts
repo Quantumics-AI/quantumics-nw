@@ -39,6 +39,9 @@ export class ViewRunningRulesComponent implements OnInit {
   anyCheckboxSelected: boolean = false;
   public ruleId: any = [];
   public selectedJobIds: number[] = [];
+  public reRunStatus: boolean;
+  public selectedReRunJobIds: number[] = [];
+  selectedBusinessDate: string | null = null;
 
   constructor(
     // public modal: NgbActiveModal,
@@ -72,55 +75,63 @@ export class ViewRunningRulesComponent implements OnInit {
     };
     this.ruleCreationService.getRuleJobs(this.userId, this.projectId).subscribe((response) => {
       console.log("Rule data:", response);
-      this.runningList = response?.result;
-      this.loading = false;
-      // Check if there is at least one object with jobStatus "Inprocess"
-      const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
-      // If there is an in-process job, show the button; otherwise, hide it
-      // Loop through the updated runningList and update selectedJobIds array
-      // this.runningList.forEach(view => {
-      //   const jobId = view.jobId;
-      //   if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
-      //     if(this.selectedJobIds.length != 0) {
-      //       // Check if jobId is already in the selectedJobIds array
-      //       if (!this.selectedJobIds.includes(jobId)) {
-      //         // If not, add it to the selectedJobIds array
-      //         this.selectedJobIds.push(jobId);
-      //       }
-      //     }
-          
-      //   } else {
-      //     // Check if jobId is in the selectedJobIds array
-      //     const index = this.selectedJobIds.indexOf(jobId);
-      //     if (index !== -1) {
-      //       // If it is, remove it from the selectedJobIds array
-      //       this.selectedJobIds.splice(index, 1);
-      //     }
-      //   }
-      // });
+      if (response?.code != 500) {
+        this.runningList = response?.result;
+        this.loading = false;
+        // Check if there is at least one object with jobStatus "Inprocess"
+        const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
+        this.reRunStatus = this.runningList.some(item => item.jobStatus === 'Failed' || item.jobStatus === 'Cancelled');
+        // If there is an in-process job, show the button; otherwise, hide it
+        // Loop through the updated runningList and update selectedJobIds array
+        // this.runningList.forEach(view => {
+        //   const jobId = view.jobId;
+        //   if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
+        //     if(this.selectedJobIds.length != 0) {
+        //       // Check if jobId is already in the selectedJobIds array
+        //       if (!this.selectedJobIds.includes(jobId)) {
+        //         // If not, add it to the selectedJobIds array
+        //         this.selectedJobIds.push(jobId);
+        //       }
+        //     }
+            
+        //   } else {
+        //     // Check if jobId is in the selectedJobIds array
+        //     const index = this.selectedJobIds.indexOf(jobId);
+        //     if (index !== -1) {
+        //       // If it is, remove it from the selectedJobIds array
+        //       this.selectedJobIds.splice(index, 1);
+        //     }
+        //   }
+        // });
 
-      this.runningList.forEach(view => {
-        const jobId = view.jobId;
-        if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
-          const isSelected = this.selectedJobIds.includes(jobId);
-          view.isChecked = isSelected; // Add an 'isChecked' property to each item
-        } else {
-          // Check if jobId is in the selectedJobIds array
-          const index = this.selectedJobIds.indexOf(jobId);
-          if (index !== -1) {
-            // If it is, remove it from the selectedJobIds array
-            this.selectedJobIds.splice(index, 1);
+        this.runningList.forEach(view => {
+          const jobId = view.jobId;
+          if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
+            const isSelected = this.selectedJobIds.includes(jobId);
+            view.isChecked = isSelected; // Add an 'isChecked' property to each item
+          } else {
+            // Check if jobId is in the selectedJobIds array
+            const index = this.selectedJobIds.indexOf(jobId);
+            if (index !== -1) {
+              // If it is, remove it from the selectedJobIds array
+              this.selectedJobIds.splice(index, 1);
+            }
           }
-        }
-        
-      });
+          
+        });
 
-      if (hasInprocessJob) {
-        setTimeout(refreshPage, 5000);
-        this.cancelBtn = true;
+        if (hasInprocessJob) {
+          setTimeout(refreshPage, 5000);
+          this.cancelBtn = true;
+        } else {
+          this.cancelBtn = false;
+        }
       } else {
-        this.cancelBtn = false;
+        this.runningList = [];
+        this.loading = false;
+
       }
+      
     }, (error) => {
       this.loading = false;
     });
@@ -205,6 +216,47 @@ export class ViewRunningRulesComponent implements OnInit {
     
   }
 
+  public reRunRuleFunction(): void {
+    this.loading = true;
+    const request = {
+      ruleIds: this.selectedReRunJobIds,
+      businessDate: this.selectedBusinessDate
+    }
+
+    this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
+      this.loading = false;
+      this.selectedReRunJobIds = [];
+      this.snakbar.open(res.message);
+      this.getRulJobs();
+    }, (error) => {
+      this.loading = false;
+      this.snakbar.open(error);
+    });
+    
+    // const modalRef = this.modalService.open(ConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
+    // modalRef.result.then((result) => {
+    //   this.loading = true;
+  
+    //   const req = {
+    //     jobIds : this.selectedJobIds
+    //   };
+  
+    //   this.ruleCreationService.cancelRunningRule(this.userId, this.projectId, req).subscribe((res) => {
+    //     this.loading = false;
+    //     this.snakbar.open(res.message);
+    //     this.getRulJobs();
+    //   }, (error) => {
+    //     this.loading = false;
+    //   });
+  
+    //   // Now, 'jobIds' contains all the jobIds for objects with jobStatus "Inprocess"
+    //   console.log(this.selectedJobIds); // You can use the 'jobIds' array as needed
+    // }, (error) => {
+    //   this.snakbar.open(error);
+    // });
+    
+  }
+
   public refresh(): void {
     // call get function
     this.getRulJobs();
@@ -254,6 +306,47 @@ export class ViewRunningRulesComponent implements OnInit {
       }
     }
     
+  }
+
+  selectReRule(event: any, d: any): void {
+    // const jobId = d.jobId;
+
+    // // Clear the array before adding the new jobId
+    // this.selectedReRunJobIds = [];
+
+    // if (event.target.checked) {
+    //   // Checkbox is checked, add jobId to the selectedJobIds array
+    //   this.selectedReRunJobIds.push(jobId);
+    // }
+
+    const jobId = d.ruleId;
+
+    // Clear the array before adding the new jobId
+    this.selectedReRunJobIds = [];
+
+    if (event.target.checked) {
+      // Checkbox is checked, add jobId to the selectedJobIds array
+      this.selectedReRunJobIds.push(jobId);
+
+      // Find the object with the selected jobId
+      const selectedJob = this.runningList.find(job => job.ruleId === jobId);
+
+      // Extract the businessDate from the selected object
+      if (selectedJob) {
+        this.selectedBusinessDate = selectedJob.businessDate;
+      } else {
+        this.selectedBusinessDate = null;
+      }
+    } else {
+      // Checkbox is unchecked, reset the selectedBusinessDate
+      this.selectedBusinessDate = null;
+    }
+    
+  }
+
+  isSelected(jobId: number): boolean {
+    // Check if the jobId is in the selectedReRunJobIds array
+    return this.selectedReRunJobIds.includes(jobId);
   }
 
   convertToUKTimeZone(timestamp: number) {
