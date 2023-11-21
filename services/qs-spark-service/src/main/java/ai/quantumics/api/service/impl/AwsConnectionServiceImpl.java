@@ -61,6 +61,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.CLIENT_NAME_NOT_CONFIGURED;
+import static ai.quantumics.api.constants.DatasourceConstants.COMMA_DELIMITER;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
 import static ai.quantumics.api.constants.DatasourceConstants.CORREPTED_FILE;
@@ -70,17 +71,13 @@ import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_UPDATED;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET;
-import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_BUCKET_REGIONS;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_REGIONS;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
-import static ai.quantumics.api.constants.DatasourceConstants.NATWEST;
 import static ai.quantumics.api.constants.DatasourceConstants.NOT_WELL_FORMATTED;
-import static ai.quantumics.api.constants.DatasourceConstants.NO_IMPLEMENTATION_AVAILABLE;
 import static ai.quantumics.api.constants.DatasourceConstants.POUND_DELIMITTER;
-import static ai.quantumics.api.constants.DatasourceConstants.QUANTUMICS;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_KEY;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_MISSING;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
@@ -110,12 +107,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     @Value("${qs.client.name}")
     private String clientName;
-
-    @Value("${qs.aws.quantumics.bucket.region}")
-    private String quantumicsBucketRegionNames;
-
-    @Value("${qs.aws.natwest.bucket.region}")
-    private String natwestBucketRegionNames;
 
     @Value("${qs.aws.config.regions}")
     private String configRegionNames;
@@ -357,28 +348,6 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public List<BucketDetails> getBucketRegions() {
-        if(StringUtils.isEmpty(clientName)) {
-            throw new BadRequestException(CLIENT_NAME_NOT_CONFIGURED);
-        }
-        switch (clientName) {
-            case QUANTUMICS:
-                List<String> qsBucketRegions = Arrays.asList(quantumicsBucketRegionNames.split(DELIMITER));
-                if(CollectionUtils.isEmpty(qsBucketRegions) || StringUtils.isEmpty(qsBucketRegions.get(0))) {
-                    throw new BadRequestException(EMPTY_BUCKET_REGIONS);
-                }
-                return parseBucketRegions(qsBucketRegions);
-            case NATWEST:
-                List<String> nwBucketRegions = Arrays.asList(natwestBucketRegionNames.split(DELIMITER));
-                if(CollectionUtils.isEmpty(nwBucketRegions) || StringUtils.isEmpty(nwBucketRegions.get(0))) {
-                    throw new BadRequestException(EMPTY_BUCKET_REGIONS);
-                }
-                return parseBucketRegions(nwBucketRegions);
-            default:
-                throw new BadRequestException(String.format(NO_IMPLEMENTATION_AVAILABLE, clientName));
-        }
-    }
-    @Override
     public List<String> getRegions() {
         if(StringUtils.isEmpty(clientName)) {
             throw new BadRequestException(CLIENT_NAME_NOT_CONFIGURED);
@@ -387,7 +356,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         if (regionList == null) {
             throw new BadRequestException(REGION_PROPERTY_MISSING);
         }
-        List<String> regions = Arrays.asList(regionList.split(DELIMITER));
+        List<String> regions = Arrays.asList(regionList.split(COMMA_DELIMITER));
         if(CollectionUtils.isEmpty(regions) || StringUtils.isEmpty(regions.get(0))) {
             throw new BadRequestException(EMPTY_REGIONS);
         }
