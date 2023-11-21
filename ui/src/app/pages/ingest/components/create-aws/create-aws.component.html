@@ -95,18 +95,18 @@
                                     </ng-template>
                                     <!-- </div> -->
                                     <div class="form-group">
-                                        <label for="inputName" class="p2">Select Bucket*</label>
-                                        <select class="form-control input-design" #bck formControlName="bucket"
-                                        [(ngModel)]="selectedBucket" (change)="onSelectBucket(bck.value)">
-                                            <option value="" [value]="undefined" disabled selected>Select data connection</option>
-                                            <option *ngFor="let item of bucketList" [value]="item.name" >
-                                                {{item.name}}
+                                        <label for="inputName" class="p2">Select Region*</label>
+                                        <select class="form-control input-design" #bck formControlName="region"
+                                        [(ngModel)]="selectedBucket" (change)="onSelectRegion(bck.value)">
+                                            <option value="" [value]="undefined" disabled selected>Select region name</option>
+                                            <option *ngFor="let item of regionList" [value]="item" >
+                                                {{item}}
                                             </option>
                                         </select>
-                                        <div *ngIf="fg.get('bucket').invalid && fg.get('bucket').dirty || fg.get('bucket').touched">
-                                            <div class="text-error fs-12" *ngIf="fg.get('bucket').hasError('required')">
+                                        <div *ngIf="fg.get('region').invalid && fg.get('region').dirty || fg.get('region').touched">
+                                            <div class="text-error fs-12" *ngIf="fg.get('region').hasError('required')">
                                                 <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
-                                                Select Bucket is mandatory
+                                                Select Region is mandatory
                                             </div>
                                         </div>
                                     </div>
@@ -114,10 +114,16 @@
                                     <div class="form-group">
                                         <label for="inputName" class="p2">
                                             <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
-                                            Selected Region*
+                                            Bucket Name*
                                         </label>
-                                        <input type="text" class="form-control input-design" id="regionName" #regionName
-                                            formControlName="region" placeholder="Region name" [value]="'eu-west-2'" readonly>
+                                        <input type="text" class="form-control input-design" id="bucketName" #bucketName
+                                            formControlName="bucket" placeholder="Bucket name" (input)="checkBucket()">
+                                        <div *ngIf="fg.get('bucket').invalid && fg.get('bucket').dirty || fg.get('bucket').touched">
+                                            <div class="text-error fs-12" *ngIf="fg.get('bucket').hasError('required')">
+                                                <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp; 
+                                                Bucket name is mandatory
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"> -->
