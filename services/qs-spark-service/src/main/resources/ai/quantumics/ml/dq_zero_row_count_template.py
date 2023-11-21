@@ -15,34 +15,34 @@ s3Path = $S3_OUTPUT_PATH
 # Read the CSV file from S3 into a DataFrame
 df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True)
 duplicate_count = 0
-pass_status = false
+pass_status = True
 # Check if there are no records in the DataFrame
 if df.count() == 0:
-    pass_status = true
+    pass_status = False
     print("No records found in the file.")
 else:
-    duplicate_count = df.count
+    duplicate_count = df.count()
 
 source_s3_path = f"s3a://{s3_bucket_name}/{s3_file_path}"
 source_file_name = os.path.basename(s3_file_path)
-    # Prepare response in the specified format
-    response = {
-        "source": duplicate_count,
-        "match": pass_status,
-        "ruleTypeName": rule_type_name,
-        "levelName": level_name,
-        "pass": pass_status,
-        "SourceFile": source_s3_path,
-        "SourceFileName": source_file_name
+# Prepare response in the specified format
+response = {
+    "source": duplicate_count,
+    "match": pass_status,
+    "ruleTypeName": rule_type_name,
+    "levelName": level_name,
+    "pass": pass_status,
+    "SourceFile": source_s3_path,
+    "SourceFileName": source_file_name
     }
 
-    # Prepare job_output as a JSON string
-    job_output = json.dumps(response)
+# Prepare job_output as a JSON string
+job_output = json.dumps(response)
 
-    # Print the counts and job_output
-    print("Job Output:")
-    print(job_output, flush=True)
+# Print the counts and job_output
+print("Job Output:")
+print(job_output, flush=True)
 
-    job_output_df = spark.createDataFrame([(job_output,)], ["jobOutput"])
+job_output_df = spark.createDataFrame([(job_output,)], ["jobOutput"])
 
-    job_output_df.repartition(1).write.format('json').options(mode='overwrite').json(s3Path)
+job_output_df.repartition(1).write.format('json').options(mode='overwrite').json(s3Path)
