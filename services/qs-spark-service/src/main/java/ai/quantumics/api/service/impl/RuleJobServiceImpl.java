@@ -19,6 +19,7 @@ import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.RuleJobRequest;
+import ai.quantumics.api.req.RunRuleJobRequest;
 import ai.quantumics.api.service.ProjectService;
 import ai.quantumics.api.service.RuleJobService;
 import ai.quantumics.api.service.UserServiceV2;
@@ -41,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,10 +104,11 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
-            List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus());
+            LocalDate businessDate = QsConstants.convertToLocalDate(ruleJobRequest.getBusinessDate());
+            List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
                 QsRule rule = ruleRepository.findByRuleId(ruleId);
-                List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, LocalDate.now());
+                List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, businessDate);
                 if (CollectionUtils.isNotEmpty(ruleJobs)) {
                     inProcessRules.add(ruleId);
                     inProcessRulesCount++;
@@ -124,12 +127,12 @@ public class RuleJobServiceImpl implements RuleJobService {
                 ruleJob.setCreatedDate(DateTime.now().toDate());
                 ruleJob.setModifiedDate(DateTime.now().toDate());
                 ruleJob.setJobSubmittedDate(DateTime.now().toDate());
-                ruleJob.setBusinessDate(LocalDate.now());
+                ruleJob.setBusinessDate(businessDate);
                 ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                 ruleJob.setModifiedBy(ruleJob.getCreatedBy());
 
                 ruleJob = ruleJobRepository.save(ruleJob);
-                RuleDetails ruleDetails = convertToRuleDetails(rule);
+                RuleDetails ruleDetails = convertToRuleDetails(rule, ruleJob);
                 ruleJobHelper.submitRuleJob(ruleJob, ruleDetails, controllerHelper.getFullName(userObj.getQsUserProfile()), projectId);
             }
             response.put("code", HttpStatus.SC_OK);
@@ -138,6 +141,20 @@ public class RuleJobServiceImpl implements RuleJobService {
             } else {
                 response.put("message", "All the selected " + ruleJobRequest.getRuleIds().size() + " rules are submitted successfully for processing");
             }
+        } catch (final Exception ex) {
+            response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.put("message", "Error while submitting rule job:  " + ex.getMessage());
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Override
+    public ResponseEntity<Object> runBatchRuleJob(RunRuleJobRequest ruleJobRequest) {
+        final Map<String, Object> response = new HashMap<>();
+        try {
+            ruleJobHelper.submitRuleJob(ruleJobRequest.getRuleJob(), ruleJobRequest.getRuleDetails(), ruleJobRequest.getModifiedBy(), ruleJobRequest.getProjectId());
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", "Rule job submitted successfully for ruleId: " + ruleJobRequest.getRuleJob().getRuleId());
         } catch (final Exception ex) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             response.put("message", "Error while submitting rule job:  " + ex.getMessage());
@@ -264,7 +281,7 @@ public class RuleJobServiceImpl implements RuleJobService {
         return ResponseEntity.ok().body(response);
     }
 
-    public RuleDetails convertToRuleDetails(QsRule qsRule) {
+    public RuleDetails convertToRuleDetails(QsRule qsRule, QsRuleJob ruleJob) {
         Gson gson = new Gson();
         RuleDetails ruleDetails = new RuleDetails();
         ruleDetails.setRuleId(qsRule.getRuleId());
@@ -272,7 +289,15 @@ public class RuleJobServiceImpl implements RuleJobService {
         ruleDetails.setRuleDescription(qsRule.getRuleDescription());
         ruleDetails.setSourceAndTarget(qsRule.isSourceAndTarget());
         ruleDetails.setSourceData(gson.fromJson(qsRule.getSourceData(), DataSourceDetails.class));
+        if(ruleDetails.getSourceData() != null) {
+            String sourceFilePath = qsRule.getSourceFeedName() + "/" + QsConstants.convertToDDMMYYYY(ruleJob.getBusinessDate()) + "/" + qsRule.getSourceFileName();
+            ruleDetails.getSourceData().setFilePath(sourceFilePath);
+        }
         ruleDetails.setTargetData(gson.fromJson(qsRule.getTargetData(), DataSourceDetails.class));
+        if(ruleDetails.getTargetData() != null) {
+            String targetFilePath = qsRule.getTargetFeedName() + "/" + QsConstants.convertToDDMMYYYY(ruleJob.getBusinessDate()) + "/" + qsRule.getTargetFileName();
+            ruleDetails.getTargetData().setFilePath(targetFilePath);
+        }
         ruleDetails.setRuleDetails(gson.fromJson(qsRule.getRuleDetails(), RuleTypeDetails.class));
         ruleDetails.setUserId(qsRule.getUserId());
         ruleDetails.setStatus(qsRule.getStatus());
@@ -282,5 +307,4 @@ public class RuleJobServiceImpl implements RuleJobService {
         ruleDetails.setModifiedBy(qsRule.getModifiedBy());
         return ruleDetails;
     }
-
 }

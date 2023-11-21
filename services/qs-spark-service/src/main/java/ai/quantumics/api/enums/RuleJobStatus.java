@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 public enum RuleJobStatus {
     NOT_STARTED("Not Started"),
+    IN_QUEUE("In Queue"),
     INPROCESS("Inprocess"),
     COMPLETE("Complete"),
     CANCELLED("Cancelled"),
