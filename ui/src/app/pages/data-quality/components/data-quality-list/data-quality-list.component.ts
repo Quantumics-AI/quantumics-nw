@@ -52,7 +52,7 @@ export class DataQualityListComponent implements OnInit {
 
   public ruleStatus: string = 'Active';
   public pageNumebr: number = 1;
-  public pageLength: number = 100;
+  public pageLength: number = 10;
 
   public ruleId: any = [];
   public covertTime: any;
@@ -124,6 +124,7 @@ export class DataQualityListComponent implements OnInit {
       if (response.code === 400) {
         this.searchNull = true;
         this.totalNumberOfRules = 0;
+        this.paginationData = [];
       } 
       if(response.code === 200){
         this.searchNull = false;

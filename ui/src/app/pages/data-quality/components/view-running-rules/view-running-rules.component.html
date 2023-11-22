@@ -49,8 +49,12 @@
                                     <td>
                                         <input type="checkbox" (change)="selectRule($event, view)" [checked]="view.isChecked" 
                                         *ngIf="view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess'">
-                                        <input type="checkbox" (change)="selectReRule($event, view)" [checked]="isSelected(view.jobId)" 
+                                        <!-- <input type="checkbox" (change)="selectReRule($event, view)" [checked]="isSelected(view.jobId)" 
+                                        *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'"> -->
+                                        <a placement="top" (click)="reRun(view)" ngbTooltip="Re-Run"
                                         *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'">
+                                            <img src="/assets/img/project/re-run.svg" >
+                                        </a>
                                         <span class="mr-l-10">{{view?.ruleName}}</span>
                                         
                                     </td>
@@ -113,8 +117,8 @@
             <button class="btn btn-design mr-r-20" *ngIf="cancelBtn" (click)="cancelInprocess()"
             [disabled]="selectedJobIds.length === 0">Cancel</button>
 
-            <button class="btn btn-design" *ngIf="reRunStatus" (click)="reRunRuleFunction()"
-            [disabled]="selectedReRunJobIds.length === 0">Re-run Rule</button>
+            <!-- <button class="btn btn-design" *ngIf="reRunStatus" (click)="reRunRuleFunction()"
+            [disabled]="selectedReRunJobIds.length === 0">Re-run Rule</button> -->
         </div>
     </div>
 </app-loader>

@@ -349,6 +349,30 @@ export class ViewRunningRulesComponent implements OnInit {
     return this.selectedReRunJobIds.includes(jobId);
   }
 
+  public reRun(d: any): void {
+    this.loading = true;
+    this.selectedReRunJobIds = [];
+    this.selectedReRunJobIds.push(d.ruleId);
+    this.selectedBusinessDate = d.businessDate;
+
+    
+    const request = {
+      ruleIds: this.selectedReRunJobIds,
+      businessDate: this.selectedBusinessDate
+    }
+
+    this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
+      this.loading = false;
+      this.selectedReRunJobIds = [];
+      this.snakbar.open(res.message);
+      this.getRulJobs();
+    }, (error) => {
+      this.loading = false;
+      this.selectedReRunJobIds = [];
+      this.snakbar.open(error);
+    });
+  }
+
   convertToUKTimeZone(timestamp: number) {
     if(timestamp) {
       const ukTimestamp = new Date(timestamp);
