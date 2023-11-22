@@ -152,7 +152,7 @@ export class EditRuleComponent implements OnInit {
         this.fg.controls.sourceBucketOne.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.selectedBucketOne = this.fetchEditRule?.sourceData.bucketName;
         this.bucketSourceOne.push(this.fetchEditRule?.sourceData.bucketName);
-        this.fg.controls.region.setValue(this.fetchEditRule?.sourceData.bucketName);
+        this.fg.controls.region.setValue(this.fetchEditRule?.sourceData.region);
         this.fg.controls.sourceFolderPath.setValue(this.fetchEditRule?.sourceData.filePath);
         //source-2
         this.selectedDataConnections2 = this.fetchEditRule?.targetData.dataSourceId;
@@ -160,14 +160,14 @@ export class EditRuleComponent implements OnInit {
         this.fg.controls.sourceBucketTwo.setValue(this.fetchEditRule?.targetData.bucketName);
         this.selectedBucketTwo = this.fetchEditRule?.targetData.bucketName;
         this.bucketSourceTwo.push(this.fetchEditRule?.targetData.bucketName);
-        this.fg.controls.regionTwo.setValue(this.fetchEditRule?.sourceData.bucketName);
+        this.fg.controls.regionTwo.setValue(this.fetchEditRule?.sourceData.region);
         this.fg.controls.sourceFolderPathTwo.setValue(this.fetchEditRule?.targetData.filePath);
       } else {
         //source
         this.fg.controls.sourceDataConnection.setValue(this.fetchEditRule?.sourceData.dataSourceId);
         this.fg.controls.sourceBucketOne.setValue(this.fetchEditRule?.sourceData.bucketName);
         this.bucketSourceOne.push(this.fetchEditRule?.sourceData.bucketName);
-        this.fg.controls.region.setValue(this.fetchEditRule?.sourceData.bucketName);
+        this.fg.controls.region.setValue(this.fetchEditRule?.sourceData.region);
         this.fg.controls.sourceFolderPath.setValue(this.fetchEditRule?.sourceData.filePath);
       }
       this.getRuleTypeList();
