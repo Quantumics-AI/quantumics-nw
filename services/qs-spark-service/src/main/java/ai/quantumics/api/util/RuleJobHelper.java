@@ -29,6 +29,7 @@ import static ai.quantumics.api.constants.QsConstants.DQ_DUPLICATE_VALUE_COLUMN_
 import static ai.quantumics.api.constants.QsConstants.DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_NULL_VALUE_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DQ_ROW_COUNT_TEMPLATE_NAME;
+import static ai.quantumics.api.constants.QsConstants.DQ_ZERO_ROW_COUNT_TEMPLATE_NAME;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_COLUMN_VALUE;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_MULTI_COLUMN_VALUE;
 import static ai.quantumics.api.constants.QsConstants.DUPLICATE_ROW;
@@ -46,6 +47,7 @@ import static ai.quantumics.api.constants.QsConstants.SUM_OF_COLUMN_VALUE;
 import static ai.quantumics.api.constants.QsConstants.TABLE_LEVEL;
 import static ai.quantumics.api.constants.QsConstants.TARGET_BUCKET;
 import static ai.quantumics.api.constants.QsConstants.TARGET_PATH;
+import static ai.quantumics.api.constants.QsConstants.ZERO_ROW_CHECK;
 
 @Slf4j
 @Component
@@ -114,6 +116,10 @@ public class RuleJobHelper {
                         scriptStr = prepareDuplicateValueColumnEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                         break;
                 }
+                break;
+            case ZERO_ROW_CHECK:
+                readLinesFromTemplate(fileContents, DQ_ZERO_ROW_COUNT_TEMPLATE_NAME);
+                scriptStr = prepareZeroRowCountEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
                 break;
         }
 
@@ -263,6 +269,20 @@ public class RuleJobHelper {
 
         String temp = prepareDuplicateRowValueEtlScriptVarsInit(fileContents, ruleJob, ruleDetails, jobName);
         temp = temp.replace(COLUMNS_DETAILS, String.format("'%s'", String.join(",", ruleDetails.getRuleDetails().getRuleLevel().getColumns())));
+        return temp;
+    }
+    private String prepareZeroRowCountEtlScriptVarsInit(StringBuilder fileContents, QsRuleJob ruleJob, RuleDetails ruleDetails, String jobName) {
+        String temp;
+        jobName = jobName.replace(".py", "");
+
+        final String outputBucketName =
+                String.format("s3://%s/%s/%s", qsRuleJobBucket, RULE_OUTPUT_FOLDER, jobName);
+
+        temp = fileContents.toString().replace(SOURCE_BUCKET, String.format("'%s'", ruleDetails.getSourceData().getBucketName()));
+        temp = temp.replace(SOURCE_PATH, String.format("'%s'", ruleDetails.getSourceData().getFilePath()));
+        temp = temp.replace(S3_OUTPUT_PATH, String.format("'%s'", outputBucketName));
+        temp = temp.replace(RULE_TYPE_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleTypeName()));
+        temp = temp.replace(LEVEL_NAME, String.format("'%s'", ruleDetails.getRuleDetails().getRuleLevel().getLevelName()));
         return temp;
     }
 
