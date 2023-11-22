@@ -101,15 +101,20 @@ export class ListAwsComponent {
     })
   }
 
-  public searchRule(): void {
-    this.buttonDisabled = true;
+  public searchData(): void {
     this.isSearch = true;
     this.pageNumebr = 1;
+    this.searchRule();
+  }
+
+  public searchRule(): void {
+    this.buttonDisabled = true;
     this.sourceDataService.getSearchConnection(this.userId, +this.projectId, this.searchString, this.filter, this.pageNumebr, this.pageLength).subscribe((response) => {
       // debugger
       console.log("------->",response);
       if (response.code === 400) {
         this.searchNull = true;
+        this.paginationData = [];
       } 
       if(response.code === 200){
         this.searchNull = false;
@@ -253,6 +258,7 @@ export class ListAwsComponent {
     this.searchDiv = false;
     this.buttonDisabled = true;
     this.isSearch = false;
+    this.getAwsList();
   }
 
   public onPageChange(currentPage: number): void {

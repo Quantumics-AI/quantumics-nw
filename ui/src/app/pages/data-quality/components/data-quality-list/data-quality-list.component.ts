@@ -70,6 +70,7 @@ export class DataQualityListComponent implements OnInit {
   public selectedStatus: string = 'Active';
   public isActive: boolean;
   public selectedBusinessDate: any;
+  public isSearch: boolean = false;
 
   constructor(
     private readonly router: Router,
@@ -115,10 +116,16 @@ export class DataQualityListComponent implements OnInit {
     });
   }
 
+  public searchData(): void {
+    this.isSearch = true;
+    this.pageNumebr = 1;
+    this.searchRule();
+  }  
+
   public searchRule(): void {
     this.selectedStatus = 'Search'
     this.buttonDisabled = true;
-    this.pageNumebr = 1;
+    
     this.ruleCreationService.getSearchRule(this.userId, this.projectId, this.searchString, this.pageNumebr, this.pageLength).subscribe((response) => {
       
       if (response.code === 400) {
@@ -356,7 +363,12 @@ export class DataQualityListComponent implements OnInit {
     } else {
       this.pageNumebr = currentPage;
     }
-    this.getRules();
+
+    if(this.isSearch){
+      this.searchRule();
+    } else {
+      this.getRules();
+    }
     // this.pageNumebr = 
     // this.startIndex = (currentPage - 1) * this.pageSize;
     // this.endIndex = this.startIndex + this.pageSize;
@@ -370,7 +382,7 @@ export class DataQualityListComponent implements OnInit {
     
     if (str.length == 0) {
       this.searchDiv = false;
-      // this.isSearch = false;
+      this.isSearch = false;
       this.searchNull = false;
       this.selectedStatus = 'Active';
       this.getRules();
@@ -416,6 +428,7 @@ export class DataQualityListComponent implements OnInit {
     this.searchTerm = { ruleName: '' };
     this.searchDiv = false;
     this.buttonDisabled = true;
+    this.isSearch = false;
   }
 
   public onChangeFilterBy(value: string): void {
