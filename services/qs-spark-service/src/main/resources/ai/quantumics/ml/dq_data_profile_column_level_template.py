@@ -29,7 +29,8 @@ else:
     # Create a mapping from the original data types to the desired types
     data_type_mapping = {
         "IntegerType": "Integer",
-        "DoubleType": "Double"
+        "DoubleType": "Double",
+        "LongType": "Long"
     }
 
     def round_value(value):
