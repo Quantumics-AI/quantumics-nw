@@ -54,13 +54,13 @@ public class RuleTypeController {
     public ResponseEntity<Object> getRuleTypes(
             @PathVariable(value = "projectId") final int projectId,
             @RequestParam(value = "sourceOnly") final boolean sourceOnly,
-            @RequestParam(value = "filter", defaultValue = "false") final boolean filter) {
+            @RequestParam(value = "allRuleTypes", defaultValue = "false") final boolean allRuleTypes) {
         dbUtil.changeSchema("public");
         final Projects project = projectService.getProject(projectId);
         final Map<String, Object> response = new HashMap<>();
         dbUtil.changeSchema(project.getDbSchemaName());
         try {
-            List<QsRuleType> qsRuleTypes = ruleTypeService.getActiveRuleTypes(sourceOnly, filter);
+            List<QsRuleType> qsRuleTypes = ruleTypeService.getActiveRuleTypes(sourceOnly, allRuleTypes);
             List<RuleTypeResponse> responseList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(qsRuleTypes)) {
                 Collections.sort(qsRuleTypes, Comparator.comparingInt(QsRuleType::getId));
