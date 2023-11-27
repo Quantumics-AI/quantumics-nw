@@ -23,7 +23,10 @@ public class RuleTypeServiceImpl implements RuleTypeService {
 	private RuleTypeRepository ruleTypeRepository;
 
 	@Override
-	public List<QsRuleType> getActiveRuleTypes(boolean sourceOnly) {
+	public List<QsRuleType> getActiveRuleTypes(boolean sourceOnly, boolean filter) {
+		if(filter){
+			return ruleTypeRepository.findByActiveIsTrue();
+		}
 		return ruleTypeRepository.findBySourceOnlyAndActiveIsTrue(sourceOnly);
 	}
 }
