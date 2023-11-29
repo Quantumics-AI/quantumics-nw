@@ -287,7 +287,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     public BucketFileContent getContent(String bucketName, String file) {
         if(file == null){
             throw new BadRequestException(FILE_NAME_NOT_NULL);
-        }else if(!(file.endsWith(CSV_EXTENSION) || file.endsWith(PARQUET_EXTENSION))){
+        }else if(!(file.endsWith(CSV_EXTENSION))&& !(file.endsWith(PARQUET_EXTENSION))){
             throw new BadRequestException(INVALID_FILE_EXTENSION);
         }
         List<Map<String, String>> data = new ArrayList<>();
@@ -409,8 +409,10 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                     rowCount++;
                 }
             } catch (IOException e) {
+                log.error("Error reading Parquet file {}", e.getMessage());
                 e.printStackTrace();
             } catch(Exception e){
+                log.error("Error reading Parquet file {}", e.getMessage());
                 throw new BadRequestException(CORREPTED_FILE);
             }
             bucketFileContent.setHeaders(headers);
