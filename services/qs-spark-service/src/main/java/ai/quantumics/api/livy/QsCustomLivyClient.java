@@ -47,7 +47,6 @@ public class QsCustomLivyClient {
   
   private final EngFlowEventService engFlowEventService;
   private int livySessionId = -1;
-
   @Value("${qs.livy.base.url}")
   private String livyBaseUrl;
   
@@ -64,10 +63,10 @@ public class QsCustomLivyClient {
   private String driverMemory;
 
   @Value("${spark.executor.cores}")
-  private String executorCores;
+  private int executorCores;
 
   @Value("${spark.executor.instances}")
-  private String numExecutors;
+  private int numExecutors;
 
   public QsCustomLivyClient(EngFlowEventService engFlowEventService) {
     this.engFlowEventService = engFlowEventService;
@@ -123,10 +122,7 @@ public class QsCustomLivyClient {
     final JsonObject payload = new JsonObject();
     payload.addProperty("kind", "pyspark");
     payload.addProperty("name", sessionName);
-    payload.addProperty("executorMemory", executorMemory);
-    payload.addProperty("driverMemory", driverMemory);
-    payload.addProperty("executorCores", executorCores);
-    payload.addProperty("numExecutors", numExecutors);
+    setSparkProperty(payload);
     int sessionId = -1;
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> getResp;
@@ -176,10 +172,7 @@ public class QsCustomLivyClient {
     final JsonObject payload = new JsonObject();
     payload.addProperty("kind", "pyspark");
     payload.addProperty("name", sessionName);
-    payload.addProperty("executorMemory", executorMemory);
-    payload.addProperty("driverMemory", driverMemory);
-    payload.addProperty("executorCores", executorCores);
-    payload.addProperty("numExecutors", numExecutors);
+    setSparkProperty(payload);
     int sessionId = -1;
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> getResp;
@@ -210,7 +203,12 @@ public class QsCustomLivyClient {
     
     return sessionId;
   }
-  
+  public void setSparkProperty(JsonObject payload) {
+    payload.addProperty("executorMemory", executorMemory);
+    payload.addProperty("driverMemory", driverMemory);
+    payload.addProperty("executorCores", executorCores);
+    payload.addProperty("numExecutors", numExecutors);
+  }
   private int createNewApacheLivySession(ObjectMapper mapper, String payload) throws Exception{
     final String postResp = livyPostHandler(livyBaseUrl, payload);
     JsonNode sessionPostResNode = mapper.readValue(postResp, JsonNode.class);
@@ -227,10 +225,7 @@ public class QsCustomLivyClient {
     final JsonObject payload = new JsonObject();
     payload.addProperty("kind", "pyspark");
     payload.addProperty("name", sessionName);
-    payload.addProperty("executorMemory", executorMemory);
-    payload.addProperty("driverMemory", driverMemory);
-    payload.addProperty("executorCores", executorCores);
-    payload.addProperty("numExecutors", numExecutors);
+    setSparkProperty(payload);
     ResponseEntity<String> postForEntity;
     log.info("Initialize the session with - {}", payload.toString());
     if (livySessionId == -1) {

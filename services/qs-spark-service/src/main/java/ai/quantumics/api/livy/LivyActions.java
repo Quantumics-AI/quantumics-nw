@@ -1108,10 +1108,7 @@ public class LivyActions {
         //String payload1 = "{\"file\":\""+pysparkScriptS3FileLoc+"\"}";
         final JsonObject payload = new JsonObject();
         payload.addProperty("file", pysparkScriptS3FileLoc);
-        payload.addProperty("executorMemory", executorMemory);
-        payload.addProperty("driverMemory", driverMemory);
-        payload.addProperty("executorCores", executorCores);
-        payload.addProperty("numExecutors", numExecutors);
+        livyClient.setSparkProperty(payload);
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -1158,10 +1155,7 @@ public class LivyActions {
 
         final JsonObject payload = new JsonObject();
         payload.addProperty("file", pysparkScriptS3FileLoc);
-        payload.addProperty("executorMemory", executorMemory);
-        payload.addProperty("driverMemory", driverMemory);
-        payload.addProperty("executorCores", executorCores);
-        payload.addProperty("numExecutors", numExecutors);
+        livyClient.setSparkProperty(payload);
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -1238,10 +1232,7 @@ public class LivyActions {
 
         final JsonObject payload = new JsonObject();
         payload.addProperty("file", pysparkScriptS3FileLoc);
-        payload.addProperty("executorMemory", executorMemory);
-        payload.addProperty("driverMemory", driverMemory);
-        payload.addProperty("executorCores", executorCores);
-        payload.addProperty("numExecutors", numExecutors);
+        livyClient.setSparkProperty(payload);
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -1388,10 +1379,7 @@ public class LivyActions {
             }
             payload.add("pyFiles", udfFiles);
         }
-        payload.addProperty("executorMemory", executorMemory);
-        payload.addProperty("driverMemory", driverMemory);
-        payload.addProperty("executorCores", executorCores);
-        payload.addProperty("numExecutors", numExecutors);
+        livyClient.setSparkProperty(payload);
         log.info("Livy payload : {}", payload.toString());
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 
