@@ -68,7 +68,7 @@ public class QsCustomLivyClient {
 
   @Value("${spark.executor.instances}")
   private String numExecutors;
-  
+
   public QsCustomLivyClient(EngFlowEventService engFlowEventService) {
     this.engFlowEventService = engFlowEventService;
   }
