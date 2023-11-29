@@ -9,10 +9,12 @@
 package ai.quantumics.api.service;
 
 import ai.quantumics.api.model.QsRuleType;
+import ai.quantumics.api.req.RuleTypesDTO;
 
 import java.util.List;
 
 public interface RuleTypeService {
 
   List<QsRuleType> getActiveRuleTypes(boolean sourceOnly, boolean allRuleTypes);
+  List<QsRuleType> getFilteredRuleTypes(RuleTypesDTO ruleTypesDTO);
 }
