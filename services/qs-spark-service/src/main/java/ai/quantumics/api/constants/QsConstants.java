@@ -145,6 +145,7 @@ public class QsConstants {
   public static final String DUPLICATE_COLUMN_VALUE = "Column";
   public static final String DUPLICATE_MULTI_COLUMN_VALUE = "Multiple Column";
   public static final String THRESHOLD_ERROR = "Batch job aborted, as the job execution time exceeded the threshold. Couldn't capture the batch job log";
+
   public static final String RULE_LEVEL_ALL = "All";
   public static final String RULE_TYPE_NOT_FOUND = "No Rule Type found";
   // Email Template Actions

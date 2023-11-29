@@ -77,42 +77,7 @@ public class RuleTypeController {
         dbUtil.changeSchema(project.getDbSchemaName());
         try {
             List<QsRuleType> qsRuleTypes = ruleTypeService.getActiveRuleTypes(sourceOnly, allRuleTypes);
-            List<RuleTypeResponse> responseList = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(qsRuleTypes)) {
-                Collections.sort(qsRuleTypes, Comparator.comparingInt(QsRuleType::getId));
-                Map<String, List<QsRuleType>> groupedMap = qsRuleTypes.stream()
-                        .collect(Collectors.groupingBy(
-                                QsRuleType::getRuleTypeName,
-                                LinkedHashMap::new, // Use LinkedHashMap to maintain order
-                                Collectors.toList()
-                        ));
-                responseList = groupedMap.entrySet().stream()
-                        .map(entry -> {
-                            String ruleTypeName = entry.getKey();
-                            List<QsRuleType> ruleTypes = entry.getValue();
-
-                            RuleTypeResponse ruleTypeResponse = new RuleTypeResponse();
-                            ruleTypeResponse.setRuleTypeName(ruleTypeName);// Assuming id is the same for all in the group
-
-                            List<RuleTypeLevel> ruleTypeLevels = ruleTypes.stream()
-                                    .map(qsRuleType -> {
-                                        RuleTypeLevel level = new RuleTypeLevel();
-                                        level.setLevelName(qsRuleType.getLevelName());
-                                        level.setColumnLevel(qsRuleType.isColumnLevel());
-                                        return level;
-                                    })
-                                    .collect(Collectors.toList());
-
-                            ruleTypeResponse.setLevel(ruleTypeLevels);
-                            return ruleTypeResponse;
-                        })
-                        .collect(Collectors.toList());
-            }
-            response.put("code", HttpStatus.SC_OK);
-            response.put("message", "Rule Type Listed Successfully");
-            response.put("projectName", project.getProjectDisplayName());
-            response.put("result", responseList);
-
+            prepareResponse(qsRuleTypes, response, project);
         } catch (Exception exception) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             response.put("message", "Error -" + exception.getMessage());
