@@ -19,6 +19,8 @@ import ai.quantumics.api.res.BucketDetails;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
@@ -36,7 +38,20 @@ import com.opencsv.exceptions.CsvValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.http.HttpStatus;
+import org.apache.parquet.column.ColumnDescriptor;
+import org.apache.parquet.example.data.Group;
+import org.apache.parquet.hadoop.ParquetFileReader;
+import org.apache.parquet.hadoop.ParquetReader;
+import org.apache.parquet.hadoop.example.GroupReadSupport;
+import org.apache.parquet.hadoop.metadata.ParquetMetadata;
+import org.apache.parquet.hadoop.util.HadoopInputFile;
+import org.apache.parquet.io.InputFile;
+import org.apache.parquet.schema.LogicalTypeAnnotation;
+import org.apache.parquet.schema.MessageType;
+import org.apache.parquet.schema.PrimitiveType;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +81,6 @@ import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_SUCCESSFUL;
 import static ai.quantumics.api.constants.DatasourceConstants.CORREPTED_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.CSV_EXTENSION;
-import static ai.quantumics.api.constants.DatasourceConstants.CSV_FILE;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_NOT_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_UPDATED;
@@ -76,7 +90,9 @@ import static ai.quantumics.api.constants.DatasourceConstants.EMPTY_REGIONS;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NAME_NOT_NULL;
 import static ai.quantumics.api.constants.DatasourceConstants.Files;
 import static ai.quantumics.api.constants.DatasourceConstants.INVALID_ACCESS_TYPE;
+import static ai.quantumics.api.constants.DatasourceConstants.INVALID_FILE_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.NOT_WELL_FORMATTED;
+import static ai.quantumics.api.constants.DatasourceConstants.PARQUET_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.POUND_DELIMITTER;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_KEY;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_MISSING;
@@ -271,17 +287,26 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     public BucketFileContent getContent(String bucketName, String file) {
         if(file == null){
             throw new BadRequestException(FILE_NAME_NOT_NULL);
-        }else if(!file.endsWith(CSV_EXTENSION)){
-            throw new BadRequestException(CSV_FILE);
+        }else if(!(file.endsWith(CSV_EXTENSION) || file.endsWith(PARQUET_EXTENSION))){
+            throw new BadRequestException(INVALID_FILE_EXTENSION);
         }
         List<Map<String, String>> data = new ArrayList<>();
 
         BucketFileContent bucketFileContent = new BucketFileContent();
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
-        S3Object s3Object = awsS3Client.getObject(bucketName, file);
-        S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
+        if(file.endsWith(PARQUET_EXTENSION)) {
+            readParquetContent(data, bucketFileContent, headers, dataTypes, bucketName, file);
+        } else {
+            S3Object s3Object = awsS3Client.getObject(bucketName, file);
+            S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
+            return readCSVContent(data, bucketFileContent, headers, dataTypes, objectInputStream);
+        }
+        return bucketFileContent;
+    }
+
+    private static BucketFileContent readCSVContent(List<Map<String, String>> data, BucketFileContent bucketFileContent, List<String> headers, List<ColumnDataType> dataTypes, S3ObjectInputStream objectInputStream) {
         try (CSVReader reader = new CSVReader(new InputStreamReader(objectInputStream))) {
             String[] nextLine;
             String[] headerLine;
@@ -330,7 +355,124 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return bucketFileContent;
     }
 
-    @Override
+    private static BucketFileContent readParquetContent(List<Map<String, String>> data, BucketFileContent bucketFileContent, List<String> headers, List<ColumnDataType> dataTypes, String bucketName, String file) {
+        try {
+            // Parse the S3 URI
+            String s3Uri = "s3a://" + bucketName + "/" + file;
+            AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
+            Configuration hadoopConfig = new Configuration();
+            hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
+            hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
+            hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
+
+            // Create InputFile
+            InputFile inputFile = HadoopInputFile.fromPath(new Path(s3Uri), hadoopConfig);
+
+            ParquetFileReader parquetFileReader = ParquetFileReader.open(inputFile);
+
+            // Get the Parquet schema (MessageType)
+            ParquetMetadata parquetMetadata = parquetFileReader.getFooter();
+            MessageType schema = parquetMetadata.getFileMetaData().getSchema();
+
+            // Get column names and data types
+            List<ColumnDescriptor> columns = schema.getColumns();
+            // Print column names and data types
+            for (ColumnDescriptor column : columns) {
+                headers.add(column.getPath()[0]);
+                PrimitiveType primitiveType = column.getPrimitiveType();
+                LogicalTypeAnnotation logicalTypeAnnotation = primitiveType.getLogicalTypeAnnotation();
+                String logicalType = (logicalTypeAnnotation != null) ? logicalTypeAnnotation.toString() : "null";
+                ColumnDataType columnDataType = new ColumnDataType();
+                columnDataType.setColumnName(column.getPath()[0]);
+                columnDataType.setDataType(getColumnDataType(logicalType));
+                dataTypes.add(columnDataType);
+            }
+
+            int rowCount = 0;
+            GroupReadSupport readSupport = new GroupReadSupport();
+            readSupport.init(hadoopConfig, null, parquetMetadata.getFileMetaData().getSchema());
+
+            try (ParquetReader<Group> parquetReader = ParquetReader.builder(readSupport, new Path(s3Uri)).build()) {
+                Group group;
+                while ( (group = parquetReader.read()) != null && rowCount < 500) {
+                    Map<String, String> row = new HashMap<>();
+                    for (ColumnDescriptor column : columns) {
+                        String columnName = column.getPath()[0];
+                        if (group.getFieldRepetitionCount(column.getPath().length) > 0) {
+                            Object value = getParquetColumnValue(group, column);
+                            row.put(columnName, value.toString());
+                        } else {
+                            row.put(columnName, "");
+                        }
+                    }
+                    data.add(row);
+                    rowCount++;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch(Exception e){
+                throw new BadRequestException(CORREPTED_FILE);
+            }
+            bucketFileContent.setHeaders(headers);
+            bucketFileContent.setColumnDatatype(dataTypes);
+            bucketFileContent.setContent(data);
+            bucketFileContent.setRowCount(rowCount);
+            return bucketFileContent;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch(Exception e){
+            throw new BadRequestException(CORREPTED_FILE);
+        }
+    }
+
+
+    private static Object getParquetColumnValue(Group group, ColumnDescriptor column) {
+        String columnName = column.getPath()[0];
+        PrimitiveType.PrimitiveTypeName type = column.getPrimitiveType().getPrimitiveTypeName();
+
+        switch (type) {
+            case BINARY:
+                try {
+                    return group.getBinary(columnName, 0).toStringUsingUTF8();
+                } catch (Exception e) {
+                    return "";
+                }
+            case INT32:
+                try {
+                    return group.getInteger(columnName, 0);
+                } catch (Exception e) {
+                    return "";
+                }
+            case INT64:
+                try {
+                    return group.getLong(columnName, 0);
+                } catch (Exception e) {
+                    return "";
+                }
+
+            default:
+                throw new UnsupportedOperationException("Unsupported Parquet column type: " + type);
+        }
+    }
+
+    public static String getColumnDataType(String value) {
+        String dataType = "string"; // default type
+
+        if(!StringUtils.isEmpty(value)) {
+            if (value.equals("STRING")) {
+                dataType = "string";
+            } else if (value.contains("INT")) {
+                dataType = "int";
+            }
+        }
+        return dataType;
+    }
+
+    private static String getPrimitiveTypeName(PrimitiveType.PrimitiveTypeName typeName) {
+        return typeName.toString();
+    }
+
+        @Override
     public List<AwsDatasourceResponse> searchConnection(String datasourceName) {
         List<AwsDatasourceResponse> response = new ArrayList<>();
         List<AWSDatasource> awsDatasource = awsConnectionRepo.findByActiveAndConnectionNameStartingWithIgnoreCaseOrActiveAndConnectionNameEndingWithIgnoreCase(true, datasourceName,true, datasourceName);
