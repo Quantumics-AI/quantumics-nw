@@ -47,6 +47,7 @@ public class QsCustomLivyClient {
   
   private final EngFlowEventService engFlowEventService;
   private int livySessionId = -1;
+
   @Value("${qs.livy.base.url}")
   private String livyBaseUrl;
   
@@ -61,7 +62,6 @@ public class QsCustomLivyClient {
   
   @Value("${spark.driverMemory}")
   private String driverMemory;
-
   @Value("${spark.executor.cores}")
   private int executorCores;
 
