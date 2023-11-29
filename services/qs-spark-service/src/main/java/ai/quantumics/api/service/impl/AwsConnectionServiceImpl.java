@@ -468,11 +468,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return dataType;
     }
 
-    private static String getPrimitiveTypeName(PrimitiveType.PrimitiveTypeName typeName) {
-        return typeName.toString();
-    }
-
-        @Override
+    @Override
     public List<AwsDatasourceResponse> searchConnection(String datasourceName) {
         List<AwsDatasourceResponse> response = new ArrayList<>();
         List<AWSDatasource> awsDatasource = awsConnectionRepo.findByActiveAndConnectionNameStartingWithIgnoreCaseOrActiveAndConnectionNameEndingWithIgnoreCase(true, datasourceName,true, datasourceName);
