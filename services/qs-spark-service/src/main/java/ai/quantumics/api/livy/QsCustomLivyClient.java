@@ -36,6 +36,10 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static ai.quantumics.api.constants.QsConstants.SPARK_DRIVER_MEMORY;
+import static ai.quantumics.api.constants.QsConstants.SPARK_EXECUTOR_CORES;
+import static ai.quantumics.api.constants.QsConstants.SPARK_EXECUTOR_INSTANCES;
+import static ai.quantumics.api.constants.QsConstants.SPARK_EXECUTOR_MEMORY;
 import static java.lang.Thread.sleep;
 
 @Slf4j
@@ -202,12 +206,6 @@ public class QsCustomLivyClient {
     }
     
     return sessionId;
-  }
-  public void setSparkProperty(JsonObject payload) {
-    payload.addProperty("executorMemory", executorMemory);
-    payload.addProperty("driverMemory", driverMemory);
-    payload.addProperty("executorCores", executorCores);
-    payload.addProperty("numExecutors", numExecutors);
   }
   private int createNewApacheLivySession(ObjectMapper mapper, String payload) throws Exception{
     final String postResp = livyPostHandler(livyBaseUrl, payload);
@@ -576,5 +574,10 @@ public class QsCustomLivyClient {
       return "{"+this.elapsed+"; "+this.duration+"}";
     }
   }
-  
+  public void setSparkProperty(JsonObject payload) {
+    payload.addProperty(SPARK_EXECUTOR_MEMORY, executorMemory);
+    payload.addProperty(SPARK_DRIVER_MEMORY, driverMemory);
+    payload.addProperty(SPARK_EXECUTOR_CORES, executorCores);
+    payload.addProperty(SPARK_EXECUTOR_INSTANCES, numExecutors);
+  }
 }
