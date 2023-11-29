@@ -117,12 +117,6 @@ public class LivyActions {
     @Value("${spark.driverMemory}")
     private String driverMemory;
 
-    @Value("${spark.executor.cores}")
-    private int executorCores;
-
-    @Value("${spark.executor.instances}")
-    private int numExecutors;
-
     @Value("${s3.udf.bucketName}")
     private String udfBucketName;
     // private final SimpMessageSendingOperations messagingTemplate;
