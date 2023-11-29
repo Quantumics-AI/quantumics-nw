@@ -242,7 +242,7 @@ public class QsConstants {
   public static final SimpleDateFormat formatter = new SimpleDateFormat(STANDARD_DATE_FORMAT);
   public static final String europe_london_timezone = "Europe/London";
   public static final String[] NEW_COL_GENERATING_RULES = {"countMatch", "mergeRule", "manageColumns", "extractColumnValues", "split"};
-  
+  public static final String RULE_TYPE_NOT_FOUND = "No Rule Type found";
   // Cleansing Rule Types
   public static final String COUNT_MATCH = "countMatch";
   public static final String FILL_NULL = "fillNull";
