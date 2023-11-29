@@ -8,15 +8,16 @@
 
 package ai.quantumics.api.livy;
 
-import static java.lang.Thread.sleep;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import ai.quantumics.api.model.EngFlowEvent;
+import ai.quantumics.api.service.EngFlowEventService;
+import ai.quantumics.api.vo.BatchJobLog;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,16 +26,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import ai.quantumics.api.model.EngFlowEvent;
-import ai.quantumics.api.service.EngFlowEventService;
-import ai.quantumics.api.vo.BatchJobLog;
-import lombok.extern.slf4j.Slf4j;
+
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
@@ -60,6 +62,12 @@ public class QsCustomLivyClient {
   
   @Value("${spark.driverMemory}")
   private String driverMemory;
+
+  @Value("${spark.executor.cores}")
+  private String executorCores;
+
+  @Value("${spark.executor.instances}")
+  private String numExecutors;
   
   public QsCustomLivyClient(EngFlowEventService engFlowEventService) {
     this.engFlowEventService = engFlowEventService;
@@ -117,6 +125,8 @@ public class QsCustomLivyClient {
     payload.addProperty("name", sessionName);
     payload.addProperty("executorMemory", executorMemory);
     payload.addProperty("driverMemory", driverMemory);
+    payload.addProperty("executorCores", executorCores);
+    payload.addProperty("numExecutors", numExecutors);
     int sessionId = -1;
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> getResp;
@@ -168,6 +178,8 @@ public class QsCustomLivyClient {
     payload.addProperty("name", sessionName);
     payload.addProperty("executorMemory", executorMemory);
     payload.addProperty("driverMemory", driverMemory);
+    payload.addProperty("executorCores", executorCores);
+    payload.addProperty("numExecutors", numExecutors);
     int sessionId = -1;
     ObjectMapper mapper = new ObjectMapper();
     ResponseEntity<String> getResp;
@@ -217,6 +229,8 @@ public class QsCustomLivyClient {
     payload.addProperty("name", sessionName);
     payload.addProperty("executorMemory", executorMemory);
     payload.addProperty("driverMemory", driverMemory);
+    payload.addProperty("executorCores", executorCores);
+    payload.addProperty("numExecutors", numExecutors);
     ResponseEntity<String> postForEntity;
     log.info("Initialize the session with - {}", payload.toString());
     if (livySessionId == -1) {
