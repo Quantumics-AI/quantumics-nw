@@ -19,5 +19,4 @@ public interface RuleTypeRepository extends JpaRepository<QsRuleType, Integer> {
 
     List<QsRuleType> findBySourceOnlyAndActiveIsTrue(boolean sourceOnly);
     List<QsRuleType> findByActiveIsTrue();
-    List<QsRuleType> findByRuleTypeNameInAndActiveIsTrue(List<String> ruleNames);
 }

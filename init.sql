@@ -966,8 +966,8 @@ BEGIN
     		target_bucket_name varchar(100) NULL,
     		target_feed_name varchar(100) NULL,
     		target_file_name varchar(100) NULL,
-			rule_type_name varchar(50) NOT NULL,
-			level_name varchar(50) NOT NULL,
+    		rule_type_name varchar(50) NOT NULL,
+    		level_name varchar(50) NOT NULL,
     		CONSTRAINT qsp_rule_pkey PRIMARY KEY (rule_id)
             )';
 

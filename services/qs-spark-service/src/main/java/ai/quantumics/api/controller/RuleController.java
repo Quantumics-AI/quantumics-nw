@@ -21,7 +21,8 @@ import springfox.documentation.spring.web.json.Json;
 
 import java.util.List;
 
-import static ai.quantumics.api.constants.DatasourceConstants.ACTIVE_RULE;
+import static ai.quantumics.api.constants.QsConstants.ACTIVE_RULE;
+
 
 @Slf4j
 @RestController
@@ -110,6 +111,7 @@ public class RuleController {
             @PathVariable(value = "ruleName") final String ruleName) {
         return ruleService.getRuleByName(userId, projectId, ruleName, status);
     }
+
     @ApiOperation(value = "Rule", response = Json.class)
     @PutMapping("/filter/{userId}/{projectId}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Type")})

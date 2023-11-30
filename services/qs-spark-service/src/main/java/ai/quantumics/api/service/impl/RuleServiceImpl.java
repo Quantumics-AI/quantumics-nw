@@ -50,9 +50,9 @@ import static ai.quantumics.api.constants.DatasourceConstants.FEED_NAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILENAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN_WITH_PATTERN;
 import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
-import static ai.quantumics.api.constants.DatasourceConstants.RULE_LEVEL_ALL;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
+import static ai.quantumics.api.constants.QsConstants.RULE_LEVEL_ALL;
 @Slf4j
 @Service
 public class RuleServiceImpl implements RuleService {
