@@ -263,7 +263,10 @@ public class QsConstants {
   public static final String METADATE = "metadata";
   
   public static final String EMPTY = " ";
-  
+  public static final String SPARK_EXECUTOR_MEMORY = "executorMemory";
+  public static final String SPARK_DRIVER_MEMORY = "driverMemory";
+  public static final String SPARK_EXECUTOR_CORES = "executorCores";
+  public static final String SPARK_EXECUTOR_INSTANCES = "numExecutors";
   private QsConstants() {}
   
   public static Date getCurrentUtcDate() {
