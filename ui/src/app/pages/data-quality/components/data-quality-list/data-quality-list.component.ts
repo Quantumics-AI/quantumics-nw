@@ -254,10 +254,11 @@ export class DataQualityListComponent implements OnInit {
   public applyFilter(): void {
     // console.log("Selected filter data:", this.selectedLevels);
     this.filterPayload = this.transformDataToRuleTypes(this.selectedLevels);
-
-    console.log("Selected filter data:", this.filterPayload);
+    const req = {
+      ruleTypes: this.filterPayload
+    };
     this.loading = true;
-    this.ruleCreationService.filterRuleData(this.userId, this.projectId, this.selectedStatus, this.pageNumebr, this.pageLength, this.filterPayload).subscribe((response) => {
+    this.ruleCreationService.filterRuleData(this.userId, this.projectId, this.selectedStatus, this.pageNumebr, this.pageLength, req).subscribe((response) => {
     
       this.loading = false;
       this.dataQualityList = response?.result?.content;
