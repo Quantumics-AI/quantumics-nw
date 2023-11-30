@@ -45,4 +45,6 @@ public class QsRule {
   private String targetBucketName;
   private String targetFeedName;
   private String targetFileName;
+  private String ruleTypeName;
+  private String levelName;
 }
