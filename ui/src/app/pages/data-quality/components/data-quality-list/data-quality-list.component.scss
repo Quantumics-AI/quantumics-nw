@@ -294,7 +294,7 @@
 
 .list-height {
     // height: calc(100vh - 250px);
-    height: 55vh;
+    height: 40vh;
 }
 
 .h-405 {
@@ -303,4 +303,144 @@
 
 .z-0 {
     z-index: 0 !important;
+}
+
+.source-type {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+    
+    // text-align: center;
+    // color: #888C92;
+    /* Blue */
+    
+    color: #212244;
+}
+
+.s-label {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+    
+    text-align: center;
+    
+    /* Dark Grey */
+    
+    color: #888C92;
+}
+
+.source-type-div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.activeText {
+    color: #00977C;
+}
+
+.bg-w {
+    background: #ffffff !important;
+}
+
+// .custom-select {
+//     position: relative;
+//     display: inline-block;
+// }
+  
+// .custom-select select {
+//     appearance: none;
+//     -webkit-appearance: none;
+//     -moz-appearance: none;
+//     padding: 8px;
+// }
+  
+// .custom-select select::-ms-expand {
+//     display: none;
+// }
+
+// .custom-select:after {
+//     content: url('../../../../../assets/img/side-bar/selected-arrow.svg');
+//     position: absolute;
+//     top: 50%;
+//     right: 10px;
+//     transform: translateY(-50%);
+//     display: none;
+// }
+  
+// .custom-select select:focus + :after {
+//     display: block;
+// }
+  
+// .selected:after {
+//     display: block;
+// }
+
+
+// filter rule type 
+.df {
+    display: flex;
+}
+
+.align-start {
+    align-items: flex-start !important;
+}
+
+.br-n {
+    border: none;
+}
+
+.dif {
+    display: inline-flex;
+}
+
+.mr-l-20 {
+    margin-left: 20px;
+}
+
+.h-32 {
+    height: 32px;
+}
+
+.rules-type {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+    
+    // text-align: center;
+    color: #888C92;
+    /* Blue */
+    
+    // color: #212244;
+}
+
+.rules {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+    
+    // text-align: center;
+    /* Blue */
+    
+    // color: #212244;
+}
+
+.mr-b-5 {
+    margin-bottom: 5px;
+}
+
+.mr-l-50 {
+    margin-left: 50px;
 }

@@ -25,11 +25,12 @@ export class DataQualityListComponent implements OnInit {
   private certificateData: Certificate;
   public loading:boolean;
   public ruleFilter = [
+    { label: 'Active', name: 'Active', selected: false },
     { label: 'Inactive', name: 'Inactive', selected: false },
     { label: 'Deleted', name: 'Deleted', selected: false }
   ] as RuleFilter[];
   public filterBy = [
-    { label: 'Date', name: 'date', selected: false },
+    // { label: 'Date', name: 'date', selected: false },
     { label: 'Rule type', name: 'type', selected: false }
   ] as RuleListFilter[];
 
@@ -52,7 +53,7 @@ export class DataQualityListComponent implements OnInit {
 
   public ruleStatus: string = 'Active';
   public pageNumebr: number = 1;
-  public pageLength: number = 10;
+  public pageLength: number = 100;
 
   public ruleId: any = [];
   public covertTime: any;
@@ -71,6 +72,13 @@ export class DataQualityListComponent implements OnInit {
   public isActive: boolean;
   public selectedBusinessDate: any;
   public isSearch: boolean = false;
+  public selectedFilterStatus: string = 'Active';
+  public selectedFilter: string;
+  public selectedRuleType: string = 'All';
+
+  public selectedLevels: { [ruleTypeName: string]: string } = {};
+  public ruleTypeList: any;
+  public filterPayload: any;
 
   constructor(
     private readonly router: Router,
@@ -95,6 +103,7 @@ export class DataQualityListComponent implements OnInit {
     this.getRules();
     this.getRulesInactive();
     this.getRulesDelete();
+    this.getRuleTypeList();
     sessionStorage.clear();
   }
 
@@ -114,6 +123,17 @@ export class DataQualityListComponent implements OnInit {
     }, (error) => {
       this.loading = false;
     });
+  }
+
+  public getRuleTypeList(): void {
+    this.loading = true;
+    this.ruleCreationService.getAllRuletypes(this.projectId, true, true).subscribe((response) => {
+      this.loading = false;
+      this.ruleTypeList = response.result;
+    }, (error) => {
+      this.snakbar.open(error);
+      this.loading = false;
+    })
   }
 
   public searchData(): void {
@@ -192,6 +212,64 @@ export class DataQualityListComponent implements OnInit {
     // }, (result) => {
       
     // });
+  }
+
+  public viewRunHistory(): void {
+    this.router.navigate([`projects/${this.projectId}/data-quality/view-history`]);
+  }
+
+  onCheckboxChange(item: any): void {
+    if (item.checked) {
+      this.selectedLevels[item.ruleTypeName] = 'All'; // Set default selected level to 'All'
+    } else {
+      delete this.selectedLevels[item.ruleTypeName];
+    }
+    
+  }
+
+  isButtonEnabled(): boolean {
+    // Check if at least one checkbox is selected
+    return Object.values(this.selectedLevels).some(level => level === 'All');
+  }
+
+  public onSelectLevelName(id: string): void {
+    
+  }
+
+  public transformDataToRuleTypes(data: any): any[] {
+    return Object.keys(data).map((key) => {
+      let ruleLevel = data[key];
+      // Check if the key is "Null Value" or "Zero Row Check" and set ruleLevel to ""
+      if (key === "Null Value" || key === "Zero Row Check") {
+        ruleLevel = "";
+      }
+
+      return {
+        "ruleTypeName": key,
+        "ruleLevel": ruleLevel
+      };
+    });
+  }
+
+  public applyFilter(): void {
+    // console.log("Selected filter data:", this.selectedLevels);
+    this.filterPayload = this.transformDataToRuleTypes(this.selectedLevels);
+
+    console.log("Selected filter data:", this.filterPayload);
+    this.loading = true;
+    this.ruleCreationService.filterRuleData(this.userId, this.projectId, this.selectedStatus, this.pageNumebr, this.pageLength, this.filterPayload).subscribe((response) => {
+    
+      this.loading = false;
+      this.dataQualityList = response?.result?.content;
+      const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
+      this.isActive = !hasInactiveOrDeleted;
+      this.ruleCount =  response?.result?.content;
+      this.paginationData = response?.result;
+      this.totalNumberOfRules = response?.result?.totalElements;
+      
+    }, (error) => {
+      this.loading = false;
+    });
   }
 
   selectRuleAll(event: Event): void {
@@ -340,6 +418,12 @@ export class DataQualityListComponent implements OnInit {
     this.getStatusRules();
   }
 
+  public onItemChange(value: string): void {
+    this.ruleStatus = value;
+    this.selectedStatus = value;
+    this.getStatusRules();
+  }
+
   public getStatusRules(): void {
     this.loading = true;
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
@@ -433,5 +517,9 @@ export class DataQualityListComponent implements OnInit {
 
   public onChangeFilterBy(value: string): void {
     
+  }
+
+  public onSelectRuleType(type: string): void {
+
   }
 }

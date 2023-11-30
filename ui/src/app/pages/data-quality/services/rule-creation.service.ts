@@ -95,4 +95,15 @@ export class RuleCreationService {
   public getSearchRule(userId: number, projectId: number, searchRule: string, pageNumber: number, sizeLength: number): Observable<any> {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/searchRule/${userId}/${projectId}/${searchRule}?page=${pageNumber}&size=${sizeLength}`);
   }
+
+  // http://localhost:8082/QuantumSparkServiceAPI/api/v1/ruletypes/1?allRuleTypes=true&sourceOnly=true
+
+  public getAllRuletypes(projectId: number, ruletypes: boolean, source: boolean): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/ruletypes/${projectId}?allRuleTypes=${ruletypes}&sourceOnly=${source}`);
+  }
+  
+  // http://localhost:8082/QuantumSparkServiceAPI/api/v1/qsrules/filter/1/1?status=Active&page=1&size=5
+  public filterRuleData(userId:number, projectId:number, status: string, pageNumber: number, sizeLength: number, data: any): Observable<any> {
+    return this.http.put(`/QuantumSparkServiceAPI/api/v1/qsrules/filter/${userId}/${projectId}?status=${status}&page=${pageNumber}&size=${sizeLength}`, data);
+  }
 }
