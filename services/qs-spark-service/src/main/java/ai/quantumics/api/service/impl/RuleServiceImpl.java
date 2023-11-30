@@ -14,12 +14,15 @@ import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsRule;
 import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.repo.RuleRepository;
+import ai.quantumics.api.req.RuleTypes;
+import ai.quantumics.api.req.RuleTypesDTO;
 import ai.quantumics.api.service.ProjectService;
 import ai.quantumics.api.service.RuleService;
 import ai.quantumics.api.service.RuleTypeService;
 import ai.quantumics.api.service.UserServiceV2;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.PatternUtils;
+import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
 import ai.quantumics.api.vo.RuleTypeDetails;
@@ -28,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.BUCKETNAME;
 import static ai.quantumics.api.constants.DatasourceConstants.ERROR_FETCHING_RULE;
@@ -44,9 +49,10 @@ import static ai.quantumics.api.constants.DatasourceConstants.EXPECTED_IN_FILE_P
 import static ai.quantumics.api.constants.DatasourceConstants.FEED_NAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILENAME;
 import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN_WITH_PATTERN;
+import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
+import static ai.quantumics.api.constants.DatasourceConstants.RULE_LEVEL_ALL;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
-
 @Slf4j
 @Service
 public class RuleServiceImpl implements RuleService {
@@ -58,19 +64,21 @@ public class RuleServiceImpl implements RuleService {
 	private final ProjectService projectService;
 	private final ControllerHelper controllerHelper;
 	private final UserServiceV2 userService;
-
+	private final ValidatorUtils validatorUtils;
 	public RuleServiceImpl(RuleRepository ruleRepositoryCi,
 						   DbSessionUtil dbUtilCi,
 						   RuleTypeService ruleTypeServiceCi,
 						   ProjectService projectServiceCi,
 						   ControllerHelper controllerHelperCi,
-						   UserServiceV2 userServiceCi) {
+						   UserServiceV2 userServiceCi,
+						   ValidatorUtils validatorUtilsCi) {
 		this.ruleRepository = ruleRepositoryCi;
 		this.dbUtil = dbUtilCi;
 		this.ruleTypeService = ruleTypeServiceCi;
 		this.projectService = projectServiceCi;
 		this.controllerHelper = controllerHelperCi;
 		this.userService = userServiceCi;
+		this.validatorUtils = validatorUtilsCi;
 	}
 
 
@@ -209,6 +217,8 @@ public class RuleServiceImpl implements RuleService {
 				qsRule.setTargetFileName(targetFileName);
 			}
 			qsRule.setRuleDetails(gson.toJson(ruleDetails.getRuleDetails()));
+			qsRule.setRuleTypeName(ruleDetails.getRuleDetails().getRuleTypeName());
+			qsRule.setLevelName(ruleDetails.getRuleDetails().getRuleLevel().getLevelName());
 			qsRule.setUserId(ruleDetails.getUserId());
 			qsRule.setStatus(RuleStatus.ACTIVE.getStatus());
 			qsRule.setCreatedDate(DateTime.now().toDate());
@@ -447,6 +457,41 @@ public class RuleServiceImpl implements RuleService {
 		}
 		return ResponseEntity.ok().body(response);
 	}
+	@Override
+	public ResponseEntity<Object> filterByRuleType(int userId, int projectId, RuleTypesDTO ruleTypesDTO, int page, int pageSize, List<String> status) {
+		final Map<String, Object> response = new HashMap<>();
+		try {
+			dbUtil.changeSchema(PUBLIC_SCHEMA);
+			validatorUtils.checkUser(userId);
+			final Projects project = validatorUtils.checkProject(projectId);
+			dbUtil.changeSchema(project.getDbSchemaName());
+			List<RuleTypes> ruleTypes = ruleTypesDTO.getRuleTypes();
+			List<QsRule> filteredResponse;
+			if(!CollectionUtils.isEmpty(ruleTypes)){
+				Map<String, String> ruleTypeAndLevelMap = ruleTypes.stream().collect(Collectors.toMap(RuleTypes::getRuleTypeName, RuleTypes::getRuleLevel));
+				List<String> ruleTypeList = ruleTypes.stream().map(RuleTypes::getRuleTypeName).collect(Collectors.toList());
+				List<QsRule> dbResultList = ruleRepository.findByRuleTypeNameInAndStatusInOrderByCreatedDateDesc(ruleTypeList, status);
+				filteredResponse = dbResultList.stream()
+						.filter(dbResult -> {
+							String ruleLevel = ruleTypeAndLevelMap.get(dbResult.getRuleTypeName());
+							return RULE_LEVEL_ALL.equals(ruleLevel) || dbResult.getLevelName().equals(ruleLevel);
+						}).collect(Collectors.toList());
+			}else{
+				filteredResponse = ruleRepository.findAllByStatusInOrderByCreatedDateDesc(status);
+			}
+
+			Page<QsRule> paginatedFilteredResponse = getPaginatedFilteredResponse(filteredResponse, page-1, pageSize);
+			response.put("code", HttpStatus.SC_OK);
+			response.put("message", "Rules Listed Successfully");
+			response.put("projectName", project.getProjectDisplayName());
+			response.put("result", paginatedFilteredResponse.map(this::convertToRuleDetails));
+		} catch (Exception exception) {
+			response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			response.put("message", "Error -" + exception.getMessage());
+		}
+		return ResponseEntity.ok().body(response);
+	}
+
 	public RuleDetails convertToRuleDetails(QsRule qsRule) {
 		Gson gson = new Gson();
 		RuleDetails ruleDetails = new RuleDetails();
@@ -466,5 +511,16 @@ public class RuleServiceImpl implements RuleService {
 		return ruleDetails;
 	}
 
-
+	// Convert List<QsRule> to Page<QsRule>
+	public <T> Page<T> getPaginatedFilteredResponse(List<T> filteredResponse, int pageNo, int pageSize) {
+		int responseSize = filteredResponse.size();
+		int start = pageNo * pageSize;
+		PageRequest pageRequest = PageRequest.of(pageNo, pageSize);
+		//Added equals condition to avoid extra calculations
+		if (start >= responseSize) {
+			return new PageImpl<>(List.of(), pageRequest, 0);
+		}
+		int end = Math.min((start + pageSize), responseSize);
+		return new PageImpl<>(filteredResponse.subList(start, end), pageRequest, filteredResponse.size());
+	}
 }

@@ -52,6 +52,8 @@ public class DatasourceConstants {
   public static final String REGION_PROPERTY_KEY = "qs.aws.%s.region";
   public static final String REGION_PROPERTY_MISSING = "Region property is missing";
   public static final String COMMA_DELIMITER = ",";
+  public static final String RULE_LEVEL_ALL = "All";
+  public static final String ACTIVE_RULE = "Active";
   private DatasourceConstants() {}
 
 }

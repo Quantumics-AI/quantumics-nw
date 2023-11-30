@@ -1,5 +1,6 @@
 package ai.quantumics.api.controller;
 
+import ai.quantumics.api.req.RuleTypesDTO;
 import ai.quantumics.api.service.RuleService;
 import ai.quantumics.api.vo.RuleDetails;
 import io.swagger.annotations.Api;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.spring.web.json.Json;
 
 import java.util.List;
+
+import static ai.quantumics.api.constants.DatasourceConstants.ACTIVE_RULE;
 
 @Slf4j
 @RestController
@@ -107,5 +110,16 @@ public class RuleController {
             @PathVariable(value = "ruleName") final String ruleName) {
         return ruleService.getRuleByName(userId, projectId, ruleName, status);
     }
-
+    @ApiOperation(value = "Rule", response = Json.class)
+    @PutMapping("/filter/{userId}/{projectId}")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Get Rule By Rule Type")})
+    public ResponseEntity<Object> getByRuleType(
+            @RequestBody final RuleTypesDTO ruleTypesDTO,
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "projectId") final int projectId,
+            @RequestParam(name = "page", required = true) int page,
+            @RequestParam(name = "size", required = true) int size,
+            @RequestParam(value = "status", defaultValue = ACTIVE_RULE)  final List<String> status) {
+        return ruleService.filterByRuleType(userId, projectId, ruleTypesDTO, page, size, status);
+    }
 }

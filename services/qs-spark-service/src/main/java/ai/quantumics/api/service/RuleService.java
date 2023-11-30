@@ -8,6 +8,7 @@
 
 package ai.quantumics.api.service;
 
+import ai.quantumics.api.req.RuleTypesDTO;
 import ai.quantumics.api.vo.RuleDetails;
 import org.springframework.http.ResponseEntity;
 
@@ -20,4 +21,5 @@ public interface RuleService {
     ResponseEntity<Object> editRule(RuleDetails ruleDetails, int userId, int projectId);
     ResponseEntity<Object> searchRule(int userId, int projectId, String ruleName, List<String> status, int page, int pageSize);
     ResponseEntity<Object> getRuleByName(int userId, int projectId, String ruleName, List<String> status);
+    ResponseEntity<Object> filterByRuleType(int userId, int projectId, RuleTypesDTO ruleTypesDTO, int page, int pageSize, List<String> status);
 }
