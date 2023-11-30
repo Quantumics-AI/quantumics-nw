@@ -285,6 +285,8 @@ public class RuleServiceImpl implements RuleService {
 				qsRule.setTargetData(gson.toJson(ruleDetails.getTargetData()));
 			}
 			qsRule.setRuleDetails(gson.toJson(ruleDetails.getRuleDetails()));
+			qsRule.setRuleTypeName(ruleDetails.getRuleDetails().getRuleTypeName());
+			qsRule.setLevelName(ruleDetails.getRuleDetails().getRuleLevel().getLevelName());
 			qsRule.setUserId(ruleDetails.getUserId());
 			qsRule.setStatus(ruleDetails.getStatus());
 			qsRule.setModifiedDate(DateTime.now().toDate());

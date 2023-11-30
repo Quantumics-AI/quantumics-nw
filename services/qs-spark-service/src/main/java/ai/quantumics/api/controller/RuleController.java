@@ -22,8 +22,6 @@ import springfox.documentation.spring.web.json.Json;
 import java.util.List;
 
 import static ai.quantumics.api.constants.QsConstants.ACTIVE_RULE;
-
-
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/qsrules")
