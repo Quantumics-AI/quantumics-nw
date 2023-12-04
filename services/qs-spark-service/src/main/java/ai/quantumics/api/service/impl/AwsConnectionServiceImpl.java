@@ -362,9 +362,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             String s3Uri = "s3a://" + bucketName + "/" + file;
             AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
             Configuration hadoopConfig = new Configuration();
-            hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
-            hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
-            hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
+            //hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
+            //hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
+            //hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
             log.info("Access key is : {}", awsCredentials.getAWSAccessKeyId());
             log.info("Secret key is : {}", awsCredentials.getAWSSecretKey());
             // Create InputFile
