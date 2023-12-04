@@ -357,6 +357,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
 
     private static BucketFileContent readParquetContent(List<Map<String, String>> data, BucketFileContent bucketFileContent, List<String> headers, List<ColumnDataType> dataTypes, String bucketName, String file) {
         try {
+            log.info("Reading parquet file method starts");
             // Parse the S3 URI
             String s3Uri = "s3a://" + bucketName + "/" + file;
             AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
@@ -364,12 +365,15 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
             hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
             hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
-
+            log.info("Access key is : {}", awsCredentials.getAWSAccessKeyId());
+            log.info("Secret key is : {}", awsCredentials.getAWSSecretKey());
             // Create InputFile
+            log.info("Preparing hadoop input file");
             InputFile inputFile = HadoopInputFile.fromPath(new Path(s3Uri), hadoopConfig);
-
+            log.info("Hadoop input file prepared");
+            log.info("Open hadoop input file");
             ParquetFileReader parquetFileReader = ParquetFileReader.open(inputFile);
-
+            log.info("Hadoop input file opened");
             // Get the Parquet schema (MessageType)
             ParquetMetadata parquetMetadata = parquetFileReader.getFooter();
             MessageType schema = parquetMetadata.getFileMetaData().getSchema();
