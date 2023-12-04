@@ -38,8 +38,21 @@ header_results = []
 
 # Loop through the file paths
 for s3_file_path, s3_bucket_name in file_paths:
-    # Read the CSV file from S3 into a DataFrame
-    df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True)
+    # Extract the file extension from the file path
+    file_extension = os.path.splitext(s3_file_path)[1].lower()
+
+    base_name, file_extension = os.path.splitext(s3_file_path)
+
+    print("Base Name:", base_name)
+    print("File Extension:", file_extension)
+
+    # Read the file based on the file extension
+    if file_extension == '.csv':
+        df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True)
+    elif file_extension == '.parquet':
+        df = spark.read.parquet(f"s3a://{s3_bucket_name}/{s3_file_path}")
+    else:
+        raise ValueError(f"Unsupported file format: {file_extension}")
 
     # Calculate the number of records in the DataFrame
     record_count = df.count()

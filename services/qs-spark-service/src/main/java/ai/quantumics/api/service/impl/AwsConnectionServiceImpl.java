@@ -19,8 +19,6 @@ import ai.quantumics.api.res.BucketDetails;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
@@ -65,6 +63,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,6 +101,11 @@ import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_KE
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_MISSING;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
 import static ai.quantumics.api.constants.QsConstants.DELIMITER;
+import static ai.quantumics.api.constants.QsConstants.PARQUET_DATE;
+import static ai.quantumics.api.constants.QsConstants.PARQUET_DATE_PATTERN;
+import static ai.quantumics.api.constants.QsConstants.PARQUET_TIMESTAMP;
+import static ai.quantumics.api.constants.QsConstants.PARQUET_TIMESTAMP_PATTERN;
+
 @Slf4j
 @Service
 public class AwsConnectionServiceImpl implements AwsConnectionService {
@@ -360,20 +368,16 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
             log.info("Reading parquet file method starts");
             // Parse the S3 URI
             String s3Uri = "s3a://" + bucketName + "/" + file;
-            AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
             Configuration hadoopConfig = new Configuration();
-            //hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
-            //hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
-            //hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
-            log.info("Access key is : {}", awsCredentials.getAWSAccessKeyId());
-            log.info("Secret key is : {}", awsCredentials.getAWSSecretKey());
+            //Uncomment below lines to work in local
+            /*AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
+            hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
+            hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
+            hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");*/
             // Create InputFile
-            log.info("Preparing hadoop input file");
             InputFile inputFile = HadoopInputFile.fromPath(new Path(s3Uri), hadoopConfig);
-            log.info("Hadoop input file prepared");
-            log.info("Open hadoop input file");
             ParquetFileReader parquetFileReader = ParquetFileReader.open(inputFile);
-            log.info("Hadoop input file opened");
+
             // Get the Parquet schema (MessageType)
             ParquetMetadata parquetMetadata = parquetFileReader.getFooter();
             MessageType schema = parquetMetadata.getFileMetaData().getSchema();
@@ -385,7 +389,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 headers.add(column.getPath()[0]);
                 PrimitiveType primitiveType = column.getPrimitiveType();
                 LogicalTypeAnnotation logicalTypeAnnotation = primitiveType.getLogicalTypeAnnotation();
-                String logicalType = (logicalTypeAnnotation != null) ? logicalTypeAnnotation.toString() : "null";
+                String logicalType = (logicalTypeAnnotation != null) ? logicalTypeAnnotation.toString() : primitiveType.getPrimitiveTypeName() != null ? primitiveType.getPrimitiveTypeName().toString() : "null";
                 ColumnDataType columnDataType = new ColumnDataType();
                 columnDataType.setColumnName(column.getPath()[0]);
                 columnDataType.setDataType(getColumnDataType(logicalType));
@@ -445,17 +449,48 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 }
             case INT32:
                 try {
+                    if(column.getPrimitiveType().getLogicalTypeAnnotation() != null && column.getPrimitiveType().getLogicalTypeAnnotation().toString().equals(PARQUET_DATE)) {
+                        int daysSinceEpoch = group.getInteger(columnName, 0);
+                        LocalDate date = java.time.LocalDate.ofEpochDay(daysSinceEpoch);
+                        String formattedDate = date.format(java.time.format.DateTimeFormatter.ofPattern(PARQUET_DATE_PATTERN));
+                        return formattedDate;
+                    }
                     return group.getInteger(columnName, 0);
                 } catch (Exception e) {
                     return "";
                 }
             case INT64:
                 try {
+                    if(column.getPrimitiveType().getLogicalTypeAnnotation() != null && column.getPrimitiveType().getLogicalTypeAnnotation().toString().contains(PARQUET_TIMESTAMP)) {
+                        long timestampInSeconds = group.getLong(columnName, 0);
+                        Instant instant = Instant.ofEpochMilli(timestampInSeconds/1000);
+                        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PARQUET_TIMESTAMP_PATTERN);
+                        String formattedDateTime = formatter.format(zonedDateTime);
+                        return formattedDateTime;
+                    }
                     return group.getLong(columnName, 0);
                 } catch (Exception e) {
                     return "";
                 }
-
+            case FLOAT:
+                try {
+                    return group.getFloat(columnName, 0);
+                } catch (Exception e) {
+                    return "";
+                }
+            case DOUBLE:
+                try {
+                    return group.getDouble(columnName, 0);
+                } catch (Exception e) {
+                    return "";
+                }
+            case BOOLEAN:
+                try {
+                    return group.getBoolean(columnName, 0);
+                }                catch (Exception e) {
+                    return "";
+                }
             default:
                 throw new UnsupportedOperationException("Unsupported Parquet column type: " + type);
         }
@@ -469,6 +504,14 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
                 dataType = "string";
             } else if (value.contains("INT")) {
                 dataType = "int";
+            } else if (value.equals("FLOAT")) {
+                dataType = "float";
+            } else if (value.equals("DOUBLE")) {
+                dataType = "double";
+            } else if (value.equals("BOOLEAN")) {
+                dataType = "boolean";
+            } else if (value.equals("DATE") || value.contains("TIMESTAMP")) {
+                dataType = "date";
             }
         }
         return dataType;

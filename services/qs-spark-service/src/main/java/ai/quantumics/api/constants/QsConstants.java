@@ -270,6 +270,10 @@ public class QsConstants {
   public static final String SPARK_DRIVER_MEMORY = "driverMemory";
   public static final String SPARK_EXECUTOR_CORES = "executorCores";
   public static final String SPARK_EXECUTOR_INSTANCES = "numExecutors";
+  public static final String PARQUET_TIMESTAMP = "TIMESTAMP";
+  public static final String PARQUET_DATE = "DATE";
+  public static final String PARQUET_DATE_PATTERN = "yyyy-MM-dd";
+  public static final String PARQUET_TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
   private QsConstants() {}
   
   public static Date getCurrentUtcDate() {

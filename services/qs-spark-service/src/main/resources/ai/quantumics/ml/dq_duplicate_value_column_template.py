@@ -18,25 +18,28 @@ input_acceptance_percentage_float = float(input_acceptance_percentage)
 # Convert the input headers string into an array of strings
 input_headers = input_headers_str.split(",")
 
-# Read the CSV file from S3 into a DataFrame
-df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True)
+# Extract the file extension from the file path
+file_extension = os.path.splitext(s3_file_path)[1].lower()
 
-if input_headers_str.strip().lower() == "all":
-    df = df.na.drop()
+base_name, file_extension = os.path.splitext(s3_file_path)
+
+print("Base Name:", base_name)
+print("File Extension:", file_extension)
+
+# Read the file based on the file extension
+if file_extension == '.csv':
+    df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True).select(*input_headers)
+elif file_extension == '.parquet':
+    df = spark.read.parquet(f"s3a://{s3_bucket_name}/{s3_file_path}").select(*input_headers)
 else:
-    df = df.select(*input_headers)
-    df = df.na.drop()
+    raise ValueError(f"Unsupported file format: {file_extension}")
 
+df = df.na.drop()
 # Check if there are no records in the DataFrame
 if df.count() == 0:
-    print("No records found in the file.")
+    print("No records found in the file columns.")
 else:
-    if input_headers_str.strip().lower() == "all":
-        # Group the DataFrame by all columns and count the number of rows in each group
-        grouped_df = df.groupBy(df.columns).count()
-    else:
-        # Group the DataFrame by the specified list of columns and count the number of rows in each group
-        grouped_df = df.groupBy(*input_headers).count()
+    grouped_df = df.groupBy(*input_headers).count()
 
     # Filter for rows with a count greater than 1 to identify duplicates
     duplicate_df = grouped_df.filter(grouped_df["count"] > 1)
