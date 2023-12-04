@@ -64,7 +64,7 @@ else:
         "pass": pass_status,
         "SourceFile": source_s3_path,
         "SourceFileName": source_file_name,
-        "headers": input_headers_str
+        "header": input_headers_str
     }
 
     # Prepare job_output as a JSON string
