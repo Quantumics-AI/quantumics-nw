@@ -8,7 +8,8 @@
     <!-- <div class="container"> -->
         <ng-container *ngIf="output.ruleTypeName == nullRule">
             <div class="rd">
-                <p class="p2 text-center fsw">{{output?.ruleTypeName}} Check</p>
+                <p class="p2 text-center fsw mr-b-0">{{output?.ruleTypeName}} Check</p>
+                <p class=" text-center form-text body-text-muted">({{columnName}})</p>
             </div>
             <div class="text-center">
                 <p class="p2 fs-16 mr-b-0">Source</p>
@@ -32,7 +33,8 @@
         <ng-container *ngIf="output.ruleTypeName == dataComplete">
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
-                <p class="p2 text-center fsw">{{output?.levelName}}</p>
+                <p class="p2 text-center fsw mr-b-0">{{output?.levelName}}</p>
+                <p class=" text-center form-text body-text-muted">({{columnName}})</p>
             </div>
             
             <div class="row">
@@ -53,7 +55,7 @@
         <ng-container *ngIf="output.ruleTypeName == duplicateRule">
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
-                <p class="p2 text-center fsw">
+                <p class="p2 text-center fsw" [ngClass]="{'mr-b-0': columnName}">
                     <span *ngIf="output?.levelName == 'Multiple Column'">
                        Duplicate Data-Combined Column Check
                     </span>
@@ -64,6 +66,7 @@
                         Duplicate Data-Column Check
                     </span>
                 </p>
+                <p *ngIf="columnName" class=" text-center form-text body-text-muted">({{columnName}})</p>
             </div>
             <div class="text-center">
                 <p class="p2 fs-16 mr-b-0">Source</p>

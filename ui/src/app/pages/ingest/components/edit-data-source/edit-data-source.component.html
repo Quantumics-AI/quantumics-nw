@@ -9,7 +9,7 @@
         <div class="form-group">
             <label for="inputName" class="p2">
                 <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
-                Connection name*
+                Connection Name*
             </label>
             <input type="text" class="form-control input-design" id="sourceName" #source
                 formControlName="dataSourceName" autocomplete="off" placeholder="Input connection name" 
@@ -54,7 +54,7 @@
         <div class="form-group">
             <label for="inputName" class="p2">
                 <!-- <img class="img-fluid" alt="Responsive image" alt="Responsive image" src="assets/img/pii/folder-name.svg" alt=""> -->
-                Sub data source*
+                Sub Data Source*
             </label>
             <input type="text" class="form-control input-design" id="sourceName" #subdataSource
                 formControlName="subDataSource" autocomplete="off" placeholder="Sub data source name" [value]="'S3'">
@@ -63,7 +63,16 @@
 
         <div class="form-group">
             <label for="inputName" class="p2">
-                Selected Region*
+                Bucket Name*
+            </label>
+            <input type="text" class="form-control input-design" id="bucketName" #bucketname
+                formControlName="bucketName" autocomplete="off" placeholder="Bucket name" >
+            
+        </div>
+
+        <div class="form-group">
+            <label for="inputName" class="p2">
+                Region*
             </label>
             <input type="text" class="form-control input-design" id="sourceName" #region
                 formControlName="region" placeholder="Region name" readonly>

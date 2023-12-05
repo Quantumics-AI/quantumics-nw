@@ -50,13 +50,13 @@ export class RuleCreationService {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/${userId}/${projectId}/${ruleId}`);
   }
 
-  public getBrowseFile(userId: number, projectId: number, bucketName: string): Observable<any> {
-    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/buckets/${userId}/${projectId}/${bucketName}`);
+  public getBrowseFile(userId: number, projectId: number, bucketName: string, region: string, accessType: string): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/buckets/${userId}/${projectId}/${bucketName}?region=${region}&accessType=${accessType}`);
   }
 
   //file content
-  public getFileContent(userId: number, projectId: number, bucketName: string, filePath: string): Observable<any> {
-    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/content/${userId}/${projectId}?bucket=${bucketName}&file=${filePath}`);
+  public getFileContent(userId: number, projectId: number, bucketName: string, filePath: string,  region: string, accessType: string): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/aws/content/${userId}/${projectId}?bucket=${bucketName}&file=${filePath}&region=${region}&accessType=${accessType}`);
   }
 
   //file row Count

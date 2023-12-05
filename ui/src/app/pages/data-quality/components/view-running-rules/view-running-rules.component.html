@@ -2,13 +2,17 @@
     <div class="page-header1">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb breadcrumb-top pd-l-0">
-                <li class="breadcrumb-item"><a [routerLink]="['/projects', projectId, 'data-quality']">Rules</a></li>
-                <li class="breadcrumb-item active" aria-current="page">
+                <li class="breadcrumb-item active">
+                    <!-- <a [routerLink]="['/projects', projectId, 'data-quality']"> -->
+                        View Running Rules
+                    <!-- </a> -->
+                </li>
+                <!-- <li class="breadcrumb-item active" aria-current="page">
                     <span style="position: relative;">
                         <img src="../../../../../assets/img/arrow.svg" alt="Arrow" style="width: 16px; vertical-align: middle;">
                         Rule Status
                     </span>
-                </li>
+                </li> -->
             </ol>
         </nav>
     </div>
@@ -19,7 +23,7 @@
                 <div class="di mr-t-6" >
                     <a class="card-main-text mr-b-0" (click)="back()">
                         <span><img src="/assets/img/pipline/back-pipe.svg" class="cp"></span>
-                        Back to rules
+                        Back to Rules
                     </a>
                 </div>
             </div>

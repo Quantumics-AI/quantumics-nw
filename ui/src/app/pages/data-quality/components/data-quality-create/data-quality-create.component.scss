@@ -213,6 +213,8 @@ input[type=radio]:checked{
     .folder-pophover {
         max-width: 700px !important;
         width: auto !important;
+        transform: translate(0, 64px) !important;
+        // left: 0 !important;
     }
 
     ul {

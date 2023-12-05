@@ -79,6 +79,11 @@ export class DataQualityListComponent implements OnInit {
   public selectedLevels: { [ruleTypeName: string]: string } = {};
   public ruleTypeList: any;
   public filterPayload: any;
+  public filtered: boolean = false;
+  public disableButton: boolean = false;
+  public showActive: number;
+  public showInactive: number;
+  public showDeleted: number;
 
   constructor(
     private readonly router: Router,
@@ -114,9 +119,11 @@ export class DataQualityListComponent implements OnInit {
     
       this.loading = false;
       this.dataQualityList = response?.result?.content;
+      this.filtered = false;
       const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
       this.isActive = !hasInactiveOrDeleted;
-      this.ruleCount =  response?.result?.content;
+      this.ruleCount =  response?.result?.totalElements;
+      this.showActive = response?.result?.totalElements;
       this.paginationData = response?.result;
       this.totalNumberOfRules = response?.result?.totalElements;
       
@@ -156,9 +163,10 @@ export class DataQualityListComponent implements OnInit {
       if(response.code === 200){
         this.searchNull = false;
         this.dataQualityList = response?.result?.content;
+        this.filtered = false;
         const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
         this.isActive = !hasInactiveOrDeleted;
-        this.ruleCount =  response?.result?.content;
+        this.ruleCount =  response?.result?.totalElements;
         this.paginationData = response?.result;
         this.totalNumberOfRules = response?.result?.totalElements;
       }
@@ -172,7 +180,8 @@ export class DataQualityListComponent implements OnInit {
     this.loading = true;
     this.ruleCreationService.getRulesData(this.userId, this.projectId, 'Inactive', this.pageNumebr, this.pageLength).subscribe((response) => {
     
-      this.ruleCountInactive =  response?.result?.content;
+      this.ruleCountInactive =  response?.result?.totalElements;
+      this.showInactive = response?.result?.totalElements;
       
     }, (error) => {
       this.loading = false;
@@ -184,11 +193,25 @@ export class DataQualityListComponent implements OnInit {
     this.ruleCreationService.getRulesData(this.userId, this.projectId,'Deleted', this.pageNumebr, this.pageLength).subscribe((response) => {
       
       this.loading = false;
-      this.ruleCountDeleted =  response?.result?.content;
+      this.ruleCountDeleted =  response?.result?.totalElements;
+      this.showDeleted = response?.result?.totalElements;
       
     }, (error) => {
       this.loading = false;
     });
+  }
+
+  shouldShowOption(option: RuleFilter): boolean {
+    switch (option.name) {
+        // case 'Active':
+        //     return this.showActive !== 0;
+        case 'Inactive':
+            return this.showInactive !== 0;
+        case 'Deleted':
+            return this.showDeleted !== 0;
+        default:
+            return true; // Show by default if name doesn't match any condition
+    }
   }
 
   public edit(dataQuality: any): void {
@@ -224,16 +247,36 @@ export class DataQualityListComponent implements OnInit {
     } else {
       delete this.selectedLevels[item.ruleTypeName];
     }
+
+    if (this.disableButton) {
+      this.getStatusRules();
+    }
     
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
   }
 
-  isButtonEnabled(): boolean {
+  public isButtonEnabled(): boolean {
     // Check if at least one checkbox is selected
-    return Object.values(this.selectedLevels).some(level => level === 'All');
+    return Object.keys(this.selectedLevels).length > 0;
   }
 
-  public onSelectLevelName(id: string): void {
+  public onSelectLevelName(ruleTypeName: string, selectedLevel: string): void {
+    this.selectedLevels[ruleTypeName] = selectedLevel;
+    this.isButtonEnabled();
+    if (this.disableButton) {
+      this.disableButton = false;
+    }
     
+  }
+
+  public clearFilterData(): void {
+    // Uncheck all checkboxes after applying the filter
+    this.ruleTypeList.forEach(item => item.checked = false);
+
+    // Reset the selected levels
+    this.selectedLevels = {};
+    this.getStatusRules();
   }
 
   public transformDataToRuleTypes(data: any): any[] {
@@ -261,10 +304,11 @@ export class DataQualityListComponent implements OnInit {
     this.ruleCreationService.filterRuleData(this.userId, this.projectId, this.selectedStatus, this.pageNumebr, this.pageLength, req).subscribe((response) => {
     
       this.loading = false;
+      this.filtered = true;
       this.dataQualityList = response?.result?.content;
       const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
       this.isActive = !hasInactiveOrDeleted;
-      this.ruleCount =  response?.result?.content;
+      // this.ruleCount =  response?.result?.content;
       this.paginationData = response?.result;
       this.totalNumberOfRules = response?.result?.totalElements;
       
@@ -423,6 +467,11 @@ export class DataQualityListComponent implements OnInit {
     this.ruleStatus = value;
     this.selectedStatus = value;
     this.getStatusRules();
+    // Uncheck all checkboxes after applying the filter
+    this.ruleTypeList.forEach(item => item.checked = false);
+
+    // Reset the selected levels
+    this.selectedLevels = {};
   }
 
   public getStatusRules(): void {
@@ -430,8 +479,9 @@ export class DataQualityListComponent implements OnInit {
     this.ruleCreationService.getRulesData(this.userId, this.projectId, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
       
       this.dataQualityList = response?.result?.content;
-      const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Inactive' || item.status === 'Deleted');
-      this.isActive = !hasInactiveOrDeleted;
+      this.filtered = false;
+      const hasInactiveOrDeleted = response?.result?.content.some(item => item.status === 'Active');
+      this.isActive = hasInactiveOrDeleted;
       this.paginationData = response?.result;
       this.totalNumberOfRules = response?.result?.totalElements;
       this.loading = false;

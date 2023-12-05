@@ -149,6 +149,8 @@ export class ViewRunningRulesComponent implements OnInit {
 
   public viewResult(r: any): void {
     const data = JSON.parse(r.jobOutput);
+    console.log("---", data);
+    
 
     if (Array.isArray(data)) {
       // It's a JSON array, you can loop through its elements

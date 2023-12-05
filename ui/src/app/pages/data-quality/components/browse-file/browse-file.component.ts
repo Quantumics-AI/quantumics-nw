@@ -68,6 +68,9 @@ export class BrowseFileComponent implements OnInit {
   public selectedFile: string;
   public filePath: string;
   public patternPath: string;
+  public selectedSource: string;
+  public regionName: string;
+  public accesType: string;
 
   constructor(
     private router: Router,
@@ -87,6 +90,9 @@ export class BrowseFileComponent implements OnInit {
           this.userId = +this.certificateData.user_id;
         }
       });
+      this.selectedSource = sessionStorage.getItem('source');
+      this.regionName = sessionStorage.getItem('region');
+      this.accesType = sessionStorage.getItem('accessType');
   }
 
   ngOnInit(): void {
@@ -97,7 +103,7 @@ export class BrowseFileComponent implements OnInit {
   }
 
   public getBrowseFileData(): void {
-    this.ruleCreationService.getBrowseFile(this.userId, +this.projectId, this.bucketName).subscribe((res) => {
+    this.ruleCreationService.getBrowseFile(this.userId, +this.projectId, this.bucketName, this.regionName, this.accesType).subscribe((res) => {
       
       this.fileStructure = res;
     })
@@ -207,7 +213,7 @@ export class BrowseFileComponent implements OnInit {
   }
 
   public getFileData(): void {
-    this.ruleCreationService.getFileContent(this.userId, +this.projectId, this.bucketName, this.filePath).subscribe((res) => {
+    this.ruleCreationService.getFileContent(this.userId, +this.projectId, this.bucketName, this.filePath, this.regionName, this.accesType).subscribe((res) => {
       
       this.headers = res.headers;
       this.fileContent = res.content;

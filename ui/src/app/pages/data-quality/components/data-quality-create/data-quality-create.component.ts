@@ -133,6 +133,7 @@ export class DataQualityCreateComponent implements OnInit {
       sourceDataConnection: new FormControl('', Validators.required),
       sourceBucketOne: new FormControl('', Validators.required),
       region: new FormControl (''),
+      accessType: new FormControl(''),
       sourceFolderPath: new FormControl('', Validators.required),
       sourcePatternPath: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
       //
@@ -141,6 +142,7 @@ export class DataQualityCreateComponent implements OnInit {
       sourceDataConnectionTwo: new FormControl('', Validators.required),
       sourceBucketTwo: new FormControl('', Validators.required),
       regionTwo: new FormControl (''),
+      accessTypeTwo: new FormControl(''),
       sourceFolderPathTwo: new FormControl('', Validators.required),
       sourcePatternPathTwo: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
       //types
@@ -191,6 +193,7 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.controls.sourceBucketOne.setValue(this.formData?.sourceBucketOne);
       this.bucketSourceOne.push(this.formData?.sourceBucketOne);
       this.fg.controls.region.setValue(this.formData?.region);
+      this.fg.controls.accessType.setValue(this.formData?.accessType);
       if (this.filecheck) {
         if (this.selectedSource == 'source-1') {
           this.fg.controls.sourceFolderPath.setValue(this.selectedPath);
@@ -212,6 +215,7 @@ export class DataQualityCreateComponent implements OnInit {
       this.fg.controls.sourceBucketTwo.setValue(this.formData?.sourceBucketTwo);
       this.bucketSourceTwo.push(this.formData?.sourceBucketTwo);
       this.fg.controls.regionTwo.setValue(this.formData?.regionTwo);
+      this.fg.controls.accessTypeTwo.setValue(this.formData?.accessTypeTwo);
       this.checkExistName();
     } else {
     }
@@ -515,6 +519,8 @@ export class DataQualityCreateComponent implements OnInit {
   public browseSourceOne(s: string): void {
     sessionStorage.setItem("source", s);
     sessionStorage.setItem("bucketName", this.fg.get('sourceBucketOne').value);
+    sessionStorage.setItem("region", this.fg.get('region').value);
+    sessionStorage.setItem("accessType", this.fg.get('accessType').value);
     const form_obj = {};
     Object.keys(this.fg.controls).forEach(key => {
       form_obj[key] = this.fg.get(key).value;
@@ -527,6 +533,8 @@ export class DataQualityCreateComponent implements OnInit {
   public browseSourceTwo(s: string): void {
     sessionStorage.setItem("source", s);
     sessionStorage.setItem("bucketName", this.fg.get('sourceBucketTwo').value);
+    sessionStorage.setItem("region", this.fg.get('regionTwo').value);
+    sessionStorage.setItem("accessType", this.fg.get('accessTypeTwo').value);
     const form_obj = {};
     Object.keys(this.fg.controls).forEach(key => {
       form_obj[key] = this.fg.get(key).value;
@@ -599,6 +607,7 @@ export class DataQualityCreateComponent implements OnInit {
     this.bucketSourceOne.push(connectionBucket.bucketName);
     this.fg.controls.sourceBucketOne.setValue(connectionBucket.bucketName);
     this.fg.controls.region.setValue(connectionBucket.region);
+    this.fg.controls.accessType.setValue(connectionBucket.accessType);
   }
 
   public onSelectDataConnections2(id: string): void {
@@ -610,6 +619,7 @@ export class DataQualityCreateComponent implements OnInit {
     this.bucketSourceTwo.push(connectionBucket.bucketName);
     this.fg.controls.sourceBucketTwo.setValue(connectionBucket.bucketName);
     this.fg.controls.regionTwo.setValue(connectionBucket.region);
+    this.fg.controls.accessTypeTwo.setValue(connectionBucket.accessType);
   }
 
   public onSelectBucketOne(d: string): void {

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SnackbarService } from 'src/app/core/services/snackbar.service';
-import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateStruct, NgbCalendar } from '@ng-bootstrap/ng-bootstrap';
 import { RuleCreationService } from '../../services/rule-creation.service';
 
 
@@ -18,12 +18,16 @@ export class BusinessDateComponent {
 
   public selectedBusinessDate: NgbDateStruct;
   // selectedBusinessDate: NgbDateStruct;
+  maxDate: NgbDateStruct;
 
   constructor(
     public modal: NgbActiveModal,
     private snakbar: SnackbarService,
-    private ruleCreationService: RuleCreationService
-  ) { }
+    private ruleCreationService: RuleCreationService,
+    private calendar: NgbCalendar
+  ) {
+    this.maxDate = this.calendar.getToday();
+   }
 
   ngOnInit(): void {
   }

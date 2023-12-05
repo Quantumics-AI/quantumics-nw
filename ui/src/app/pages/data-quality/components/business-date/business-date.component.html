@@ -13,7 +13,8 @@
             <label for="filePath" class="p2">Business Date*</label>
             <div class="input-group br-d">
               <input class="form-control search-input br-bx-n h36 z-0" placeholder="dd-mm-yyyy" [(ngModel)]="selectedBusinessDate"
-                     name="dp" ngbDatepicker #d="ngbDatepicker" [value]="getFormattedDate()" (ngModelChange)="selectedBusinessDate = $event"
+                     name="dp" ngbDatepicker #d="ngbDatepicker" [maxDate]="maxDate"
+                      [value]="getFormattedDate()" (ngModelChange)="selectedBusinessDate = $event"
                 >
               <div class="input-group-append">
                 <button class="btn calendar" (click)="d.toggle()" type="button">

@@ -26,6 +26,7 @@ export class ViewResultComponent implements OnInit {
   public zeroRowCheck: string = 'Zero Row Check';
   public sourceFileName: string;
   public targetFileName: string;
+  public columnName: string;
   constructor(
     public modal: NgbActiveModal,
   ){
@@ -64,6 +65,10 @@ export class ViewResultComponent implements OnInit {
   
         // Remove the surrounding double quotes
         this.targetFileName = fileNameWithQuotes.replace(/"/g, '');
+      }
+
+      if (this.output?.header) {
+        this.columnName = this.output.header;
       }
       
   }
