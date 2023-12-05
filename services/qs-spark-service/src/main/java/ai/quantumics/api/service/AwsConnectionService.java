@@ -27,11 +27,11 @@ public interface AwsConnectionService {
 
     List<String> getBuckets();
 
-    String getFoldersAndFilePath(String bucketName) throws IOException;
+    String getFoldersAndFilePath(String bucketName, String region, String accessType) throws IOException;
 
     String testConnection(AwsDatasourceRequest awsDatasourceRequest);
 
-    BucketFileContent getContent(String bucketName, String file);
+    BucketFileContent getContent(String bucketName, String file, String region, String accessType);
     List<AwsDatasourceResponse> searchConnection(String datasourceName);
     List<String> getRegions();
 }
