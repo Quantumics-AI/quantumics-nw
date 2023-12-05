@@ -4,6 +4,7 @@ from pyspark.sql.types import BooleanType
 import json
 import re
 import boto3
+import os
 
 # Initialize a Spark session
 spark = SparkSession.builder.appName("EDI-DQ-RULE_DATA-PROFILE-TABLE-LEVEL").getOrCreate()
@@ -17,9 +18,25 @@ rule_type_name = $RULE_TYPE_NAME
 level_name = $LEVEL_NAME
 s3Path = $S3_OUTPUT_PATH
 
-# Read the CSV files without specifying a date format
-source_df = spark.read.csv(f"s3a://{bucket1}/{filepath1}", header=True, inferSchema=True)
-target_df = spark.read.csv(f"s3a://{bucket2}/{filepath2}", header=True, inferSchema=True)
+# Function to read DataFrame from either CSV or Parquet based on file extension
+def read_dataframe(file_path, bucket_name):
+    # Extract the file extension from the file path
+    file_extension = os.path.splitext(file_path)[1].lower()
+
+    base_name, file_extension = os.path.splitext(file_path)
+
+    print("Base Name:", base_name)
+    print("File Extension:", file_extension)
+    if file_extension == '.csv':
+        return spark.read.csv(f"s3a://{bucket_name}/{file_path}", header=True, inferSchema=True)
+    elif file_extension == '.parquet':
+        return spark.read.parquet(f"s3a://{bucket_name}/{file_path}")
+    else:
+        raise ValueError(f"Unsupported file format for {file_path}")
+
+# Usage:
+source_df = read_dataframe(filepath1, bucket1)
+target_df = read_dataframe(filepath2, bucket2)
 
 # Check if either source_df or target_df has no records
 if source_df.count() == 0 or target_df.count() == 0:
@@ -36,6 +53,9 @@ else:
         "IntegerType": "Integer",
         "DoubleType": "Double",
         "Date": "Date",
+        "DateType" : "Date",
+        "BooleanType" : "Boolean",
+        "TimestampType" : "DateTime"
     }
 
     # Function to get the file size from S3 using boto3

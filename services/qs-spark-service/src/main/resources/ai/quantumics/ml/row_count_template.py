@@ -10,9 +10,21 @@ try:
     filepath = $SOURCE_PATH
     s3Path= $S3_OUTPUT_PATH
 
-    # Read the CSV file from S3 into a DataFrame
-    df = spark.read.csv(f"s3a://{bucket}/{filepath}", header=True, inferSchema=True)
+    # Extract the file extension from the file path
+    file_extension = os.path.splitext(filepath)[1].lower()
 
+    base_name, file_extension = os.path.splitext(filepath)
+
+    print("Base Name:", base_name)
+    print("File Extension:", file_extension)
+
+    # Read the file based on the file extension
+    if file_extension == '.csv':
+        df = spark.read.csv(f"s3a://{bucket}/{filepath}", header=True, inferSchema=True)
+    elif file_extension == '.parquet':
+        df = spark.read.parquet(f"s3a://{bucket}/{filepath}")
+    else:
+        raise ValueError(f"Unsupported file format: {file_extension}")
     # Calculate the number of records in the DataFrame
     record_count = df.count()
 

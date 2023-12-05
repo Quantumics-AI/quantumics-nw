@@ -20,8 +20,21 @@ input_headers = input_headers_str.split(",")
 # Create a list to store header-wise results
 header_results = []
 
-# Read the CSV file from S3 into a DataFrame
-df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True)
+# Extract the file extension from the file path
+file_extension = os.path.splitext(s3_file_path)[1].lower()
+
+base_name, file_extension = os.path.splitext(s3_file_path)
+
+print("Base Name:", base_name)
+print("File Extension:", file_extension)
+
+# Read the file based on the file extension
+if file_extension == '.csv':
+    df = spark.read.csv(f"s3a://{s3_bucket_name}/{s3_file_path}", header=True, inferSchema=True)
+elif file_extension == '.parquet':
+    df = spark.read.parquet(f"s3a://{s3_bucket_name}/{s3_file_path}")
+else:
+    raise ValueError(f"Unsupported file format: {file_extension}")
 
 # Check if there are no records in the DataFrame
 if df.count() == 0:

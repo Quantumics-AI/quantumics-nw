@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 import json
+import os
 
 # Initialize a Spark session
 spark = SparkSession.builder.appName("EDI-DQ-RULE_DATA-PROFILE-COLUMN-LEVEL").getOrCreate()
@@ -15,9 +16,25 @@ level_name = $LEVEL_NAME
 s3Path = $S3_OUTPUT_PATH
 column = $COLUMNS
 
-# Read the CSV files without specifying a date format
-source_df = spark.read.csv(f"s3a://{bucket1}/{filepath1}", header=True, inferSchema=True).select(column)
-target_df = spark.read.csv(f"s3a://{bucket2}/{filepath2}", header=True, inferSchema=True).select(column)
+# Function to read DataFrame from either CSV or Parquet based on file extension
+def read_dataframe(file_path, bucket_name, column):
+    # Extract the file extension from the file path
+    file_extension = os.path.splitext(file_path)[1].lower()
+
+    base_name, file_extension = os.path.splitext(file_path)
+
+    print("Base Name:", base_name)
+    print("File Extension:", file_extension)
+    if file_extension == '.csv':
+        return spark.read.csv(f"s3a://{bucket_name}/{file_path}", header=True, inferSchema=True).select(column)
+    elif file_extension == '.parquet':
+        return spark.read.parquet(f"s3a://{bucket_name}/{file_path}").select(column)
+    else:
+        raise ValueError(f"Unsupported file format for {file_path}")
+
+# Usage:
+source_df = read_dataframe(filepath1, bucket1, column)
+target_df = read_dataframe(filepath2, bucket2, column)
 
 # Check if either source_df or target_df has no records
 if source_df.count() == 0 or target_df.count() == 0:
