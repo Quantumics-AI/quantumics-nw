@@ -157,14 +157,16 @@ public class AwsConnectionController {
 
     @GetMapping(value="/buckets/{userId}/{projectId}/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getFoldersAndFilePath(@PathVariable(value = "userId") final int userId,
-                                                   @PathVariable(value = "projectId") final int projectId,
-                                                   @PathVariable(value = "bucketName") final String bucketName) throws IOException {
+                                                        @PathVariable(value = "projectId") final int projectId,
+                                                        @PathVariable(value = "bucketName") final String bucketName,
+                                                        @RequestParam(value = "region") final String region,
+                                                        @RequestParam(value = "accessType") final String accessType) throws IOException {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         validatorUtils.checkUser(userId);
         Projects project = validatorUtils.checkProject(projectId);
         dbUtil.changeSchema(project.getDbSchemaName());
-        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getFoldersAndFilePath(bucketName));
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getFoldersAndFilePath(bucketName, region, accessType));
     }
 
     @PostMapping("/testConnection/{userId}/{projectId}")
@@ -181,14 +183,16 @@ public class AwsConnectionController {
 
     @GetMapping("/content/{userId}/{projectId}")
     public ResponseEntity<Object> getFileContent(@PathVariable(value = "userId") final int userId,
-                                                   @PathVariable(value = "projectId") final int projectId,
-                                                       @RequestParam(value = "bucket") final String bucket,
-                                                       @RequestParam(value = "file") final String file) {
+                                                 @PathVariable(value = "projectId") final int projectId,
+                                                 @RequestParam(value = "bucket") final String bucket,
+                                                 @RequestParam(value = "file") final String file,
+                                                 @RequestParam(value = "region") final String region,
+                                                 @RequestParam(value = "accessType") final String accessType) {
 
         dbUtil.changeSchema(PUBLIC_SCHEMA);
         validatorUtils.checkUser(userId);
         validatorUtils.checkProject(projectId);
-        BucketFileContent content = awsConnectionService.getContent(bucket, file);
+        BucketFileContent content = awsConnectionService.getContent(bucket, file, region, accessType);
         return ResponseEntity.status(HttpStatus.OK).body(content);
     }
 

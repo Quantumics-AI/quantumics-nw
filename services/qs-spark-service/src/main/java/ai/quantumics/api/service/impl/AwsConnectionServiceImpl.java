@@ -267,9 +267,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public String getFoldersAndFilePath(String bucketName) throws IOException {
+    public String getFoldersAndFilePath(String bucketName, String region, String accessType) throws IOException {
         List<S3ObjectSummary> objectSummaries = new ArrayList<>();
-        listObjects(bucketName, "",objectSummaries);
+        listObjects(bucketName, "",objectSummaries, region, accessType);
         return getFoldersAndFilePathHierarchy(objectSummaries);
     }
 
@@ -292,7 +292,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
     }
 
     @Override
-    public BucketFileContent getContent(String bucketName, String file) {
+    public BucketFileContent getContent(String bucketName, String file, String region, String accessType) {
         if(file == null){
             throw new BadRequestException(FILE_NAME_NOT_NULL);
         }else if(!(file.endsWith(CSV_EXTENSION))&& !(file.endsWith(PARQUET_EXTENSION))){
@@ -306,6 +306,9 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         if(file.endsWith(PARQUET_EXTENSION)) {
             readParquetContent(data, bucketFileContent, headers, dataTypes, bucketName, file);
         } else {
+            if(!region.equals(awsS3Client.getRegionName())){
+                awsS3Client = awsCustomConfiguration.amazonS3Client(accessType, region);
+            }
             S3Object s3Object = awsS3Client.getObject(bucketName, file);
             S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
 
@@ -593,14 +596,17 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         });
     }
 
-    private void listObjects(String bucketName, String prefix, List<S3ObjectSummary> objectSummaries) {
+    private void listObjects(String bucketName, String prefix, List<S3ObjectSummary> objectSummaries, String region, String accessType) {
         ListObjectsV2Request request = new ListObjectsV2Request()
                 .withBucketName(bucketName)
                 .withPrefix(prefix);
+        if(!region.equals(awsS3Client.getRegionName())){
+            awsS3Client = awsCustomConfiguration.amazonS3Client(accessType, region);
+        }
         ListObjectsV2Result result = awsS3Client.listObjectsV2(request);
 
         for (String commonPrefix : result.getCommonPrefixes()) {
-            listObjects(bucketName, commonPrefix, objectSummaries);
+            listObjects(bucketName, commonPrefix, objectSummaries, region, accessType);
         }
         objectSummaries.addAll(result.getObjectSummaries());
     }
