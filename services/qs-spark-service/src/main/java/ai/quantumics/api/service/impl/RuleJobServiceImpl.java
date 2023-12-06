@@ -137,9 +137,13 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
             response.put("code", HttpStatus.SC_OK);
             if (inProcessRulesCount > 0) {
-                response.put("message", "Out of selected " + ruleJobRequest.getRuleIds().size() + "rules, " + (ruleJobRequest.getRuleIds().size() - inProcessRulesCount) + " rules are submitted successfully and remaining " + inProcessRulesCount + " rules are already inprocess ");
+                if(inProcessRulesCount == ruleJobRequest.getRuleIds().size()) {
+                    response.put("message", "All the selected rules already inprocess");
+                } else {
+                    response.put("message", inProcessRulesCount + " rules already inprocess, remaining " + (ruleJobRequest.getRuleIds().size() - inProcessRulesCount) + " rules submitted for processing");
+                }
             } else {
-                response.put("message", "All the selected " + ruleJobRequest.getRuleIds().size() + " rules are submitted successfully for processing");
+                response.put("message", ruleJobRequest.getRuleIds().size() + " rules submitted successfully for processing");
             }
         } catch (final Exception ex) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
