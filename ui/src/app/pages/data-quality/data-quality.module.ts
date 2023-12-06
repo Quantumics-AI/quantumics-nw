@@ -22,6 +22,7 @@ import { FilterPipeModule } from 'ngx-filter-pipe';
 import { FilterPipe, FilterDatabasePipe } from './pipes/filter.pipe';
 import { RuleLogsComponent } from './components/rule-logs/rule-logs.component';
 import { BusinessDateComponent } from './components/business-date/business-date.component';
+import { ViewHistoryComponent } from './components/view-history/view-history.component';
 
 @NgModule({
     declarations: [
@@ -41,7 +42,8 @@ import { BusinessDateComponent } from './components/business-date/business-date.
         FilterPipe,
         FilterDatabasePipe,
         RuleLogsComponent,
-        BusinessDateComponent
+        BusinessDateComponent,
+        ViewHistoryComponent
     ],
     imports: [
         CommonModule,

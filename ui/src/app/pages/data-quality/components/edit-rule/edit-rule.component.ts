@@ -54,7 +54,7 @@ export class EditRuleComponent implements OnInit {
   public ruleFilter = [
     { label: 'Active', name: 'Active', selected: false },
     { label: 'Inactive', name: 'Inactive', selected: false },
-    { label: 'Deleted', name: 'Deleted', selected: false }
+    { label: 'Delete', name: 'Deleted', selected: false }
   ];
   public loading: boolean
   public ruleStatus: string = 'Active';

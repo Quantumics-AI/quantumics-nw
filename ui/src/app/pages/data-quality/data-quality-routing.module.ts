@@ -9,6 +9,8 @@ import { ViewRunningRulesComponent } from './components/view-running-rules/view-
 import { EditRuleComponent } from './components/edit-rule/edit-rule.component';
 import { BrowseFileComponent } from './components/browse-file/browse-file.component';
 import { RuleLogsComponent } from './components/rule-logs/rule-logs.component';
+import { ViewIngestComponent } from '../ingest/components/view-ingest/view-ingest.component';
+import { ViewHistoryComponent } from './components/view-history/view-history.component';
 
 const routes: Routes = [
     {
@@ -30,6 +32,10 @@ const routes: Routes = [
     {
         path:'view-rules',
         component :ViewRunningRulesComponent
+    },
+    {
+        path:'view-history',
+        component : ViewHistoryComponent
     },
     {
         path: 'create/table',

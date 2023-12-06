@@ -11,17 +11,14 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ViewResultComponent } from '../view-result/view-result.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
+import { NgbDateStruct, NgbCalendar } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-view-running-rules',
-  templateUrl: './view-running-rules.component.html',
-  styleUrls: ['./view-running-rules.component.scss']
+  selector: 'app-view-history',
+  templateUrl: './view-history.component.html',
+  styleUrls: ['./view-history.component.scss']
 })
-export class ViewRunningRulesComponent implements OnInit {
-  // @Input() projectId: number;
-  // @Input() userId: number;
-
-  fg: FormGroup;
+export class ViewHistoryComponent implements OnInit {
   projectId: number;
   userId: number;
   certificate$: Observable<Certificate>;
@@ -29,6 +26,7 @@ export class ViewRunningRulesComponent implements OnInit {
   private unsubscribe: Subject<void> = new Subject<void>();
   public loading:boolean;
   public runningList: any;
+
   public cancelBtn: boolean;
   public outputData: any;
   public startIndex: number = 0;
@@ -43,6 +41,40 @@ export class ViewRunningRulesComponent implements OnInit {
   public selectedReRunJobIds: number[] = [];
   selectedBusinessDate: string | null = null;
 
+  public selectedLevels: { [ruleTypeName: string]: string } = {};
+  public ruleTypeList: any;
+  public filterPayload: any;
+  public statusFilterList = [
+    {
+      id: 1, status: 'Completed',
+      level: [
+        { name: 'Matched' },
+        { name: 'Mismatched' },
+      ]
+    },
+    {id: 2, status: 'Failed'},
+    {id: 3, status: 'Cancelled'},
+    {id: 4, status: 'Inprogress'},
+    {id: 5, status: 'Not Started'},
+    {id: 6, status: 'InQueue'}
+  ];
+  public selectedStatusLevels: { [status: string]: string } = {};
+  public selectedbusinessDate = 'Yesterday';
+  public businessDate = [
+    {name: 'Yesterday'},
+    {name: 'Last Week'},
+    {name: 'This Month'},
+    {name: 'Custom'}
+  ];
+  public selectedFromBusinessDate: NgbDateStruct;
+  public selectedToBusinessDate: NgbDateStruct;
+  public isValidDateRange: boolean = false;
+  public isValidFromDate: boolean = false;
+  public areDatesSelected: boolean = false;
+  // selectedBusinessDate: NgbDateStruct;
+  maxDate: NgbDateStruct;
+  public selectedDate: string;
+
   constructor(
     // public modal: NgbActiveModal,
     private snakbar: SnackbarService,
@@ -52,6 +84,7 @@ export class ViewRunningRulesComponent implements OnInit {
     private quantumFacade: Quantumfacade,
     private modalService: NgbModal,
     private ruleCreationService: RuleCreationService,
+    private calendar: NgbCalendar
   ){
     // this.projectId = parseInt(this.activatedRoute.parent.snapshot.paramMap.get('projectId'), 10);
     this.certificate$ = this.quantumFacade.certificate$;
@@ -61,18 +94,21 @@ export class ViewRunningRulesComponent implements OnInit {
         this.certificateData = certificate;
         this.userId = +certificate.user_id;
       });
+    this.maxDate = this.calendar.getToday();
   }
 
   ngOnInit(): void {
     this.projectId = +localStorage.getItem('project_id');
     this.getRulJobs();
+    this.getRuleTypeList();
+    this.onSelectBusinesDate(this.selectedbusinessDate);
   }
 
   public getRulJobs(): void {
     // this.loading = true;
-    const refreshPage = () => {
-        this.autoRefresh();
-    };
+    // const refreshPage = () => {
+    //     this.autoRefresh();
+    // };
     this.ruleCreationService.getRuleJobs(this.userId, this.projectId).subscribe((response) => {
       console.log("Rule data:", response);
       if (response?.code != 500) {
@@ -120,12 +156,12 @@ export class ViewRunningRulesComponent implements OnInit {
           
         });
 
-        if (hasInprocessJob) {
-          setTimeout(refreshPage, 5000);
-          this.cancelBtn = true;
-        } else {
-          this.cancelBtn = false;
-        }
+        // if (hasInprocessJob) {
+        //   setTimeout(refreshPage, 5000);
+        //   this.cancelBtn = true;
+        // } else {
+        //   this.cancelBtn = false;
+        // }
       } else {
         this.runningList = [];
         this.loading = false;
@@ -137,20 +173,24 @@ export class ViewRunningRulesComponent implements OnInit {
     });
   }
 
-  public autoRefresh(): void {
-    // const autoRefreshInterval = 5000; // 5 seconds
+  public getRuleTypeList(): void {
+    this.loading = true;
+    this.ruleCreationService.getAllRuletypes(this.projectId, true, true).subscribe((response) => {
+      this.loading = false;
+      this.ruleTypeList = response.result;
+    }, (error) => {
+      this.snakbar.open(error);
+      this.loading = false;
+    })
+  }
 
-    // const refreshPage = () => {
-    //   location.reload();
-    // };
+  public autoRefresh(): void {
 
     this.getRulJobs();
   }
 
   public viewResult(r: any): void {
     const data = JSON.parse(r.jobOutput);
-    console.log("---", data);
-    
 
     if (Array.isArray(data)) {
       // It's a JSON array, you can loop through its elements
@@ -165,7 +205,7 @@ export class ViewRunningRulesComponent implements OnInit {
       // You can add your conditional logic for JSON objects here
     }
 
-    const modalRef = this.modalService.open(ViewResultComponent, { size: 'md', windowClass: 'custom-modal-class', scrollable: false });
+    const modalRef = this.modalService.open(ViewResultComponent, { size: 'md', windowClass: 'modal-size', scrollable: false });
     modalRef.componentInstance.userId = this.userId;
     modalRef.componentInstance.projectId = this.projectId;
     modalRef.componentInstance.output = this.outputData;
@@ -219,21 +259,23 @@ export class ViewRunningRulesComponent implements OnInit {
   }
 
   public reRunRuleFunction(): void {
-    this.loading = true;
-    const request = {
-      ruleIds: this.selectedReRunJobIds,
-      businessDate: this.selectedBusinessDate
-    }
+    console.log(this.selectedReRunJobIds);
+    
+    // this.loading = true;
+    // const request = {
+    //   ruleIds: this.selectedReRunJobIds,
+    //   businessDate: this.selectedBusinessDate
+    // }
 
-    this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
-      this.loading = false;
-      this.selectedReRunJobIds = [];
-      this.snakbar.open(res.message);
-      this.getRulJobs();
-    }, (error) => {
-      this.loading = false;
-      this.snakbar.open(error);
-    });
+    // this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
+    //   this.loading = false;
+    //   this.selectedReRunJobIds = [];
+    //   this.snakbar.open(res.message);
+    //   this.getRulJobs();
+    // }, (error) => {
+    //   this.loading = false;
+    //   this.snakbar.open(error);
+    // });
     
     // const modalRef = this.modalService.open(ConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
     // modalRef.result.then((result) => {
@@ -311,7 +353,24 @@ export class ViewRunningRulesComponent implements OnInit {
   }
 
   selectReRule(event: any, d: any): void {
-    // const jobId = d.jobId;
+    const jobId = d.ruleId;
+
+    // Clear the array before adding the new jobId
+    // this.selectedReRunJobIds = [];
+
+    if (event.target.checked) {
+      // Checkbox is checked, add jobId to the selectedJobIds array
+      this.selectedReRunJobIds.push(jobId);
+    } else {
+      const i = this.selectedReRunJobIds.indexOf(jobId);
+      if (i !== -1) {
+        this.selectedReRunJobIds.splice(i, 1);
+      }
+    }
+
+    // added following logic for single select
+
+    // const jobId = d.ruleId;
 
     // // Clear the array before adding the new jobId
     // this.selectedReRunJobIds = [];
@@ -319,30 +378,20 @@ export class ViewRunningRulesComponent implements OnInit {
     // if (event.target.checked) {
     //   // Checkbox is checked, add jobId to the selectedJobIds array
     //   this.selectedReRunJobIds.push(jobId);
+
+    //   // Find the object with the selected jobId
+    //   const selectedJob = this.runningList.find(job => job.ruleId === jobId);
+
+    //   // Extract the businessDate from the selected object
+    //   if (selectedJob) {
+    //     this.selectedBusinessDate = selectedJob.businessDate;
+    //   } else {
+    //     this.selectedBusinessDate = null;
+    //   }
+    // } else {
+    //   // Checkbox is unchecked, reset the selectedBusinessDate
+    //   this.selectedBusinessDate = null;
     // }
-
-    const jobId = d.ruleId;
-
-    // Clear the array before adding the new jobId
-    this.selectedReRunJobIds = [];
-
-    if (event.target.checked) {
-      // Checkbox is checked, add jobId to the selectedJobIds array
-      this.selectedReRunJobIds.push(jobId);
-
-      // Find the object with the selected jobId
-      const selectedJob = this.runningList.find(job => job.ruleId === jobId);
-
-      // Extract the businessDate from the selected object
-      if (selectedJob) {
-        this.selectedBusinessDate = selectedJob.businessDate;
-      } else {
-        this.selectedBusinessDate = null;
-      }
-    } else {
-      // Checkbox is unchecked, reset the selectedBusinessDate
-      this.selectedBusinessDate = null;
-    }
     
   }
 
@@ -404,5 +453,186 @@ export class ViewRunningRulesComponent implements OnInit {
       return `${formattedDate}, ${formattedTime} ${amPm}`;
     }
     
+  }
+
+  // filter by rule types 
+  onCheckboxChange(item: any): void {
+    if (item.checked) {
+      this.selectedLevels[item.ruleTypeName] = 'All'; // Set default selected level to 'All'
+    } else {
+      delete this.selectedLevels[item.ruleTypeName];
+    }
+    
+  }
+
+  public onSelectLevelName(id: string): void {
+    
+  }
+
+  // Filter by status 
+  onCheckboxChangeStatus(item: any): void {
+    if (item.checked) {
+      this.selectedStatusLevels[item.status] = 'All'; // Set default selected level to 'All'
+    } else {
+      delete this.selectedStatusLevels[item.status];
+    }
+    
+  }
+
+  public onSelectStatusLevelName(id: string): void {
+    
+  }
+
+  // Filter by business date 
+  public onSelectBusinesDate(d: string): void {
+    console.log(d);
+    switch (d) {
+      case 'Yesterday':
+        // Logic to set yesterday's date in DD-MM-YYYY format
+        this.setYesterdayDate();
+        this.areDatesSelected = true;
+        this.isValidDateRange = true;
+        this.isValidFromDate = true;
+        break;
+      case 'Last Week':
+        // Logic to set last Monday and Sunday dates
+        this.setLastWeekDates();
+        this.areDatesSelected = true;
+        this.isValidDateRange = true;
+        this.isValidFromDate = true;
+        break;
+      case 'This Month':
+        // Logic to set start and end dates of the current month
+        this.setThisMonthDates();
+        this.areDatesSelected = true;
+        this.isValidDateRange = true;
+        this.isValidFromDate = true;
+        break;
+      case 'Custom':
+        // Logic for handling custom date range
+        // Implement your custom logic here
+        this.selectedFromBusinessDate = null;
+        this.selectedToBusinessDate = null;
+        this.areDatesSelected = false;
+        this.isValidDateRange = true;
+        this.isValidFromDate = true;
+        break;
+      default:
+        // Handle other cases if needed
+        break;
+    }
+    
+  }
+
+  private setYesterdayDate(): void {
+    // Logic to set yesterday's date in DD-MM-YYYY format
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    this.selectedDate = this.formatDate(yesterday);
+    console.log("Date Yesterday", this.selectedDate);
+    
+  }
+
+  private setLastWeekDates(): void {
+    // Logic to set last Monday and Sunday dates
+    const today = new Date();
+    const lastMonday = new Date(today);
+    lastMonday.setDate(today.getDate() - today.getDay() - 6); // Setting it to last Monday
+
+    const lastSunday = new Date(today);
+    lastSunday.setDate(today.getDate() - today.getDay()); // Setting it to last Sunday
+
+    this.selectedDate = `${this.formatDate(lastMonday)} and ${this.formatDate(lastSunday)}`;
+    console.log("Date Last week", this.selectedDate);
+  }
+
+  private setThisMonthDates(): void {
+    // Logic to set start and end dates of the current month
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    this.selectedDate = `${this.formatDate(firstDayOfMonth)} - ${this.formatDate(lastDayOfMonth)}`;
+    console.log("Date this month", this.selectedDate);
+  }
+
+  private formatDate(date: Date): string {
+    // Helper function to format date in DD-MM-YYYY
+    const day = ('0' + date.getDate()).slice(-2);
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  // custom 
+  onDateChange() {
+    // Check if both 'From' and 'To' dates are selected
+    this.areDatesSelected = this.checkIfDatesSelected();
+
+    // If both dates are selected, check the 'From' date condition
+    if (this.areDatesSelected) {
+      this.isValidFromDate = this.checkFromDate();
+
+      // Only check the date range condition if 'From' date condition is true
+      if (this.isValidFromDate) {
+        this.isValidDateRange = this.checkDateDifference();
+      } else {
+        this.isValidDateRange = true; // Reset the range validation if 'From' date is invalid
+      }
+    } else {
+      // Reset both validations if dates are not selected
+      this.isValidFromDate = true;
+      this.isValidDateRange = true;
+    }
+  }
+
+  checkIfDatesSelected(): boolean {
+    return !!this.selectedFromBusinessDate && !!this.selectedToBusinessDate;
+  }
+  // Function to check the date difference
+  checkDateDifference(): boolean {
+    if (this.selectedFromBusinessDate && this.selectedToBusinessDate) {
+      const fromDate = new Date(this.selectedFromBusinessDate.year, this.selectedFromBusinessDate.month - 1, this.selectedFromBusinessDate.day);
+      const toDate = new Date(this.selectedToBusinessDate.year, this.selectedToBusinessDate.month - 1, this.selectedToBusinessDate.day);
+
+      const differenceInMonths = Math.abs((toDate.getFullYear() - fromDate.getFullYear()) * 12 + toDate.getMonth() - fromDate.getMonth());
+
+      return differenceInMonths <= 3;
+    }
+
+    return true; // Default to true if dates are not selected yet
+  }
+
+  checkFromDate(): boolean {
+    if (this.selectedFromBusinessDate && this.selectedToBusinessDate) {
+      const fromDate = new Date(this.selectedFromBusinessDate.year, this.selectedFromBusinessDate.month - 1, this.selectedFromBusinessDate.day);
+      const toDate = new Date(this.selectedToBusinessDate.year, this.selectedToBusinessDate.month - 1, this.selectedToBusinessDate.day);
+
+      return fromDate <= toDate;
+    }
+
+    return true; // Default to true if dates are not selected yet
+  }
+
+  getFormattedFromDate(): string {
+    if (this.selectedFromBusinessDate) {
+        const day = this.selectedFromBusinessDate.day.toString().padStart(2, '0');
+        const month = this.selectedFromBusinessDate.month.toString().padStart(2, '0');
+        const year = this.selectedFromBusinessDate.year;
+
+        return `${day}-${month}-${year}`;
+    }
+    return '';
+  }
+
+  getFormattedToDate(): string {
+    if (this.selectedToBusinessDate) {
+        const day = this.selectedToBusinessDate.day.toString().padStart(2, '0');
+        const month = this.selectedToBusinessDate.month.toString().padStart(2, '0');
+        const year = this.selectedToBusinessDate.year;
+
+        return `${day}-${month}-${year}`;
+    }
+    return '';
   }
 }

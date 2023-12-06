@@ -461,15 +461,15 @@
                             </div>
                         </ng-container>
                         <div>
-                            <p class="p2 active-s">Active status*</p>
+                            <p class="p2 active-s">Active Status*</p>
                             <div class="form-group">
                                 <ng-container *ngFor="let item of ruleFilter">
-                                    <div class="form-check form-check-inline" [ngClass]="{'dit': item.label == 'Deleted'}">
+                                    <div class="form-check form-check-inline" [ngClass]="{'dit': item.label == 'Delete'}">
                                         <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" 
                                         (change)="selectedStatus(item.name)" formControlName="status" [value]="item.name" [(ngModel)]="selectedStatusValue">
                                         <label class="form-check-label p2" for="inlineRadio1">{{item.label}}</label>
                                         <ng-container *ngIf="selectedStatusValue == 'Deleted'">
-                                            <small *ngIf="item.label == 'Deleted'" id="workspaceNameHelp" class="form-text body-text-muted mute-text">
+                                            <small *ngIf="item.label == 'Delete'" id="workspaceNameHelp" class="form-text body-text-muted mute-text">
                                                 It will delete the rule permanently and no action can be taken further
                                             </small>
                                         </ng-container>

@@ -329,8 +329,165 @@
     height: 63vh;
 }
 
-/* Global styles or component-specific styles */
-.custom-modal-class {
-    /* Add your custom styles here */
-    max-width: 500px; /* Adjust as needed */
+// filter rule type 
+.df {
+    display: flex;
+}
+
+.align-start {
+    align-items: flex-start !important;
+}
+
+.br-n {
+    border: none;
+}
+
+.dif {
+    display: inline-flex;
+}
+
+.mr-l-20 {
+    margin-left: 20px;
+}
+
+.h-32 {
+    height: 32px;
+}
+
+.rules-type {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+    
+    // text-align: center;
+    color: #888C92;
+    /* Blue */
+    
+    // color: #212244;
+}
+
+.rules {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height, or 133% */
+    
+    // text-align: center;
+    /* Blue */
+    
+    // color: #212244;
+}
+
+.mr-b-5 {
+    margin-bottom: 5px;
+}
+
+.mr-l-50 {
+    margin-left: 50px;
+}
+
+.bg-w {
+    background: #ffffff !important;
+}
+
+.wid {
+    width: fit-content;
+}
+
+.br-d {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.c-input {
+    border-left: none;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    /* line-height: 24px; */
+    color: #667085;
+    box-shadow: 0px 1px 2px rgb(16 24 40 / 5%);
+    /* border-radius: 8px; */
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+.w-140 {
+    width: 140px;
+}
+
+.pd-i {
+    padding: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.h-28 {
+    height: 28px;
+}
+
+.mx-w {
+    max-width: fit-content;
+}
+
+.mr-l-15 {
+    margin-left: 15px;
+}
+
+.br-4 {
+    border-radius: 4px;
+}
+
+.pd-l-15 {
+    padding-left: 15px;
+}
+
+.mr-t-24 {
+    margin-top: 24px;
+}
+
+.bg-c {
+    background-color: #f7f7f7;
+}
+
+.pd-5 {
+    padding: 5px;
+}
+
+.fw-600 {
+    font-weight: 600;
+}
+
+.btn:focus{
+    outline: none;
+    box-shadow: none;
+}
+
+.pd-rl-5 {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.fs-10 {
+    font-size: 10px;
+}
+
+.err {
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+
+.mr-t-40 {
+    margin-top: 40px !important;
+}
+
+.mr-t--24 {
+    margin-top: -24px;
 }
