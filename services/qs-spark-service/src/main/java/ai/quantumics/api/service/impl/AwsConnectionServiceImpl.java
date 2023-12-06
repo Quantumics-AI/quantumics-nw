@@ -19,6 +19,8 @@ import ai.quantumics.api.res.BucketDetails;
 import ai.quantumics.api.service.AwsConnectionService;
 import ai.quantumics.api.vo.BucketFileContent;
 import ai.quantumics.api.vo.ColumnDataType;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
@@ -97,6 +99,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.INVALID_FILE_EXTEN
 import static ai.quantumics.api.constants.DatasourceConstants.NOT_WELL_FORMATTED;
 import static ai.quantumics.api.constants.DatasourceConstants.PARQUET_EXTENSION;
 import static ai.quantumics.api.constants.DatasourceConstants.POUND_DELIMITTER;
+import static ai.quantumics.api.constants.DatasourceConstants.QUANTUMICS;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_KEY;
 import static ai.quantumics.api.constants.DatasourceConstants.REGION_PROPERTY_MISSING;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_ATTACHED;
@@ -304,7 +307,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         List<String> headers = new ArrayList<>();
         List<ColumnDataType> dataTypes = new ArrayList<>();
         if(file.endsWith(PARQUET_EXTENSION)) {
-            readParquetContent(data, bucketFileContent, headers, dataTypes, bucketName, file);
+            readParquetContent(data, bucketFileContent, headers, dataTypes, bucketName, file, clientName);
         } else {
             if(!region.equals(awsS3Client.getRegionName())){
                 awsS3Client = awsCustomConfiguration.amazonS3Client(accessType, region);
@@ -366,17 +369,19 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         return bucketFileContent;
     }
 
-    private static BucketFileContent readParquetContent(List<Map<String, String>> data, BucketFileContent bucketFileContent, List<String> headers, List<ColumnDataType> dataTypes, String bucketName, String file) {
+    private static BucketFileContent readParquetContent(List<Map<String, String>> data, BucketFileContent bucketFileContent, List<String> headers, List<ColumnDataType> dataTypes, String bucketName, String file, String clientName) {
         try {
             log.info("Reading parquet file method starts");
             // Parse the S3 URI
             String s3Uri = "s3a://" + bucketName + "/" + file;
             Configuration hadoopConfig = new Configuration();
             //Uncomment below lines to work in local
-            /*AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
-            hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
-            hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
-            hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");*/
+            if(clientName.equals(QUANTUMICS)) {
+                AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
+                hadoopConfig.set("fs.s3a.access.key", awsCredentials.getAWSAccessKeyId());
+                hadoopConfig.set("fs.s3a.secret.key", awsCredentials.getAWSSecretKey());
+                hadoopConfig.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem");
+            }
             // Create InputFile
             InputFile inputFile = HadoopInputFile.fromPath(new Path(s3Uri), hadoopConfig);
             ParquetFileReader parquetFileReader = ParquetFileReader.open(inputFile);
