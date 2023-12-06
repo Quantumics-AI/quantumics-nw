@@ -41,13 +41,14 @@
                                 <p class="pull-right mr-b-8 mr-t-5">
                                     <span (click)="viewRunning()" class="mr-r-20 view-list cp">View Running Rules</span>
 
-                                    <!-- <span (click)="viewRunHistory()" class="view-list cp">View Run History</span> -->
+                                    <span (click)="viewRunHistory()" class="view-list cp">View Run History</span>
                                 </p>
                             </div>
 
                             <div class="source-type-div filterCheck">
                                 <ng-container *ngFor="let i of ruleFilter">
-                                    <div class="form-check form-check-inline" *ngIf="shouldShowOption(i)">
+                                    <!-- *ngIf="shouldShowOption(i)" -->
+                                    <div class="form-check form-check-inline">
                                         <input class="form-check-input cp" #status type="radio" name="inlineRadioOptions" 
                                         [(ngModel)]="selectedFilterStatus" [value]="i.name" (change)="onItemChange(i.name)">
                                         <label class="form-check-label s-label" [ngClass]="{'activeText': selectedFilterStatus === i.name}" for="inlineRadio1">

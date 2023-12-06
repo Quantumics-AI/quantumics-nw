@@ -32,7 +32,7 @@
                             class="form-control search-input br-bx-n h36 z-0"
                                 placeholder="Enter Connection Name" aria-label="Username" aria-describedby="basic-addon1"
                                 (ngModelChange)="searchInput($event)">
-                            <div class="input-group-append">
+                            <div class="input-group-append z-0">
                                 <button class="btn" type="button" [ngClass]="buttonDisabled ? searchInvalidClass : searchSuccessClass"
                                 [disabled]="buttonDisabled" (click)="searchData()">Search</button>
                             </div>
