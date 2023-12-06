@@ -37,7 +37,7 @@ else:
 df = df.na.drop()
 # Check if there are no records in the DataFrame
 if df.count() == 0:
-    print("No records found in the file columns.")
+    print(f"No records found in the file columns: {input_headers_str}.")
 else:
     grouped_df = df.groupBy(*input_headers).count()
 

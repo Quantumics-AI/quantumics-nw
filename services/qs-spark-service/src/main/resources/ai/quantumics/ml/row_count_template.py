@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 import json
 import logging
+import os
 
 try:
     # Initialize a Spark session
