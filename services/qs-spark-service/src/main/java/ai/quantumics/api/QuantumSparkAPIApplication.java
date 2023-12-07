@@ -26,6 +26,7 @@ import static ai.quantumics.api.constants.QsConstants.europe_london_timezone;
 @EnableAsync
 @EnableScheduling
 @EnableWebMvc
+//@EnableTransactionManagement
 public class QuantumSparkAPIApplication extends SpringBootServletInitializer {
 
   public static void main(final String[] args) {

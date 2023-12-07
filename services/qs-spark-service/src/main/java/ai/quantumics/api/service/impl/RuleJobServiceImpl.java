@@ -42,7 +42,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -130,8 +129,14 @@ public class RuleJobServiceImpl implements RuleJobService {
                 ruleJob.setBusinessDate(businessDate);
                 ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                 ruleJob.setModifiedBy(ruleJob.getCreatedBy());
-
-                ruleJob = ruleJobRepository.save(ruleJob);
+                ruleJob.setRuleTypeName(rule.getRuleTypeName());
+                ruleJob.setRuleLevelName(rule.getLevelName());
+                ruleJob.setRuleStatus(rule.getStatus());
+                ruleJob.setSourceFeedName(rule.getSourceFeedName());
+                if(rule.isSourceAndTarget()) {
+                  ruleJob.setTargetFeedName(rule.getTargetFeedName());
+                }
+                    ruleJob = ruleJobRepository.save(ruleJob);
                 RuleDetails ruleDetails = convertToRuleDetails(rule, ruleJob);
                 ruleJobHelper.submitRuleJob(ruleJob, ruleDetails, controllerHelper.getFullName(userObj.getQsUserProfile()), projectId);
             }
@@ -230,6 +235,10 @@ public class RuleJobServiceImpl implements RuleJobService {
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());
                     ruleJob.setRuleName(rule.getRuleName());
+                    ruleJob.setRuleTypeName(rule.getRuleTypeName());
+                    ruleJob.setRuleLevelName(rule.getLevelName());
+                    ruleJob.setRuleStatus(rule.getStatus());
+                    ruleJob.setSourceFeedName(rule.getSourceFeedName());
                     if (StringUtils.isNotEmpty(ruleJob.getBatchJobLog())) {
                         String batchLog = ruleJob.getBatchJobLog();
                         JsonNode node;

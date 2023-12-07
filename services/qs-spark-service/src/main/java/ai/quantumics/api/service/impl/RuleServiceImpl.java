@@ -12,7 +12,9 @@ import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsRule;
+import ai.quantumics.api.model.QsRuleJob;
 import ai.quantumics.api.model.QsUserV2;
+import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.RuleTypes;
 import ai.quantumics.api.req.RuleTypesDTO;
@@ -30,6 +32,7 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -65,6 +68,8 @@ public class RuleServiceImpl implements RuleService {
 	private final ControllerHelper controllerHelper;
 	private final UserServiceV2 userService;
 	private final ValidatorUtils validatorUtils;
+	@Autowired
+	private RuleJobRepository ruleJobRepository;
 	public RuleServiceImpl(RuleRepository ruleRepositoryCi,
 						   DbSessionUtil dbUtilCi,
 						   RuleTypeService ruleTypeServiceCi,
@@ -241,6 +246,7 @@ public class RuleServiceImpl implements RuleService {
 	}
 
 	@Override
+	//@Transactional
 	public ResponseEntity<Object> editRule(RuleDetails ruleDetails, int userId, int projectId) {
 		final Map<String, Object> response = new HashMap<>();
 		log.info("Invoking editRule  API {}", ruleDetails.toString());
@@ -268,6 +274,7 @@ public class RuleServiceImpl implements RuleService {
 			}
 			dbUtil.changeSchema(project.getDbSchemaName());
 			QsRule qsRule = ruleRepository.findByRuleId(ruleDetails.getRuleId());
+			QsRuleJob qsRuleJob = ruleJobRepository.findByRuleIdAndActiveIsTrue(ruleDetails.getRuleId());
 			if(qsRule == null){
 				response.put("code", HttpStatus.SC_BAD_REQUEST);
 				response.put("message", "No Rule found with Id: "+ ruleDetails.getRuleId());
@@ -292,6 +299,8 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setModifiedDate(DateTime.now().toDate());
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			ruleRepository.save(qsRule);
+			qsRuleJob.setRuleStatus(ruleDetails.getStatus());
+			ruleJobRepository.save(qsRuleJob);
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Data updated successfully");
 		} catch (final Exception ex) {

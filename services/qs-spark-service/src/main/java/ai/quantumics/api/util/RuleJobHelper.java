@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -162,12 +161,12 @@ public class RuleJobHelper {
     }
 
     private void readLinesFromTemplate(StringBuilder fileContents, String templateName) throws Exception {
-        /*URL url = null;
+        URL url = null;
         File contentSource = null;
         url = getClass().getClassLoader().getResource(templateName);
-        contentSource = new File(url.toURI());*/
+        contentSource = new File(url.toURI());
 
-        File contentSource = ResourceUtils.getFile("./" + templateName);
+        //File contentSource = ResourceUtils.getFile("./" + templateName);
         log.info("File in classpath Found {} : ", contentSource.exists());
         fileContents.append(new String(Files.readAllBytes(contentSource.toPath())));
     }

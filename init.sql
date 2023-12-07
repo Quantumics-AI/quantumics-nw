@@ -999,6 +999,11 @@ BEGIN
         	business_date DATE,
         	job_submitted_date timestamp without time zone,
         	job_finished_date timestamp without time zone,
+        	rule_type_name varchar(100) NOT NULL,
+        	rule_level_name varchar(100) NOT NULL,
+        	rule_status varchar(100) NOT NULL,
+        	source_feed_name varchar(100) NOT NULL,
+        	target_feed_name varchar(100) NULL,
         	CONSTRAINT qsp_rule_job_pkey PRIMARY KEY (job_id)
             )';
 

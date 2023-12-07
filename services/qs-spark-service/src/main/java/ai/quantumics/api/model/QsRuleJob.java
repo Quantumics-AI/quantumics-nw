@@ -42,6 +42,11 @@ public class QsRuleJob {
   private LocalDate businessDate;
   private Date jobSubmittedDate;
   private Date jobFinishedDate;
+  private String ruleTypeName;
+  private String ruleLevelName;
+  private String ruleStatus;
+  private String sourceFeedName;
+  private String targetFeedName;
   private Date createdDate;
   private Date modifiedDate;
   private String createdBy;

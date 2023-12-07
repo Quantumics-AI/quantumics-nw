@@ -22,4 +22,5 @@ public interface RuleJobRepository extends JpaRepository<QsRuleJob, Integer> {
     List<QsRuleJob> findByJobIdInAndActiveIsTrue(List<Integer> jobIds);
     List<QsRuleJob> findAllByActiveTrueOrderByModifiedDateDesc();
     List<QsRuleJob> findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(int ruleId, List<String> statuses, LocalDate businessDate);
+    List<QsRuleJob> findByRuleId(int ruleId);
 }
