@@ -33,8 +33,8 @@
         <ng-container *ngIf="output.ruleTypeName == dataComplete">
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
-                <p class="p2 text-center fsw mr-b-0">{{output?.levelName}}</p>
-                <p class=" text-center form-text body-text-muted">({{columnName}})</p>
+                <p class="p2 text-center fsw" [ngClass]="{'mr-b-0': columnName}">{{output?.levelName}}</p>
+                <p class="text-center form-text body-text-muted" *ngIf="columnName">({{columnName}})</p>
             </div>
             
             <div class="row">
