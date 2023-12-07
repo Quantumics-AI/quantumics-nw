@@ -42,7 +42,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -234,6 +233,9 @@ public class RuleJobServiceImpl implements RuleJobService {
                 ruleJobList.forEach(ruleJob -> {
                     QsRule rule = ruleRepository.findByRuleId(ruleJob.getRuleId());
                     ruleJob.setRuleName(rule.getRuleName());
+                    ruleJob.setRuleTypeName(rule.getRuleTypeName());
+                    ruleJob.setRuleLevelName(rule.getLevelName());
+                    ruleJob.setRuleStatus(rule.getStatus());
                     if (StringUtils.isNotEmpty(ruleJob.getBatchJobLog())) {
                         String batchLog = ruleJob.getBatchJobLog();
                         JsonNode node;

@@ -46,4 +46,10 @@ public class QsRuleJob {
   private Date modifiedDate;
   private String createdBy;
   private String modifiedBy;
+  @Transient
+  private String ruleTypeName;
+  @Transient
+  private String ruleLevelName;
+  @Transient
+  private String ruleStatus;
 }
