@@ -339,7 +339,7 @@ public class RuleServiceImpl implements RuleService {
 			for (QsRuleJob ruleJob : ruleJobs) {
 				ruleJob.setUserId(userId);
 				ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
-				ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+				ruleJob.setModifiedDate(DateTime.now().toDate());
 				ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 				ruleJobRepository.save(ruleJob);
 				if(ruleJob.getBatchJobId() >0) {
