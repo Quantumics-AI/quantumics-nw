@@ -10,6 +10,7 @@ package ai.quantumics.api.service.impl;
 
 import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.RuleJobStatus;
+import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsRule;
@@ -107,15 +108,19 @@ public class RuleJobServiceImpl implements RuleJobService {
             List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
                 QsRule rule = ruleRepository.findByRuleId(ruleId);
+                if (rule == null) {
+                    log.error("Requested rule with Id: {} not found" + ruleId);
+                    continue;
+                }
+                if (!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
+                    log.error("Requested rule with Id: {} is not active." + ruleId);
+                    continue;
+                }
                 List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, businessDate);
                 if (CollectionUtils.isNotEmpty(ruleJobs)) {
                     inProcessRules.add(ruleId);
                     inProcessRulesCount++;
                     continue;
-                }
-                if (rule == null) {
-                    response.put("code", HttpStatus.SC_BAD_REQUEST);
-                    response.put("message", "Requested rule with Id: " + ruleId + " not found.");
                 }
 
                 QsRuleJob ruleJob = new QsRuleJob();
@@ -190,7 +195,7 @@ public class RuleJobServiceImpl implements RuleJobService {
             for (QsRuleJob ruleJob : ruleJobs) {
                     ruleJob.setUserId(userId);
                     ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
-                    ruleJob.setModifiedDate(QsConstants.getCurrentUtcDate());
+                    ruleJob.setModifiedDate(DateTime.now().toDate());
                     ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
                     ruleJobRepository.save(ruleJob);
                     if(ruleJob.getBatchJobId() >0) {
