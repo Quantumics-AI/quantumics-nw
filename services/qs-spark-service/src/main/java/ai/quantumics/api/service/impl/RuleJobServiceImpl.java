@@ -10,6 +10,7 @@ package ai.quantumics.api.service.impl;
 
 import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.RuleJobStatus;
+import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsRule;
@@ -108,6 +109,9 @@ public class RuleJobServiceImpl implements RuleJobService {
             List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
                 QsRule rule = ruleRepository.findByRuleId(ruleId);
+                if(!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
+                    continue;
+                }
                 List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, businessDate);
                 if (CollectionUtils.isNotEmpty(ruleJobs)) {
                     inProcessRules.add(ruleId);
