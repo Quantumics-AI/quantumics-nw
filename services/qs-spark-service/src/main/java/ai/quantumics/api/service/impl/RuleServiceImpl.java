@@ -44,6 +44,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -336,14 +337,28 @@ public class RuleServiceImpl implements RuleService {
 			dbUtil.changeSchema(project.getDbSchemaName());
 			List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
 			List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusIn(ruleId, statuses);
+			List<QsRuleJob> ruleJobsToUpdate = new ArrayList<>();
+			List<Integer> batchJobIds = new ArrayList<>();
+			if(org.apache.commons.collections.CollectionUtils.isEmpty(ruleJobs)) {
+				log.info("No rule jobs found for ruleId {} to cancel", ruleId);
+				return;
+			}
 			for (QsRuleJob ruleJob : ruleJobs) {
 				ruleJob.setUserId(userId);
 				ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
 				ruleJob.setModifiedDate(DateTime.now().toDate());
 				ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-				ruleJobRepository.save(ruleJob);
+				ruleJobsToUpdate.add(ruleJob);
 				if(ruleJob.getBatchJobId() >0) {
-					ruleJobHelper.cancelRuleJob(ruleJob.getBatchJobId());
+					batchJobIds.add(ruleJob.getBatchJobId());
+				}
+			}
+			if(org.apache.commons.collections.CollectionUtils.isNotEmpty(ruleJobsToUpdate)) {
+				ruleJobRepository.saveAll(ruleJobsToUpdate);
+			}
+			if(org.apache.commons.collections.CollectionUtils.isNotEmpty(batchJobIds)) {
+				for (int batchJobId : batchJobIds) {
+					ruleJobHelper.cancelRuleJob(batchJobId);
 				}
 			}
 		} catch (final Exception ex) {

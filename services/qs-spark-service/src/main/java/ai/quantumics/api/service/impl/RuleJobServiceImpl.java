@@ -109,7 +109,12 @@ public class RuleJobServiceImpl implements RuleJobService {
             List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
             for (Integer ruleId : ruleJobRequest.getRuleIds()) {
                 QsRule rule = ruleRepository.findByRuleId(ruleId);
-                if(!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
+                if (rule == null) {
+                    log.error("Requested rule with Id: {} not found" + ruleId);
+                    continue;
+                }
+                if (!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
+                    log.error("Requested rule with Id: {} is not active." + ruleId);
                     continue;
                 }
                 List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, businessDate);
@@ -117,10 +122,6 @@ public class RuleJobServiceImpl implements RuleJobService {
                     inProcessRules.add(ruleId);
                     inProcessRulesCount++;
                     continue;
-                }
-                if (rule == null) {
-                    response.put("code", HttpStatus.SC_BAD_REQUEST);
-                    response.put("message", "Requested rule with Id: " + ruleId + " not found.");
                 }
 
                 QsRuleJob ruleJob = new QsRuleJob();
