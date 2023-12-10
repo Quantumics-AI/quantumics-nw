@@ -15,17 +15,22 @@ import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsRule;
 import ai.quantumics.api.model.QsRuleJob;
+import ai.quantumics.api.model.QsRuleJobResponse;
 import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.CancelJobRequest;
+import ai.quantumics.api.req.JobStatus;
+import ai.quantumics.api.req.RuleJobDTO;
 import ai.quantumics.api.req.RuleJobRequest;
+import ai.quantumics.api.req.RuleTypes;
 import ai.quantumics.api.req.RunRuleJobRequest;
 import ai.quantumics.api.service.ProjectService;
 import ai.quantumics.api.service.RuleJobService;
 import ai.quantumics.api.service.UserServiceV2;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.RuleJobHelper;
+import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
 import ai.quantumics.api.vo.RuleJobOutput;
@@ -39,17 +44,24 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
 import static ai.quantumics.api.constants.QsConstants.PUBLIC;
+import static ai.quantumics.api.constants.QsConstants.RULE_LEVEL_ALL;
 
 @Slf4j
 @Service
@@ -63,6 +75,7 @@ public class RuleJobServiceImpl implements RuleJobService {
     private final UserServiceV2 userService;
     private final ControllerHelper controllerHelper;
     private final RuleJobHelper ruleJobHelper;
+    private final ValidatorUtils validatorUtils;
 
     public RuleJobServiceImpl(RuleJobRepository ruleJobRepositoryCi,
                               DbSessionUtil dbUtilCi,
@@ -70,7 +83,8 @@ public class RuleJobServiceImpl implements RuleJobService {
                               RuleRepository ruleRepositoryCi,
                               UserServiceV2 userServiceCi,
                               ControllerHelper controllerHelperCi,
-                              RuleJobHelper ruleJobHelperCi) {
+                              RuleJobHelper ruleJobHelperCi,
+                              ValidatorUtils validatorUtilsCi) {
         this.ruleJobRepository = ruleJobRepositoryCi;
         this.dbUtil = dbUtilCi;
         this.projectService = projectServiceCi;
@@ -78,6 +92,7 @@ public class RuleJobServiceImpl implements RuleJobService {
         this.ruleRepository = ruleRepositoryCi;
         this.controllerHelper = controllerHelperCi;
         this.ruleJobHelper = ruleJobHelperCi;
+        this.validatorUtils = validatorUtilsCi;
     }
 
 
@@ -292,6 +307,64 @@ public class RuleJobServiceImpl implements RuleJobService {
         return ResponseEntity.ok().body(response);
     }
 
+    @Override
+    public ResponseEntity<Object> getFilteredRuleJobs(int userId, int projectId, RuleJobDTO ruleJobDTO, int page, int pageSize) {
+        final Map<String, Object> response = new HashMap<>();
+        try {
+            dbUtil.changeSchema(PUBLIC_SCHEMA);
+            validatorUtils.checkUser(userId);
+            final Projects project = validatorUtils.checkProject(projectId);
+            dbUtil.changeSchema(project.getDbSchemaName());
+            List<QsRuleJobResponse> dbResultList = null;
+            List<QsRuleJobResponse> filteredResponse = Collections.emptyList();
+            Map<String, String> ruleTypeAndLevelMap;
+            if(CollectionUtils.isNotEmpty(ruleJobDTO.getRuleTypes()) || CollectionUtils.isNotEmpty(ruleJobDTO.getRuleJobStatus()) || StringUtils.isNotEmpty(ruleJobDTO.getFeedName()) || StringUtils.isNotEmpty(ruleJobDTO.getFromDate()) || StringUtils.isNotEmpty(ruleJobDTO.getToDate())) {
+                String feedName = ruleJobDTO.getFeedName();
+                String fromDate = ruleJobDTO.getFromDate();
+                String toDate = ruleJobDTO.getToDate();
+                List<RuleTypes> ruleTypes = ruleJobDTO.getRuleTypes();
+                List<JobStatus> jobStatus = ruleJobDTO.getRuleJobStatus();
+
+                ruleTypeAndLevelMap = ruleTypes.stream().collect(Collectors.toMap(RuleTypes::getRuleTypeName, RuleTypes::getRuleLevel));
+                List<String> ruleTypeNames = ruleTypes.stream().map(RuleTypes::getRuleTypeName).collect(Collectors.toList());
+                List<String> ruleJobStatus = jobStatus.stream().map(JobStatus::getSelectedStatus).collect(Collectors.toList());
+                if(StringUtils.isNotEmpty(fromDate) && StringUtils.isNotEmpty(toDate)) {
+                    LocalDate startDate = QsConstants.convertToLocalDate(fromDate);
+                    LocalDate endDate = QsConstants.convertToLocalDate(toDate);
+                    dbResultList = ruleJobRepository.getFilteredRuleJobs(feedName, startDate, endDate, ruleTypeNames, ruleJobStatus);
+                } else{
+                    dbResultList = ruleJobRepository.getFilteredRuleJobsExcludeBusinessDate(feedName, ruleTypeNames, ruleJobStatus);
+                }
+                filteredResponse = dbResultList.stream()
+                        .filter(dbResult -> {
+                            String ruleLevel = ruleTypeAndLevelMap.get(dbResult.getRuleTypeName());
+                            return RULE_LEVEL_ALL.equals(ruleLevel) || dbResult.getRuleLevelName().equals(ruleLevel);
+                        }).collect(Collectors.toList());
+            }else{
+                filteredResponse = ruleJobRepository.findByActiveTrueOrderByModifiedDateDesc();
+            }
+            Page<QsRuleJobResponse> paginatedFilteredResponse = getPaginatedFilteredResponse(filteredResponse, page-1, pageSize);
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", "Filtered Rule Jobs Listed Successfully");
+            response.put("projectName", project.getProjectDisplayName());
+            response.put("result", paginatedFilteredResponse);
+        } catch (Exception exception) {
+            response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.put("message", "Error -" + exception.getMessage());
+        }
+        return ResponseEntity.ok().body(response);
+    }
+    public <T> Page<T> getPaginatedFilteredResponse(List<T> filteredResponse, int pageNo, int pageSize) {
+        int responseSize = filteredResponse.size();
+        int start = pageNo * pageSize;
+        PageRequest pageRequest = PageRequest.of(pageNo, pageSize);
+        //Added equals condition to avoid extra calculations
+        if (start >= responseSize) {
+            return new PageImpl<>(List.of(), pageRequest, 0);
+        }
+        int end = Math.min((start + pageSize), responseSize);
+        return new PageImpl<>(filteredResponse.subList(start, end), pageRequest, filteredResponse.size());
+    }
     public RuleDetails convertToRuleDetails(QsRule qsRule, QsRuleJob ruleJob) {
         Gson gson = new Gson();
         RuleDetails ruleDetails = new RuleDetails();

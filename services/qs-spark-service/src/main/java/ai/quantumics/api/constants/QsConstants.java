@@ -72,7 +72,7 @@ public class QsConstants {
   public static final String ENG_DB = "_eng" + db + "_";
   
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-  public static final String LOCAL_DATE_FORMAT = "dd-MM-yy";
+  public static final String LOCAL_DATE_FORMAT = "dd-MM-yyyy";
   public static final String ADMIN_ROLE = "Admin";
   
   public static final String FILTERROWS = "filterRows";
@@ -295,7 +295,7 @@ public class QsConstants {
 
   public static LocalDate convertToLocalDate(String dateString) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT);
-    LocalDate localDate = LocalDate.now();
+    LocalDate localDate = null;
     if(StringUtils.isNotEmpty(dateString)) {
       localDate = LocalDate.parse(dateString, formatter);
     }
