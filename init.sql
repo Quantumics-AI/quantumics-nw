@@ -956,6 +956,7 @@ BEGIN
     		created_date timestamp without time zone,
     		user_id integer NOT NULL,
     		status varchar(10) NOT NULL,
+    		rule_run_days varchar(30),
     		source_datasource_id int4 NULL,
     		target_datasource_id int4 NULL,
     		source_file_pattern varchar(100) NOT NULL,

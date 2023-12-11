@@ -31,6 +31,7 @@ public class QsRule {
   private String ruleDetails;
   private int userId;
   private String status;
+  private String ruleRunDays;
   private Date createdDate;
   private Date ModifiedDate;
   private String createdBy;
