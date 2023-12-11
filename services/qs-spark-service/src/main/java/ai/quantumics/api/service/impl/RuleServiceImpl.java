@@ -245,7 +245,7 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setSourceBucketName(sourceBucketName);
 			qsRule.setSourceFeedName(sourceFeedName);
 			qsRule.setSourceFileName(sourceFileName);
-			qsRule.setRuleConfig(ruleDetails.getRuleConfig());
+			qsRule.setRuleRunDays(ruleDetails.getRuleRunDays());
 			ruleRepository.save(qsRule);
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Data saved successfully");
@@ -305,7 +305,7 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setLevelName(ruleDetails.getRuleDetails().getRuleLevel().getLevelName());
 			qsRule.setUserId(ruleDetails.getUserId());
 			qsRule.setStatus(ruleDetails.getStatus());
-			qsRule.setRuleConfig(ruleDetails.getRuleConfig());
+			qsRule.setRuleRunDays(ruleDetails.getRuleRunDays());
 			qsRule.setModifiedDate(DateTime.now().toDate());
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			ruleRepository.save(qsRule);
@@ -574,7 +574,7 @@ public class RuleServiceImpl implements RuleService {
 		ruleDetails.setRuleDetails(gson.fromJson(qsRule.getRuleDetails(), RuleTypeDetails.class));
 		ruleDetails.setUserId(qsRule.getUserId());
 		ruleDetails.setStatus(qsRule.getStatus());
-		ruleDetails.setRuleConfig(qsRule.getRuleConfig());
+		ruleDetails.setRuleRunDays(qsRule.getRuleRunDays());
 		ruleDetails.setCreatedDate(qsRule.getCreatedDate());
 		ruleDetails.setModifiedDate(qsRule.getModifiedDate());
 		ruleDetails.setCreatedBy(qsRule.getCreatedBy());

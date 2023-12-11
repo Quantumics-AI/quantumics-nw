@@ -19,7 +19,7 @@ public class RuleDetails {
     private RuleTypeDetails ruleDetails;
     private int userId;
     private String status;
-    private String ruleConfig;
+    private String ruleRunDays;
     private Date createdDate;
     private Date ModifiedDate;
     private String createdBy;

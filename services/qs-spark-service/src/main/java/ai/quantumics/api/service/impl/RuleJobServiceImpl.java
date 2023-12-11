@@ -108,7 +108,6 @@ public class RuleJobServiceImpl implements RuleJobService {
             dbUtil.changeSchema(project.getDbSchemaName());
             List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
             for (RuleData ruleData : ruleJobRequest.getRules()) {
-                LocalDate businessDate = QsConstants.convertToLocalDate(ruleData.getBusinessDate());
                 QsRule rule = ruleRepository.findByRuleId(ruleData.getRuleId());
                 if (rule == null) {
                     log.error("Requested rule with Id: {} not found" + ruleData.getRuleId());
@@ -118,7 +117,8 @@ public class RuleJobServiceImpl implements RuleJobService {
                     log.error("Requested rule with Id: {} is not active." + ruleData.getRuleId());
                     continue;
                 }
-                if (StringUtils.isNotEmpty(rule.getRuleConfig()) && !rule.getRuleConfig().contains(BusinessDay.valueOf(businessDate.getDayOfWeek().toString()).getDay())) {
+                LocalDate businessDate = QsConstants.convertToLocalDate(ruleData.getBusinessDate());
+                if (StringUtils.isNotEmpty(rule.getRuleRunDays()) && !rule.getRuleRunDays().contains(BusinessDay.valueOf(businessDate.getDayOfWeek().toString()).getDay())) {
                     QsRuleJob ruleJob = new QsRuleJob();
                     ruleJob.setRuleId(ruleData.getRuleId());
                     ruleJob.setJobStatus(RuleJobStatus.FAILED.getStatus());
@@ -315,7 +315,7 @@ public class RuleJobServiceImpl implements RuleJobService {
         ruleDetails.setRuleName(qsRule.getRuleName());
         ruleDetails.setRuleDescription(qsRule.getRuleDescription());
         ruleDetails.setSourceAndTarget(qsRule.isSourceAndTarget());
-        ruleDetails.setRuleConfig(qsRule.getRuleConfig());
+        ruleDetails.setRuleRunDays(qsRule.getRuleRunDays());
         ruleDetails.setSourceData(gson.fromJson(qsRule.getSourceData(), DataSourceDetails.class));
         if(ruleDetails.getSourceData() != null) {
             String sourceFilePath = qsRule.getSourceFeedName() + "/" + QsConstants.convertToDDMMYYYY(ruleJob.getBusinessDate()) + "/" + qsRule.getSourceFileName();
