@@ -9,6 +9,7 @@
 package ai.quantumics.api.service.impl;
 
 import ai.quantumics.api.constants.QsConstants;
+import ai.quantumics.api.enums.BusinessDay;
 import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
@@ -19,6 +20,7 @@ import ai.quantumics.api.model.QsUserV2;
 import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.CancelJobRequest;
+import ai.quantumics.api.req.RuleData;
 import ai.quantumics.api.req.RuleJobRequest;
 import ai.quantumics.api.req.RunRuleJobRequest;
 import ai.quantumics.api.service.ProjectService;
@@ -43,7 +45,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -105,27 +106,44 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
-            LocalDate businessDate = QsConstants.convertToLocalDate(ruleJobRequest.getBusinessDate());
             List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
-            for (Integer ruleId : ruleJobRequest.getRuleIds()) {
-                QsRule rule = ruleRepository.findByRuleId(ruleId);
+            for (RuleData ruleData : ruleJobRequest.getRules()) {
+                LocalDate businessDate = QsConstants.convertToLocalDate(ruleData.getBusinessDate());
+                QsRule rule = ruleRepository.findByRuleId(ruleData.getRuleId());
                 if (rule == null) {
-                    log.error("Requested rule with Id: {} not found" + ruleId);
+                    log.error("Requested rule with Id: {} not found" + ruleData.getRuleId());
                     continue;
                 }
-                if (!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
-                    log.error("Requested rule with Id: {} is not active." + ruleId);
+                if(!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
+                    log.error("Requested rule with Id: {} is not active." + ruleData.getRuleId());
                     continue;
                 }
-                List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleId, statuses, businessDate);
+                if(StringUtils.isNotEmpty(rule.getRuleConfig()) && !rule.getRuleConfig().contains(BusinessDay.valueOf(businessDate.getDayOfWeek().toString()).getDay())) {
+                    QsRuleJob ruleJob = new QsRuleJob();
+                    ruleJob.setRuleId(ruleData.getRuleId());
+                    ruleJob.setJobStatus(RuleJobStatus.FAILED.getStatus());
+                    ruleJob.setBatchJobLog("Rule is not configured to run on " + BusinessDay.valueOf(businessDate.getDayOfWeek().toString()).getDay() + ", Please check the rule configuration.");
+                    ruleJob.setUserId(userId);
+                    ruleJob.setActive(true);
+                    ruleJob.setCreatedDate(DateTime.now().toDate());
+                    ruleJob.setModifiedDate(DateTime.now().toDate());
+                    ruleJob.setJobSubmittedDate(DateTime.now().toDate());
+                    ruleJob.setJobFinishedDate(DateTime.now().toDate());
+                    ruleJob.setBusinessDate(businessDate);
+                    ruleJob.setCreatedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                    ruleJob.setModifiedBy(ruleJob.getCreatedBy());
+                    ruleJobRepository.save(ruleJob);
+                    continue;
+                }
+                List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(ruleData.getRuleId(), statuses, businessDate);
                 if (CollectionUtils.isNotEmpty(ruleJobs)) {
-                    inProcessRules.add(ruleId);
+                    inProcessRules.add(ruleData.getRuleId());
                     inProcessRulesCount++;
                     continue;
                 }
 
                 QsRuleJob ruleJob = new QsRuleJob();
-                ruleJob.setRuleId(ruleId);
+                ruleJob.setRuleId(ruleData.getRuleId());
                 ruleJob.setJobStatus(RuleJobStatus.NOT_STARTED.getStatus());
                 ruleJob.setUserId(userId);
                 ruleJob.setActive(true);
@@ -142,13 +160,13 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
             response.put("code", HttpStatus.SC_OK);
             if (inProcessRulesCount > 0) {
-                if(inProcessRulesCount == ruleJobRequest.getRuleIds().size()) {
+                if(inProcessRulesCount == ruleJobRequest.getRules().size()) {
                     response.put("message", "All the selected rules already inprocess");
                 } else {
-                    response.put("message", inProcessRulesCount + " rules already inprocess, remaining " + (ruleJobRequest.getRuleIds().size() - inProcessRulesCount) + " rules submitted for processing");
+                    response.put("message", inProcessRulesCount + " rules already inprocess, remaining " + (ruleJobRequest.getRules().size() - inProcessRulesCount) + " rules submitted for processing");
                 }
             } else {
-                response.put("message", ruleJobRequest.getRuleIds().size() + " rules submitted successfully for processing");
+                response.put("message", ruleJobRequest.getRules().size() + " rules submitted successfully for processing");
             }
         } catch (final Exception ex) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
