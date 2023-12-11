@@ -114,11 +114,11 @@ public class RuleJobServiceImpl implements RuleJobService {
                     log.error("Requested rule with Id: {} not found" + ruleData.getRuleId());
                     continue;
                 }
-                if(!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
+                if (!rule.getStatus().equals(RuleStatus.ACTIVE.getStatus())) {
                     log.error("Requested rule with Id: {} is not active." + ruleData.getRuleId());
                     continue;
                 }
-                if(StringUtils.isNotEmpty(rule.getRuleConfig()) && !rule.getRuleConfig().contains(BusinessDay.valueOf(businessDate.getDayOfWeek().toString()).getDay())) {
+                if (StringUtils.isNotEmpty(rule.getRuleConfig()) && !rule.getRuleConfig().contains(BusinessDay.valueOf(businessDate.getDayOfWeek().toString()).getDay())) {
                     QsRuleJob ruleJob = new QsRuleJob();
                     ruleJob.setRuleId(ruleData.getRuleId());
                     ruleJob.setJobStatus(RuleJobStatus.FAILED.getStatus());
