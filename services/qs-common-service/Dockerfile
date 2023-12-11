@@ -1,17 +1,18 @@
 ### Service Layer Docker File
 
 ## BASE IMAGE - Maven
-FROM quantumics/qsaiofficial:qsai-services
+FROM maven:3.9.3-ibmjava-8
 RUN apt-get update && apt-get upgrade -y
-COPY qs-common-service /usr/src/app/qs-common-service
+#COPY qs-common-service /usr/src/app/qs-common-service
+COPY ./qs-common-service /usr/src/app/qs-common-service
 WORKDIR /usr/src/app/qs-common-service
-RUN mvn clean package
+RUN mvn install -DskipTests -DskipITs -T 4
 ## ADD target/QSCommonService.jar /QSCommonService.jar
 ## ML Modules
 RUN apt-get update
 RUN apt-get install -y
-#RUN apt install python3-pip -y
-#RUN pip3 install pandas
+RUN apt install python3-pip -y
+RUN pip3 install pandas
 RUN python3 -c 'import pandas'
 RUN python3 -m pip install boto3
 RUN python3 -c 'import boto3'
@@ -30,5 +31,6 @@ RUN python3 -c 'import requests'
 EXPOSE 8090 8083 485 587
 
 ## Setting up entrypoint
-COPY qs-common-service/src/main/resources /
+#COPY qs-common-service/src/main/resources /
+COPY ./qs-common-service/src/main/resources /
 ENTRYPOINT  java -Dspring.profiles.active=sat  -jar target/QSCommonService.jar

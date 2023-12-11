@@ -8,28 +8,81 @@
 
 package ai.quantumics.api.adapter;
 
+import ai.quantumics.api.AwsCustomConfiguration;
 import ai.quantumics.api.constants.QsConstants;
+import ai.quantumics.api.enums.AwsAccessType;
+import ai.quantumics.api.exceptions.BadRequestException;
 import ai.quantumics.api.exceptions.QsRecordNotFoundException;
-import ai.quantumics.api.model.*;
+import ai.quantumics.api.model.CleansingParam;
+import ai.quantumics.api.model.FileMetaDataAwsRef;
+import ai.quantumics.api.model.MetadataReference;
+import ai.quantumics.api.model.ProjectCumulativeSizeInfo;
+import ai.quantumics.api.model.Projects;
+import ai.quantumics.api.model.QsFiles;
+import ai.quantumics.api.model.QsFolders;
+import ai.quantumics.api.model.QsPartition;
+import ai.quantumics.api.model.RunJobStatus;
 import ai.quantumics.api.req.ColumnMetaData;
 import ai.quantumics.api.req.UploadFileRequest;
-import ai.quantumics.api.service.*;
-import ai.quantumics.api.util.*;
+import ai.quantumics.api.service.CleansingRuleParamService;
+import ai.quantumics.api.service.FileMetaDataAwsService;
+import ai.quantumics.api.service.FileService;
+import ai.quantumics.api.service.PartitionService;
+import ai.quantumics.api.service.ProjectCumulativeSizeService;
+import ai.quantumics.api.service.ProjectService;
+import ai.quantumics.api.service.RunJobService;
+import ai.quantumics.api.util.DbSessionUtil;
+import ai.quantumics.api.util.JobRunState;
+import ai.quantumics.api.util.MetadataHelper;
+import ai.quantumics.api.util.QsUtil;
+import ai.quantumics.api.util.RegexPatterns;
+import ai.quantumics.api.util.RegexUtils;
+import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.QsFileContent;
 import ai.quantumics.api.vo.S3FileUploadResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.athena.AmazonAthena;
-import com.amazonaws.services.athena.model.*;
+import com.amazonaws.services.athena.model.ColumnInfo;
+import com.amazonaws.services.athena.model.Datum;
+import com.amazonaws.services.athena.model.GetQueryExecutionRequest;
+import com.amazonaws.services.athena.model.GetQueryExecutionResult;
+import com.amazonaws.services.athena.model.GetQueryResultsRequest;
+import com.amazonaws.services.athena.model.GetQueryResultsResult;
+import com.amazonaws.services.athena.model.QueryExecutionContext;
+import com.amazonaws.services.athena.model.QueryExecutionState;
+import com.amazonaws.services.athena.model.ResultConfiguration;
+import com.amazonaws.services.athena.model.ResultSet;
+import com.amazonaws.services.athena.model.Row;
+import com.amazonaws.services.athena.model.StartQueryExecutionRequest;
+import com.amazonaws.services.athena.model.StartQueryExecutionResult;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
-import com.amazonaws.services.cloudwatch.model.*;
+import com.amazonaws.services.cloudwatch.model.Dimension;
+import com.amazonaws.services.cloudwatch.model.GetMetricDataRequest;
+import com.amazonaws.services.cloudwatch.model.GetMetricDataResult;
+import com.amazonaws.services.cloudwatch.model.ListMetricsRequest;
+import com.amazonaws.services.cloudwatch.model.ListMetricsResult;
+import com.amazonaws.services.cloudwatch.model.Metric;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.BucketAccelerateConfiguration;
+import com.amazonaws.services.s3.model.BucketAccelerateStatus;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
+import com.amazonaws.services.s3.model.HeadBucketRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
@@ -38,27 +91,50 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.io.File;
-import java.io.FileInputStream;
 
-import static ai.quantumics.api.constants.QsConstants.*;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
+import static ai.quantumics.api.constants.DatasourceConstants.REGION_PATTERN;
+import static ai.quantumics.api.constants.QsConstants.ENG;
+import static ai.quantumics.api.constants.QsConstants.PROCESSED;
+import static ai.quantumics.api.constants.QsConstants.RAW;
 
 @Slf4j
 @Component
@@ -78,8 +154,11 @@ public class AwsAdapter {
 	private final ProjectService projectService;
 	private final CleansingRuleParamService cleanseRuleParamService;
 	private final ProjectCumulativeSizeService projectSizeService;
+	private final AwsCustomConfiguration awsCustomConfiguration;
 
 	@Autowired private QsUtil qsUtil;
+	@Autowired
+	private AmazonS3 awsS3Client;
 
 	@Value("${qs.athena.query.output}")
 	private String qsAthenaOpBucket;
@@ -90,11 +169,14 @@ public class AwsAdapter {
 	@Value("${qs.athena.query.limit}")
 	private int qsQueryLimit;
 
-	@Value("${s3.credentials.accessKey}")
+	@Value("${aws.credentials.accessKey}")
 	private String s3AccessKey;
 
-	@Value("${s3.credentials.secretKey}")
+	@Value("${aws.credentials.secretKey}")
 	private String s3SecretKey;
+
+	@Value("${qs.aws.access.method}")
+	private String accessMethod;
 
 
 	public AwsAdapter(
@@ -108,8 +190,9 @@ public class AwsAdapter {
 			FileService fileServiceCi,
 			ProjectService projectServiceCi,
 			CleansingRuleParamService cleanseRuleParamServiceCi,
-			ProjectCumulativeSizeService projectSizeServiceCi
-			) {
+			ProjectCumulativeSizeService projectSizeServiceCi,
+			AwsCustomConfiguration awsCustomConfigurationCi
+	) {
 		amazonS3Client = amazonS3ClientCi;
 		fileHelper = fileHelperCi;
 		athenaClient = athenaClientCi;
@@ -121,6 +204,7 @@ public class AwsAdapter {
 		projectService = projectServiceCi;
 		cleanseRuleParamService = cleanseRuleParamServiceCi;
 		projectSizeService = projectSizeServiceCi;
+		awsCustomConfiguration = awsCustomConfigurationCi;
 	}
 
 	private String athenaPrepareQuery(
@@ -221,7 +305,7 @@ public class AwsAdapter {
 		S3Object finalEventObject = fetchObject(bucketName, path);
 		if(finalEventObject != null) {
 			try (final InputStreamReader streamReader = new InputStreamReader(finalEventObject.getObjectContent(), StandardCharsets.UTF_8);
-					final BufferedReader reader = new BufferedReader(streamReader)) {
+				 final BufferedReader reader = new BufferedReader(streamReader)) {
 				lines = reader.lines().collect(Collectors.toList());
 				if(lines != null && !lines.isEmpty()) {
 					log.info("Header line is: {}", lines.get(0));
@@ -245,7 +329,7 @@ public class AwsAdapter {
 
 	public ArrayNode getFileContentHelper(
 			final QsFileContent detailsObj, boolean skipMetadataUpdate, String type)
-					throws InterruptedException {
+			throws InterruptedException {
 		final String fileName = detailsObj.getFileName();
 		final String tableName = detailsObj.getTableName();
 		final int folderId = detailsObj.getFolderId();
@@ -346,7 +430,7 @@ public class AwsAdapter {
 			metaDataArrayNode.add(globalObjectMapper.createObjectNode().
 					put("column_name", colMetadata.getColumnName()).
 					put("data_type", colMetadata.getDataType())
-					);
+			);
 		});
 
 		prepareDataV2(dataRowsList, globalObjectMapper, dataArrayNode, columnDetails);
@@ -534,9 +618,9 @@ public class AwsAdapter {
 			detectionPyFile = "./"+QsConstants.OUTLIERS_PYTHON_FILE_REL_LOC;
 		}
 
-		
 
-		
+
+
 		List<String> commands = new ArrayList<>();
 
 		if (isWindows()) {
@@ -550,8 +634,15 @@ public class AwsAdapter {
 		commands.add(detectionPyFile);
 		commands.add(bucketNameLocal);
 		commands.add(detailsObj.getFileObjectKey());
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
+
 
 		return runExternalCommand(commands);
 	}
@@ -585,8 +676,15 @@ public class AwsAdapter {
 		commands.add(file1ObjKey);
 		commands.add(bucketNameLocal);
 		commands.add(file2ObjKey);
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
+
 
 		return runExternalCommand(commands);
 	}
@@ -616,13 +714,13 @@ public class AwsAdapter {
 			String detectionPyFile = "./"+QsConstants.PII_COL_DETECTION_PYTHON_FILE_REL_LOC;
 			System.out.println("Working Directory = " + System.getProperty("user.dir"));
 			log.info("get PII column info detectionPyFile.getAbsolutePath :{}",detectionPyFile);
-			
+
 			/*
 			File contentSource = ResourceUtils.getFile( "./"+QsConstants.QS_LIVY_TEMPLATE_ENG_NAME);
 		    log.info("File in classpath Found {} : ", contentSource.exists());
 		    log.info("File in classpath Found {} : ", new String(Files.readAllBytes(contentSource.toPath())));
 		    */
-			    
+
 			if(isWindows()) {
 				commands.add("cmd.exe");
 				commands.add("/c");
@@ -633,21 +731,21 @@ public class AwsAdapter {
 
 			commands.add(detectionPyFile);
 			commands.add(inputFileWithPath);
-	
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Exception in getPiiColumnInfo.. {}",e);
 		}
-		
+
 		return runExternalCommand(commands);
 	}
 
 	public String writeXlsxFileIntoCsv(final String inputFileWithPath) throws Exception{
 		List<String> commands = new ArrayList<>();
 		try {
-			
+
 			String detectionPyFile = "./"+QsConstants.SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC;
-						
+
 			if(isWindows()) {
 				commands.add("cmd.exe");
 				commands.add("/c");
@@ -659,7 +757,7 @@ public class AwsAdapter {
 			commands.add(detectionPyFile);
 			commands.add(inputFileWithPath);
 
-	
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Exception in writeXlsxFileIntoCsv ..."+e);
@@ -690,7 +788,7 @@ public class AwsAdapter {
 
 			process.waitFor();
 
-	
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Excdeption in runExternalCommand ..."+e);
@@ -736,7 +834,7 @@ public class AwsAdapter {
 			sb.append(tableName);
 		}
 
-		final String tableNameTmp = sb.toString(); 
+		final String tableNameTmp = sb.toString();
 		sb.delete(0, sb.length());
 
 		columns.stream().forEach((column) -> sb.append(prepareSubQuery(column.getColumnName(), tableNameTmp)));
@@ -835,7 +933,7 @@ public class AwsAdapter {
 
 				// Verify whether the transfer acceleration is enabled on the bucket or not...
 				String accelerateStatus = amazonS3Client.getBucketAccelerateConfiguration(
-						new GetBucketAccelerateConfigurationRequest(targetBucketName))
+								new GetBucketAccelerateConfigurationRequest(targetBucketName))
 						.getStatus();
 
 				if(!BucketAccelerateStatus.Enabled.name().equals(accelerateStatus)) {
@@ -852,7 +950,7 @@ public class AwsAdapter {
 				TransferManager transferManager = TransferManagerBuilder.standard()
 						.withMultipartUploadThreshold((long) (1 * 1024 * 1025))
 						.withS3Client(amazonS3Client)
-						.build(); 
+						.build();
 
 				Upload upload = transferManager.upload(targetBucketName, fileName, is, objectMetadata);
 				upload.waitForCompletion();
@@ -864,6 +962,36 @@ public class AwsAdapter {
 
 				// Approach 2:
 				//amazonS3Client.putObject(bucketName, fileName, is, objectMetadata);
+			}
+
+		} catch (final Exception exception) {
+			throw new RuntimeException("Error while uploading contents to s3." + exception.getMessage());
+		}
+		return amazonS3Client.getUrl(targetBucketName, fileName);
+	}
+
+
+	public URL s3ContentUploadV2(String targetBucketName, final String fileName, final String content) {
+		try {
+			targetBucketName = targetBucketName.substring(5, targetBucketName.length() - 1);
+
+			log.info("Bucket Name: {} and File Name: {}", targetBucketName, fileName);
+
+			String tmpdir = System.getProperty("java.io.tmpdir");
+			File scriptFile = new File(tmpdir + File.separator + fileName);
+			log.info("Python Script File: {}", scriptFile.getAbsolutePath());
+
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(scriptFile));) {
+				bw.write(content);
+			}
+
+			try(InputStream is = new FileInputStream(scriptFile);) {
+				final ObjectMetadata objectMetadata = new ObjectMetadata();
+				objectMetadata.setContentType("text/plain");
+				objectMetadata.setContentLength(scriptFile.length());
+
+				amazonS3Client.putObject(targetBucketName, fileName, is, objectMetadata);
+				log.info("Uploaded file to destination :  {}/{}", targetBucketName, fileName);
 			}
 
 		} catch (final Exception exception) {
@@ -938,15 +1066,15 @@ public class AwsAdapter {
 	/**
 	 *  Utility method for uploading files to S3 location. This API uses efficient TransferManager based approach
 	 *  for uploading files to the remote S3 bucket. It also updates Athena by creating/altering Athena table
-	 *  with the file uploaded to AWS S3 bucket 
-	 *  
+	 *  with the file uploaded to AWS S3 bucket
+	 *
 	 * @param fileName
 	 * @param contentType
 	 * @return
 	 */
 	public S3FileUploadResponse storeObjectInS3Async(final String bucketNameLocal,
-			final Object inputFile, final String partitionName, final String dbName, 
-			final String folderName, final String fileName, final String contentType) throws Exception{
+													 final Object inputFile, final String partitionName, final String dbName,
+													 final String folderName, final String fileName, final String contentType) throws Exception{
 
 		log.info("\nReceived file upload request for the file: {}", fileName);
 
@@ -959,7 +1087,7 @@ public class AwsAdapter {
 		S3FileUploadResponse s3FileUploadResp = new S3FileUploadResponse();
 		try {
 
-			final ObjectMetadata objectMetadata = new ObjectMetadata();      
+			final ObjectMetadata objectMetadata = new ObjectMetadata();
 			objectMetadata.setContentType(contentType);
 
 			if(inputFile instanceof MultipartFile) {
@@ -988,7 +1116,7 @@ public class AwsAdapter {
 
 			// Verify whether the transfer acceleration is enabled on the bucket or not...
 			String accelerateStatus = amazonS3Client.getBucketAccelerateConfiguration(
-					new GetBucketAccelerateConfigurationRequest(bucketNameLocal))
+							new GetBucketAccelerateConfigurationRequest(bucketNameLocal))
 					.getStatus();
 
 			log.info("Transfer acceleration status of the bucket {} is {}", bucketNameLocal, accelerateStatus);
@@ -997,7 +1125,7 @@ public class AwsAdapter {
 			transferManager = TransferManagerBuilder.standard()
 					.withMultipartUploadThreshold((long) (1 * 1024 * 1025))
 					.withS3Client(amazonS3Client)
-					.build(); 
+					.build();
 
 			Upload upload = transferManager.upload(bucketNameLocal, fileName, is, objectMetadata);
 			upload.waitForCompletion();
@@ -1036,9 +1164,9 @@ public class AwsAdapter {
 
 			List<String> lines = new ArrayList<>();
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-				// Limiting to only reading two lines, with the assumption that 
+				// Limiting to only reading two lines, with the assumption that
 				// the first line is a header line, followed by data line.
-				br.lines().limit(2).forEach(lines::add); 
+				br.lines().limit(2).forEach(lines::add);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1076,8 +1204,8 @@ public class AwsAdapter {
 		return s3FileUploadResp;
 	}
 
-	public String storeUdfDefInS3Async(final String udfBucketName, 
-			final File inputFile, final String fileName, final String contentType) throws Exception{
+	public String storeUdfDefInS3Async(final String udfBucketName,
+									   final File inputFile, final String fileName, final String contentType) throws Exception{
 		log.info("\nReceived file upload request for the udf file: {}", fileName);
 
 		Instant now = Instant.now();
@@ -1100,7 +1228,7 @@ public class AwsAdapter {
 
 			// Verify whether the transfer acceleration is enabled on the bucket or not...
 			String accelerateStatus = amazonS3Client.getBucketAccelerateConfiguration(
-					new GetBucketAccelerateConfigurationRequest(udfBucketName))
+							new GetBucketAccelerateConfigurationRequest(udfBucketName))
 					.getStatus();
 
 			log.info("Transfer acceleration status of the bucket {} is {}", udfBucketName, accelerateStatus);
@@ -1129,8 +1257,8 @@ public class AwsAdapter {
 		}
 	}
 
-	public String storeImageInS3Async(final String imagesBucketName, 
-			final MultipartFile inputFile, final String fileName, final String contentType) throws Exception{
+	public String storeImageInS3Async(final String imagesBucketName,
+									  final MultipartFile inputFile, final String fileName, final String contentType) throws Exception{
 
 		log.info("\nReceived file upload request for the file: {}", fileName);
 
@@ -1154,7 +1282,7 @@ public class AwsAdapter {
 
 			// Verify whether the transfer acceleration is enabled on the bucket or not...
 			String accelerateStatus = amazonS3Client.getBucketAccelerateConfiguration(
-					new GetBucketAccelerateConfigurationRequest(imagesBucketName))
+							new GetBucketAccelerateConfigurationRequest(imagesBucketName))
 					.getStatus();
 
 			log.info("Transfer acceleration status of the bucket {} is {}", imagesBucketName, accelerateStatus);
@@ -1188,8 +1316,8 @@ public class AwsAdapter {
 
 	public URL updateFileMdAfterUpload(
 			final S3FileUploadResponse s3FileUploadRes, final Projects project, final QsFolders folder,
-			final String userName, final String partitionRef, final int userId, final UploadFileRequest uploadFileRequest) throws MalformedURLException, 
-	SQLException, JsonProcessingException {
+			final String userName, final String partitionRef, final int userId, final UploadFileRequest uploadFileRequest) throws MalformedURLException,
+			SQLException, JsonProcessingException {
 
 		Instant start = Instant.now();
 
@@ -1233,7 +1361,7 @@ public class AwsAdapter {
 			QsFolders folder,
 			QsFiles saveFileInfo,
 			URL destUrl)
-					throws SQLException {
+			throws SQLException {
 		final QsPartition partition = new QsPartition();
 
 		partition.setFolderId(folderId);
@@ -1246,8 +1374,8 @@ public class AwsAdapter {
 		partitionService.save(partition);
 	}
 
-	public QsFiles getQsFiles(int projectId, int folderId, Projects project, String userName, String columnMetadataStr, 
-			int userId, UploadFileRequest uploadFileRequest, S3FileUploadResponse s3FileUploadRes) throws SQLException, JsonProcessingException{
+	public QsFiles getQsFiles(int projectId, int folderId, Projects project, String userName, String columnMetadataStr,
+							  int userId, UploadFileRequest uploadFileRequest, S3FileUploadResponse s3FileUploadRes) throws SQLException, JsonProcessingException{
 		String contentType = "";
 		String fileName = "";
 		String fileSize = "";
@@ -1276,7 +1404,7 @@ public class AwsAdapter {
 		fileToSave.setProjectId(projectId);
 		fileToSave.setQsMetaData(columnMetadataStr);
 		fileToSave.setCreatedDate(QsConstants.getCurrentUtcDate());
-		fileToSave.setUserId(userId); 
+		fileToSave.setUserId(userId);
 		fileToSave.setFileType(contentType);
 		fileToSave.setFileName(fileName);
 		fileToSave.setRuleCreatedFrom(userName);
@@ -1285,7 +1413,7 @@ public class AwsAdapter {
 		fileToSave.setAdditionalInfo(
 				(uploadFileRequest != null) ? new ObjectMapper().writeValueAsString(uploadFileRequest)
 						: (s3FileUploadRes != null) ? s3FileUploadRes.getS3FileUrl():
-								null);
+						null);
 
 		// Update the Project Cumulative Size after uploading the file..
 		dbUtil.changeSchema("public");
@@ -1402,9 +1530,9 @@ public class AwsAdapter {
 		}
 	}
 
-	public void createTableInAthena(Map<String, String> columns, String dbName, 
-			String partitionName, String folderName, String s3FileLocation, List<MetadataReference> metadataRef) {
-		
+	public void createTableInAthena(Map<String, String> columns, String dbName,
+									String partitionName, String folderName, String s3FileLocation, List<MetadataReference> metadataRef) {
+
 		String athenaTableName = normalizeAthenaTableName(folderName);
 		String athenaCreateQuery = prepareAthenaCreateQuery(partitionName, athenaTableName,
 				s3FileLocation, columns, metadataRef);
@@ -1422,10 +1550,10 @@ public class AwsAdapter {
 			throw new RuntimeException("Error while uploading file." + exception.getMessage());
 		}
 	}
-	
-	public void createTableInAthena(List<List<String>> columns, String dbName, 
-			String partitionName, String tableName, String s3FileLocation, List<MetadataReference> metadataRef) {
-		
+
+	public void createTableInAthena(List<List<String>> columns, String dbName,
+									String partitionName, String tableName, String s3FileLocation, List<MetadataReference> metadataRef) {
+
 		String athenaTableName = normalizeAthenaTableName(tableName);
 		String athenaCreateQuery = prepareAthenaCreateQuery(partitionName, athenaTableName,
 				s3FileLocation, columns, metadataRef);
@@ -1670,8 +1798,8 @@ public class AwsAdapter {
 
 		GeneratePresignedUrlRequest generatePresignedUrlRequest =
 				new GeneratePresignedUrlRequest(bucketName, objectKey)
-				.withMethod(HttpMethod.GET)
-				.withExpiration(expiration);
+						.withMethod(HttpMethod.GET)
+						.withExpiration(expiration);
 		URL url = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
 
 		log.info("Presigned URL is: {} and it expires in one hour.", url);
@@ -1703,8 +1831,8 @@ public class AwsAdapter {
 		Map<String, String> columnMetadata = new LinkedHashMap<>();
 		String[] headers = headerLine.split(QsConstants.DELIMITER_SPLIT_PATTERN);
 		String[] dataValues = dataLine.split(QsConstants.DELIMITER_SPLIT_PATTERN);
-		if (headerLine != null && headerLine.indexOf(QsConstants.DELIMITER) != -1 && dataLine != null 
-				&& dataLine.indexOf(QsConstants.DELIMITER) != -1) {   
+		if (headerLine != null && headerLine.indexOf(QsConstants.DELIMITER) != -1 && dataLine != null
+				&& dataLine.indexOf(QsConstants.DELIMITER) != -1) {
 			for (int i = 0; i < dataValues.length; i++) {
 				//columnMetadata.put(headers[i], getDataType(dataValues[i]));
 				columnMetadata.put(headers[i], "string");
@@ -1749,13 +1877,29 @@ public class AwsAdapter {
 
 		return dataType;
 	}
+	public static String getColumnDataType(String value) {
+		String dataType = "string"; // default type
+
+		if(!StringUtils.isEmpty(value)) {
+			if (RegexUtils.isInteger(value)) {
+				dataType = "int";
+			} else if (RegexUtils.isLong(value) || RegexUtils.isDouble(value)) {
+				dataType = "float";
+			} else if (ValidatorUtils.isDate(value)) {
+				dataType = "date";
+			} else if (RegexUtils.isAlphaNumeric(value)) {
+				dataType = "string";
+			}
+		}
+		return dataType;
+	}
 
 	/**
 	 * Utility method used to normalize the String by replacing all the special chars with "_" chars
 	 * to ensure the string is Athena compatible.
-	 * 
+	 *
 	 * Athena table name can have only "_" as a special char
-	 * 
+	 *
 	 * @param tableName
 	 * @return
 	 */
@@ -1765,14 +1909,14 @@ public class AwsAdapter {
 
 	/**
 	 * Utility method to prepare the Athena Create Table query
-	 * 
+	 *
 	 * @param tableName
 	 * @param s3FileLocation
 	 * @param columnMetadata
 	 * @return
 	 */
 	private String prepareAthenaCreateQuery(String partitionName, String tableName, String s3FileLocation,
-			Map<String, String> columns) {
+											Map<String, String> columns) {
 		// Query is prepared in lower case to meet Athena Standards...
 
 		log.info("Started preparing Create Table query for Athena...");
@@ -1815,109 +1959,109 @@ public class AwsAdapter {
 	}
 
 
-	public String prepareAthenaCreateQuery(String partitionName, String tableName, 
-			String s3FileLocation, List<List<String>> columns, List<MetadataReference> metadataRef) {
+	public String prepareAthenaCreateQuery(String partitionName, String tableName,
+										   String s3FileLocation, List<List<String>> columns, List<MetadataReference> metadataRef) {
 		// Query is prepared in lower case to meet Athena Standards...
 
 		log.info("Started preparing Create Table query for Athena...");
 		StringBuilder sb = new StringBuilder(128);
-       try {
-    	   
-		if(metadataRef != null && metadataRef.size() > 0) {
-			Map<String, String> refMap = new LinkedHashMap<>();
-			metadataRef.stream().forEach(ref -> {
-				refMap.put(ref.getSourceColumnnameType(), ref.getDestinationColumnnameType());
-			});
-			if (columns != null && !columns.isEmpty()) {
-				sb.append("CREATE EXTERNAL TABLE IF NOT EXISTS `");
-				sb.append(tableName);
-				sb.append("` (");
-				columns.forEach(column -> {
-					sb.append("`");
-					sb.append(column.get(0).toLowerCase());
-					sb.append("` " + (refMap.get(column.get(1)) != null ? refMap.get(column.get(1)) : "string") + ",");
-					//sb.append("` string,");
+		try {
+
+			if(metadataRef != null && metadataRef.size() > 0) {
+				Map<String, String> refMap = new LinkedHashMap<>();
+				metadataRef.stream().forEach(ref -> {
+					refMap.put(ref.getSourceColumnnameType(), ref.getDestinationColumnnameType());
 				});
+				if (columns != null && !columns.isEmpty()) {
+					sb.append("CREATE EXTERNAL TABLE IF NOT EXISTS `");
+					sb.append(tableName);
+					sb.append("` (");
+					columns.forEach(column -> {
+						sb.append("`");
+						sb.append(column.get(0).toLowerCase());
+						sb.append("` " + (refMap.get(column.get(1)) != null ? refMap.get(column.get(1)) : "string") + ",");
+						//sb.append("` string,");
+					});
 
-				// Remove the last comma that is appended above..
-				sb.deleteCharAt(sb.length() - 1);
+					// Remove the last comma that is appended above..
+					sb.deleteCharAt(sb.length() - 1);
 
-				sb.append(") ");
-				if(partitionName != null) {
-					sb.append(" PARTITIONED BY (partition_0 string) ");
+					sb.append(") ");
+					if(partitionName != null) {
+						sb.append(" PARTITIONED BY (partition_0 string) ");
+					}
+
+					sb.append(" ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde' ");
+					sb.append(" WITH SERDEPROPERTIES ( 'separatorChar' = ',', 'quoteChar' = '\"', 'escapeChar' = '\\\\') ");
+
+					//sb.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ESCAPED BY '\\' ");
+					sb.append(" STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' ");
+					sb.append(" OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' ");
+					sb.append(" LOCATION '");
+					sb.append(s3FileLocation);
+					sb.append("' ");
+					sb.append(" TBLPROPERTIES ('skip.header.line.count'='1', 'averageRecordSize'='50', 'recordCount'='50')");
 				}
 
-				sb.append(" ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde' ");
-				sb.append(" WITH SERDEPROPERTIES ( 'separatorChar' = ',', 'quoteChar' = '\"', 'escapeChar' = '\\\\') ");
-
-				//sb.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ESCAPED BY '\\' ");
-				sb.append(" STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' ");
-				sb.append(" OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' ");
-				sb.append(" LOCATION '");
-				sb.append(s3FileLocation);
-				sb.append("' ");
-				sb.append(" TBLPROPERTIES ('skip.header.line.count'='1', 'averageRecordSize'='50', 'recordCount'='50')");
+				log.info("Query to be executed in Athena is: {}", sb.toString());
 			}
 
-			log.info("Query to be executed in Athena is: {}", sb.toString());
+		}catch(final Exception e) {
+			e.printStackTrace();
 		}
-		
-       }catch(final Exception e) {
-     	  e.printStackTrace(); 
-       }
 		return sb.toString();
 	}
-	
-	public String prepareAthenaCreateQuery(String partitionName, String tableName, 
-			String s3FileLocation, Map<String, String> columns, List<MetadataReference> metadataRef) {
+
+	public String prepareAthenaCreateQuery(String partitionName, String tableName,
+										   String s3FileLocation, Map<String, String> columns, List<MetadataReference> metadataRef) {
 		// Query is prepared in lower case to meet Athena Standards...
 
 		log.info("Started preparing Create Table query for Athena...");
 		StringBuilder sb = new StringBuilder(128);
-       try {
-    	   
-		if(metadataRef != null && metadataRef.size() > 0) {
-			Map<String, String> refMap = new LinkedHashMap<>();
-			metadataRef.stream().forEach(ref -> {
-				refMap.put(ref.getSourceColumnnameType(), ref.getDestinationColumnnameType());
-			});
-			if (columns != null && !columns.isEmpty()) {
-				sb.append("CREATE EXTERNAL TABLE IF NOT EXISTS `");
-				sb.append(tableName);
-				sb.append("` (");
-				columns.entrySet().stream().forEach(column -> {
-					sb.append("`");
-					sb.append(column.getKey().toLowerCase());
-					sb.append("` " + (refMap.get(column.getValue()) != null ? refMap.get(column.getValue()) : "string") + ",");
-					//sb.append("` string,");
+		try {
+
+			if(metadataRef != null && metadataRef.size() > 0) {
+				Map<String, String> refMap = new LinkedHashMap<>();
+				metadataRef.stream().forEach(ref -> {
+					refMap.put(ref.getSourceColumnnameType(), ref.getDestinationColumnnameType());
 				});
+				if (columns != null && !columns.isEmpty()) {
+					sb.append("CREATE EXTERNAL TABLE IF NOT EXISTS `");
+					sb.append(tableName);
+					sb.append("` (");
+					columns.entrySet().stream().forEach(column -> {
+						sb.append("`");
+						sb.append(column.getKey().toLowerCase());
+						sb.append("` " + (refMap.get(column.getValue()) != null ? refMap.get(column.getValue()) : "string") + ",");
+						//sb.append("` string,");
+					});
 
-				// Remove the last comma that is appended above..
-				sb.deleteCharAt(sb.length() - 1);
+					// Remove the last comma that is appended above..
+					sb.deleteCharAt(sb.length() - 1);
 
-				sb.append(") ");
-				if(partitionName != null) {
-					sb.append(" PARTITIONED BY (partition_0 string) ");
+					sb.append(") ");
+					if(partitionName != null) {
+						sb.append(" PARTITIONED BY (partition_0 string) ");
+					}
+
+					sb.append(" ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde' ");
+					sb.append(" WITH SERDEPROPERTIES ( 'separatorChar' = ',', 'quoteChar' = '\"', 'escapeChar' = '\\\\') ");
+
+					//sb.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ESCAPED BY '\\' ");
+					sb.append(" STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' ");
+					sb.append(" OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' ");
+					sb.append(" LOCATION '");
+					sb.append(s3FileLocation);
+					sb.append("' ");
+					sb.append(" TBLPROPERTIES ('skip.header.line.count'='1', 'averageRecordSize'='50', 'recordCount'='50')");
 				}
 
-				sb.append(" ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde' ");
-				sb.append(" WITH SERDEPROPERTIES ( 'separatorChar' = ',', 'quoteChar' = '\"', 'escapeChar' = '\\\\') ");
-
-				//sb.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ESCAPED BY '\\' ");
-				sb.append(" STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' ");
-				sb.append(" OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' ");
-				sb.append(" LOCATION '");
-				sb.append(s3FileLocation);
-				sb.append("' ");
-				sb.append(" TBLPROPERTIES ('skip.header.line.count'='1', 'averageRecordSize'='50', 'recordCount'='50')");
+				log.info("Query to be executed in Athena is: {}", sb.toString());
 			}
 
-			log.info("Query to be executed in Athena is: {}", sb.toString());
+		}catch(final Exception e) {
+			e.printStackTrace();
 		}
-		
-       }catch(final Exception e) {
-     	  e.printStackTrace(); 
-       }
 		return sb.toString();
 	}
 
@@ -1971,8 +2115,8 @@ public class AwsAdapter {
 		return checkHeader;
 	}
 
-	public void handleAthenaProcessForCleanseJob(final String bucketName, final String folderName, final String partitionName, 
-			final String dbName, FileMetaDataAwsRef fileMetaDataAwsRef) throws Exception{
+	public void handleAthenaProcessForCleanseJob(final String bucketName, final String folderName, final String partitionName,
+												 final String dbName, FileMetaDataAwsRef fileMetaDataAwsRef) throws Exception{
 		Instant now = Instant.now();
 		S3Object s3Object = null;
 		try {
@@ -2022,9 +2166,9 @@ public class AwsAdapter {
 					createTableInAthena(columnMetadata, dbName, partitionName, folderName, s3FileLocation);
 
 					log.info("Created a new table in Athena for this Cleanse Job...");
-				} 
+				}
 				else {
-					// Table is already present, now check the Table structure. If mismatched, we have to 
+					// Table is already present, now check the Table structure. If mismatched, we have to
 					// add/drop columns in the table excluding the partition.
 					// Note: Drop columns is not supported currently in Athena.
 
@@ -2057,7 +2201,7 @@ public class AwsAdapter {
 
 							athenaAddColumnQuery(queryContext, folderName.toLowerCase(), columnNames);
 						}catch(AmazonClientException|InterruptedException e) {
-							// 
+							//
 						}
 					}
 				}
@@ -2500,15 +2644,15 @@ public class AwsAdapter {
 		return allowed;
 	}
 
-	public String storeSQLFileIntoS3Async(final String bucketName, 
-			ByteArrayOutputStream stream, final String fileName, final String contentType) throws Exception{
+	public String storeSQLFileIntoS3Async(final String bucketName,
+										  ByteArrayOutputStream stream, final String fileName, final String contentType) throws Exception{
 		log.info("\nReceived file upload request for the udf file: {}", fileName);
 
 		Instant now = Instant.now();
 		TransferManager transferManager = null;
 
 		try {
-			ByteArrayInputStream  inputFile = new ByteArrayInputStream(stream.toByteArray());
+			ByteArrayInputStream inputFile = new ByteArrayInputStream(stream.toByteArray());
 			final ObjectMetadata objectMetadata = new ObjectMetadata();
 			objectMetadata.setContentType(contentType);
 			objectMetadata.setContentLength(stream.toByteArray().length);
@@ -2523,7 +2667,7 @@ public class AwsAdapter {
 
 			// Verify whether the transfer acceleration is enabled on the bucket or not...
 			String accelerateStatus = amazonS3Client.getBucketAccelerateConfiguration(
-					new GetBucketAccelerateConfigurationRequest(bucketName))
+							new GetBucketAccelerateConfigurationRequest(bucketName))
 					.getStatus();
 
 			log.info("Transfer acceleration status of the bucket {} is {}", bucketName, accelerateStatus);
@@ -2581,8 +2725,15 @@ public class AwsAdapter {
 		commands.add(bucketNameLocal);
 		commands.add(fileObjKey);
 		commands.add(columnName);
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
+
 
 		return runExternalCommand(commands);
 	}
@@ -2615,10 +2766,58 @@ public class AwsAdapter {
 		commands.add(detectionPyFile);
 		commands.add(bucketNameLocal);
 		commands.add(fileObjKey);
-		commands.add(s3AccessKey);
-		commands.add(s3SecretKey);
+		if(accessMethod.equals(AwsAccessType.KEYS.getAccessType())) {
+			commands.add(s3AccessKey);
+			commands.add(s3SecretKey);
+		} else if(accessMethod.equals(AwsAccessType.IAM.getAccessType())) {
+			AWSCredentialsProvider awsCredentialsProvider = awsCustomConfiguration.getAwsCredentialsProvider();
+			commands.add(awsCredentialsProvider.getCredentials().getAWSAccessKeyId());
+			commands.add(awsCredentialsProvider.getCredentials().getAWSSecretKey());
+		}
+
 
 		return runExternalCommand(commands);
 	}
 
+	public void deleteFolderAndContents(String bucketName, String folderKey) {
+		try {
+			amazonS3Client.listObjects(bucketName, folderKey).getObjectSummaries()
+					.forEach(objectSummary -> {
+						amazonS3Client.deleteObject(new DeleteObjectRequest(bucketName, objectSummary.getKey()));
+					});
+
+			amazonS3Client.deleteObject(bucketName, folderKey);
+		} catch (final AmazonServiceException serviceException) {
+			log.error("Error - {}", serviceException.getErrorMessage());
+		} catch (final AmazonClientException exception) {
+			log.error("Error while deleting file {}", exception.getMessage());
+		}
+	}
+
+	public AmazonS3 createS3BucketClient(String bucketName){
+		AmazonS3 s3Client = awsS3Client;
+		try {
+			//s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+			HeadBucketRequest bucketLocationRequest =  new HeadBucketRequest(bucketName);
+			s3Client.headBucket(bucketLocationRequest);
+			log.info("Connection established success");
+		}catch(Exception e){
+			log.info(e.getMessage());
+			throw new BadRequestException(CONNECTION_FAILED);
+		}
+		return s3Client;
+	}
+
+	public static String getRegionFromMessage(String errorMessage) {
+		String expectedRegion = null;
+		// Define a regular expression pattern to match the expected region
+		Pattern pattern = Pattern.compile(REGION_PATTERN);
+		Matcher matcher = pattern.matcher(errorMessage);
+
+		// Find the expected region
+		if (matcher.find()) {
+			expectedRegion = matcher.group(1);
+		}
+		return expectedRegion;
+	}
 }

@@ -146,8 +146,8 @@ public class ProjectController {
             }
             //if(activeProjects != null && activeProjects.size() == 0) {
                 Projects project = initializeProjectDetails(projectRequest, userObj);
-                final boolean isProjectCreated = awsResourceHandler.createProjectSequence(project);
-                if (isProjectCreated) {
+                //final boolean isProjectCreated = awsResourceHandler.createProjectSequence(project);
+                //if (isProjectCreated) {
                     project = projectService.saveProject(project);
 
                     // Now create a schema based on the Project Name...
@@ -214,12 +214,12 @@ public class ProjectController {
                     createResponse.put("result", project);
                     createResponse.put("status", new ProjectStatus());
 
-                } else {
+                /*} else {
                     createResponse.put("code", HttpStatus.SC_OK);
                     createResponse.put("message", "Project Creation Failed");
                     createResponse.put("result", "");
                     createResponse.put("status", "");
-                }
+                }*/
             //}
         } catch (final ClassCastException e) {
             createResponse.put("code", HttpStatus.SC_BAD_REQUEST);
@@ -500,9 +500,9 @@ public class ProjectController {
         project.setProjectName(projectNameMod);
         project.setUserId(userId);
         project.setOrgName(orgName);
-        project.setBucketName(bucketName);
-        project.setRawDb(rawDb);
-        project.setProcessedDb(processedDb);
+        //project.setBucketName(bucketName);
+        //project.setRawDb(rawDb);
+        //project.setProcessedDb(processedDb);
         project.setProjectOutcome(outCome);
         project.setDbSchemaName(getNormalizedDbSchemaName(projectNameMod));
         project.setProjectDisplayName(projectRequest.getProjectName());
@@ -512,7 +512,7 @@ public class ProjectController {
                 userObj.getQsUserProfile().getUserFirstName() + " " + userObj.getQsUserProfile().getUserLastName());
         project.setCreatedDate(now.toDate());
         project.setActive(true);
-        project.setEngDb(engDb);
+        //project.setEngDb(engDb);
         project.setMarkAsDefault(false);
         return project;
     }

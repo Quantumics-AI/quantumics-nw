@@ -8,9 +8,58 @@
 
 package ai.quantumics.api.livy;
 
-import static ai.quantumics.api.constants.QsConstants.ENG_OP;
-import static ai.quantumics.api.constants.QsConstants.PROCESSED;
-import static ai.quantumics.api.constants.QsConstants.RAW;
+import ai.quantumics.api.adapter.AwsAdapter;
+import ai.quantumics.api.constants.QsConstants;
+import ai.quantumics.api.enums.RuleJobStatus;
+import ai.quantumics.api.model.EngFlowMetaDataAwsRef;
+import ai.quantumics.api.model.FileMetaDataAwsRef;
+import ai.quantumics.api.model.Projects;
+import ai.quantumics.api.model.QsFiles;
+import ai.quantumics.api.model.QsFolders;
+import ai.quantumics.api.model.QsRuleJob;
+import ai.quantumics.api.model.QsUdf;
+import ai.quantumics.api.model.RunJobStatus;
+import ai.quantumics.api.repo.RuleJobRepository;
+import ai.quantumics.api.req.ColumnMetaData;
+import ai.quantumics.api.req.DataFrameRequest;
+import ai.quantumics.api.req.EngFileOperationRequest;
+import ai.quantumics.api.req.FileJoinColumnMetadata;
+import ai.quantumics.api.req.JoinOperationRequest;
+import ai.quantumics.api.req.Metadata;
+import ai.quantumics.api.req.UdfOperationRequest;
+import ai.quantumics.api.service.FileMetaDataAwsService;
+import ai.quantumics.api.service.FileService;
+import ai.quantumics.api.service.FolderService;
+import ai.quantumics.api.service.ProjectService;
+import ai.quantumics.api.service.RunJobService;
+import ai.quantumics.api.service.UdfService;
+import ai.quantumics.api.util.DbSessionUtil;
+import ai.quantumics.api.util.MetadataHelper;
+import ai.quantumics.api.util.QsUtil;
+import ai.quantumics.api.vo.BatchJobInfo;
+import ai.quantumics.api.vo.QsFileContent;
+import ai.quantumics.api.vo.RuleJobOutput;
+import com.amazonaws.services.glue.model.JobRunState;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -23,7 +72,6 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,58 +79,11 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import com.amazonaws.services.glue.model.JobRunState;
-import com.amazonaws.services.s3.model.S3Object;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
-import ai.quantumics.api.adapter.AwsAdapter;
-import ai.quantumics.api.constants.QsConstants;
-import ai.quantumics.api.model.EngFlowMetaDataAwsRef;
-import ai.quantumics.api.model.FileMetaDataAwsRef;
-import ai.quantumics.api.model.Projects;
-import ai.quantumics.api.model.QsFiles;
-import ai.quantumics.api.model.QsFolders;
-import ai.quantumics.api.model.QsUdf;
-import ai.quantumics.api.model.RunJobStatus;
-import ai.quantumics.api.req.ColumnMetaData;
-import ai.quantumics.api.req.DataFrameRequest;
-import ai.quantumics.api.req.EngFileOperationRequest;
-import ai.quantumics.api.req.FileJoinColumnMetadata;
-import ai.quantumics.api.req.JoinOperationRequest;
-import ai.quantumics.api.req.Metadata;
-import ai.quantumics.api.req.UdfOperationRequest;
-import ai.quantumics.api.req.UdfReqColumn;
-import ai.quantumics.api.service.FileMetaDataAwsService;
-import ai.quantumics.api.service.FileService;
-import ai.quantumics.api.service.FolderService;
-import ai.quantumics.api.service.ProjectService;
-import ai.quantumics.api.service.RunJobService;
-import ai.quantumics.api.service.UdfService;
-import ai.quantumics.api.util.DbSessionUtil;
-import ai.quantumics.api.util.MetadataHelper;
-import ai.quantumics.api.util.QsUtil;
-import ai.quantumics.api.vo.BatchJobInfo;
-import ai.quantumics.api.vo.QsFileContent;
-import ai.quantumics.api.vo.S3FileUploadResponse;
-import lombok.extern.slf4j.Slf4j;
+import static ai.quantumics.api.constants.QsConstants.ENG_OP;
+import static ai.quantumics.api.constants.QsConstants.PROCESSED;
+import static ai.quantumics.api.constants.QsConstants.RAW;
+import static ai.quantumics.api.constants.QsConstants.RULE_OUTPUT_FOLDER;
+import static ai.quantumics.api.constants.QsConstants.THRESHOLD_ERROR;
 
 @Slf4j
 @Component
@@ -102,6 +103,7 @@ public class LivyActions {
     private final MetadataHelper metadataHelper;
     private final RunJobService runJobService;
     private final UdfService udfService;
+    private final RuleJobRepository ruleJobRepository;
 
     @Value("${qs.s3.result.store}")
     private String resultStore;
@@ -130,7 +132,8 @@ public class LivyActions {
             AwsAdapter awsAdapter,
             MetadataHelper metadataHelper,
             RunJobService runJobService,
-            final UdfService udfService) {
+            final UdfService udfService,
+            RuleJobRepository ruleJobRepositoryCi) {
         dbUtil = sessionUtil;
         qsUtil = qsutil;
         livyClient = livyClientCi;
@@ -142,6 +145,7 @@ public class LivyActions {
         this.metadataHelper = metadataHelper;
         this.runJobService = runJobService;
         this.udfService = udfService;
+        ruleJobRepository = ruleJobRepositoryCi;
     }
 
     @Async("qsThreadPool")
@@ -1098,8 +1102,7 @@ public class LivyActions {
         //String payload1 = "{\"file\":\""+pysparkScriptS3FileLoc+"\"}";
         final JsonObject payload = new JsonObject();
         payload.addProperty("file", pysparkScriptS3FileLoc);
-        payload.addProperty("executorMemory", executorMemory);
-        payload.addProperty("driverMemory", driverMemory);
+        livyClient.setSparkProperty(payload);
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -1140,6 +1143,172 @@ public class LivyActions {
         return batchJobId;
     }
 
+    public int invokeRuleJobOperation(final String pysparkScriptS3FileLoc, String bucketName, String jobName, int ruleJobId,
+                                      String modifiedBy, int projectId) throws Exception {
+        log.info("Invoked the Livy Job for running this Rule Job...");
+
+        final JsonObject payload = new JsonObject();
+        payload.addProperty("file", pysparkScriptS3FileLoc);
+        livyClient.setSparkProperty(payload);
+        String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+
+        final JsonNode fromJson = mapper.readTree(jsonRes);
+        final int batchJobId = fromJson.get("id").asInt();
+        log.info(" Batch Job ID {}", batchJobId);
+
+        updateBatchJobId(ruleJobId, batchJobId, projectId, modifiedBy);
+
+        final JsonNode runningBatchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.running.toString());
+        if (runningBatchResponse != null) {
+            String batchJobState = runningBatchResponse.get("state").asText();
+            if (LivySessionState.running.toString().equals(batchJobState)) {
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.INPROCESS.getStatus(), null, modifiedBy, projectId, null);
+                log.info("Running the Rule Job...");
+            } else {
+                List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, batchJobLog);
+                log.info("Failed running the Rule Job...");
+            }
+        } else {
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, THRESHOLD_ERROR);
+            log.info("Failed running the Rule Job...");
+        }
+
+        final JsonNode batchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.success.toString());
+        if (batchResponse != null) {
+            String batchJobState = batchResponse.get("state").asText();
+
+            if (LivySessionState.success.toString().equals(batchJobState)) {
+                jobName = jobName.replace(".py", "");
+                S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                if(s3Object == null) { //Error in livy job
+                    List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                    String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                    updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, batchJobLog);
+                    log.info("Failed running the Rule Job...");
+                    return batchJobId;
+                }
+                S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+                // Read the JSON data from the input stream
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+                    RuleJobOutput ruleJobOutput = objectMapper.readValue(stringBuilder.toString(), RuleJobOutput.class);
+                    updateRuleJobEntry(ruleJobId, RuleJobStatus.COMPLETE.getStatus(), ruleJobOutput.getJobOutput(), modifiedBy, projectId, null);
+                    awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                }
+                log.info("Completed running the Rule Job...");
+            } else {
+                List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, batchJobLog);
+                log.info("Failed running the Rule Job...");
+            }
+        } else {
+            updateRuleJobEntry(ruleJobId, RuleJobStatus.FAILED.getStatus(), null, modifiedBy, projectId, THRESHOLD_ERROR);
+            log.info("Failed running the Rule Job...");
+        }
+
+        return batchJobId;
+    }
+
+    public RuleJobOutput invokeRowCountJobOperation(final String pysparkScriptS3FileLoc, String bucketName, String jobName) throws Exception {
+        log.info("Invoked the Livy Job for running this Row count Job...");
+
+        final JsonObject payload = new JsonObject();
+        payload.addProperty("file", pysparkScriptS3FileLoc);
+        livyClient.setSparkProperty(payload);
+        String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+
+        final JsonNode fromJson = mapper.readTree(jsonRes);
+        final int batchJobId = fromJson.get("id").asInt();
+        log.info(" Batch Job ID {}", batchJobId);
+        RuleJobOutput ruleJobOutput = null;
+
+        final JsonNode batchResponse = livyClient.getRuleJobApacheLivyBatchState(batchJobId, mapper, LivySessionState.success.toString());
+        if (batchResponse != null) {
+            String batchJobState = batchResponse.get("state").asText();
+
+            if (LivySessionState.success.toString().equals(batchJobState)) {
+                jobName = jobName.replace(".py", "");
+                S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                if(s3Object == null) { //Error in livy job
+                   log.info("Failed running the row count Job...");
+                   throw new RuntimeException("Failed running the row count Job");
+                }
+                S3ObjectInputStream inputStream = s3Object.getObjectContent();
+
+                // Read the JSON data from the input stream
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+                    ruleJobOutput = objectMapper.readValue(stringBuilder.toString(), RuleJobOutput.class);
+                    awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                    log.info("Inside Completed running the Row count Job..{}",ruleJobOutput.getJobOutput());
+                }
+                log.info("Completed running the Row count Job...");
+            } else {
+                List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
+                String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
+                log.info("Failed running the row count Job..{}", batchJobLog);
+            }
+        } else {
+            log.info("Failed running the Row count Job");
+        }
+
+        return ruleJobOutput;
+    }
+    private void updateBatchJobId(final int ruleJobId, final int batchJobId, int projectId, String modifiedBy) throws SQLException {
+        dbUtil.changeSchema("public");
+        final Projects project = projectService.getProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        QsRuleJob ruleJob = ruleJobRepository.findByJobIdAndActiveIsTrue(ruleJobId);
+        if(ruleJob != null) {
+            ruleJob.setBatchJobId(batchJobId);
+            ruleJob.setModifiedDate(DateTime.now().toDate());
+            ruleJob.setModifiedBy(modifiedBy);
+            ruleJobRepository.save(ruleJob);
+        }
+    }
+
+    private void updateRuleJobEntry(final int ruleJobId, final String status, String jobOutput, String modifiedBy, int projectId, String batchJobLog) throws SQLException {
+        dbUtil.changeSchema("public");
+        final Projects project = projectService.getProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        QsRuleJob ruleJob = ruleJobRepository.findByJobIdAndActiveIsTrue(ruleJobId);
+        if(ruleJob != null) {
+            if(ruleJob.getJobStatus().equals(RuleJobStatus.CANCELLED.getStatus()) && ruleJob.getBatchJobId() > 0) {
+                livyClient.deleteLivyBatchJob(ruleJob.getBatchJobId());
+            } else {
+                ruleJob.setJobStatus(status);
+                ruleJob.setJobOutput(jobOutput);
+                ruleJob.setBatchJobLog(batchJobLog);
+                ruleJob.setModifiedDate(DateTime.now().toDate());
+                ruleJob.setModifiedBy(modifiedBy);
+                if(!status.equals(RuleJobStatus.INPROCESS.getStatus())) {
+                    ruleJob.setJobFinishedDate(DateTime.now().toDate());
+                }
+                ruleJobRepository.save(ruleJob);
+            }
+        }
+    }
+
     private RunJobStatus updateJobEntry(final int runJobId, final String status, final int batchJobId, final String batchJobLog,
                                         final long elapsedTime) throws SQLException {
         Optional<RunJobStatus> runJobOp = runJobService.getRunJob(runJobId);
@@ -1158,6 +1327,10 @@ public class LivyActions {
         }
 
         return null;
+    }
+
+    public void cancelBatchJob(final int batchJobId) throws SQLException {
+        livyClient.deleteLivyBatchJob(batchJobId);
     }
 
     private void updateAutoRunBatchScript(StringBuilder fileContents, int projectId, int eventId, String dfName) {
@@ -1200,8 +1373,7 @@ public class LivyActions {
             }
             payload.add("pyFiles", udfFiles);
         }
-        payload.addProperty("executorMemory", executorMemory);
-        payload.addProperty("driverMemory", driverMemory);
+        livyClient.setSparkProperty(payload);
         log.info("Livy payload : {}", payload.toString());
         String jsonRes = livyClient.livyPostHandler(livyBaseBatchesUrl, payload.toString());
 

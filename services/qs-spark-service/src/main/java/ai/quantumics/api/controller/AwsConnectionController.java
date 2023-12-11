@@ -1,0 +1,230 @@
+package ai.quantumics.api.controller;
+
+import ai.quantumics.api.enums.AwsAccessType;
+import ai.quantumics.api.exceptions.DatasourceNotFoundException;
+import ai.quantumics.api.exceptions.InvalidAccessTypeException;
+import ai.quantumics.api.model.Projects;
+import ai.quantumics.api.model.QsUserV2;
+import ai.quantumics.api.req.AwsDatasourceRequest;
+import ai.quantumics.api.res.AwsDatasourceResponse;
+import ai.quantumics.api.service.AwsConnectionService;
+import ai.quantumics.api.util.DbSessionUtil;
+import ai.quantumics.api.util.ValidatorUtils;
+import ai.quantumics.api.vo.BucketFileContent;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static ai.quantumics.api.constants.DatasourceConstants.DATA_SOURCE_DELETED;
+import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/aws")
+public class AwsConnectionController {
+    private final AwsConnectionService awsConnectionService;
+    private final DbSessionUtil dbUtil;
+    private final ValidatorUtils validatorUtils;
+
+    public AwsConnectionController(AwsConnectionService awsConnectionService, DbSessionUtil dbUtil,
+                                   ValidatorUtils validatorUtils) {
+        this.awsConnectionService = awsConnectionService;
+        this.dbUtil = dbUtil;
+        this.validatorUtils = validatorUtils;
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<AwsDatasourceResponse> saveConnection(@RequestBody @Valid AwsDatasourceRequest awsDatasourceRequest)
+            throws InvalidAccessTypeException {
+
+            dbUtil.changeSchema(PUBLIC_SCHEMA);
+            QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
+            Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
+            dbUtil.changeSchema(project.getDbSchemaName());
+            final String userName = user.getQsUserProfile().getUserFirstName() + " "
+                + user.getQsUserProfile().getUserLastName();
+            return ResponseEntity.status(HttpStatus.CREATED).body(awsConnectionService.saveConnectionInfo(awsDatasourceRequest, userName));
+    }
+
+    @GetMapping("/getConnections/{userId}/{projectId}")
+    public ResponseEntity<Page<AwsDatasourceResponse>> getConnectionInfo(@PathVariable(value = "userId") final int userId,
+                                                                         @PathVariable(value = "projectId") final int projectId,
+                                                                         @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                         @RequestParam(name = "size", defaultValue = "100") int size) throws Exception {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getActiveConnections(page, size));
+    }
+
+    @GetMapping("/getConnectionByName/{userId}/{projectId}/{datasourceName}")
+    public ResponseEntity<Object> getConnectionByName(
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "datasourceName") final String datasourceName,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size,
+            @RequestParam(name = "filter", defaultValue = "false") boolean filter)
+            throws Exception {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return awsConnectionService.getConnectionByName(datasourceName.trim(), page, size, filter);
+
+    }
+
+    @GetMapping("/getConnectionById/{userId}/{projectId}/{id}")
+    public ResponseEntity<AwsDatasourceResponse> getConnectionById(
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "id") final int id)
+            throws Exception {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getConnectionById(id));
+
+    }
+
+    @DeleteMapping("/delete/{userId}/{projectId}/{id}")
+    public ResponseEntity<Object> deleteConnection(@PathVariable(value = "userId") final int userId,
+                                                                        @PathVariable(value = "projectId") final int projectId,
+                                                                        @PathVariable(value = "id") final int id) throws DatasourceNotFoundException {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        final String userName = user.getQsUserProfile().getUserFirstName() + " "
+                + user.getQsUserProfile().getUserLastName();
+        awsConnectionService.deleteConnection(id, userName);
+        return returnResInstance(HttpStatus.OK, DATA_SOURCE_DELETED);
+    }
+
+    @GetMapping("/getAwsAccessTypes")
+    public ResponseEntity<Map<AwsAccessType,String>> getAwsAccessTypes() {
+        return ResponseEntity.status(HttpStatus.OK).body(AwsAccessType.getAccessTypeAsMap());
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Object> updateConnection(@RequestBody @Valid  AwsDatasourceRequest awsDatasourceRequest,
+                                                                  @PathVariable(value = "id") final int id)
+            throws DatasourceNotFoundException {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        QsUserV2 user = validatorUtils.checkUser(awsDatasourceRequest.getUserId());
+        Projects project = validatorUtils.checkProject(awsDatasourceRequest.getProjectId());
+        dbUtil.changeSchema(project.getDbSchemaName());
+        final String userName = user.getQsUserProfile().getUserFirstName() + " "
+                + user.getQsUserProfile().getUserLastName();
+        return awsConnectionService.updateConnectionInfo(awsDatasourceRequest, id, userName);
+    }
+
+    @GetMapping("/buckets/{userId}/{projectId}")
+    public ResponseEntity<List<String>> getBuckets(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        List<String> bucketsName = awsConnectionService.getBuckets();
+        return ResponseEntity.status(HttpStatus.OK).body(bucketsName);
+    }
+
+    @GetMapping(value="/buckets/{userId}/{projectId}/{bucketName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getFoldersAndFilePath(@PathVariable(value = "userId") final int userId,
+                                                        @PathVariable(value = "projectId") final int projectId,
+                                                        @PathVariable(value = "bucketName") final String bucketName,
+                                                        @RequestParam(value = "region") final String region,
+                                                        @RequestParam(value = "accessType") final String accessType) throws IOException {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getFoldersAndFilePath(bucketName, region, accessType));
+    }
+
+    @PostMapping("/testConnection/{userId}/{projectId}")
+    public ResponseEntity<Object> testConnection(@RequestBody AwsDatasourceRequest awsDatasourceRequest,
+                                                 @PathVariable(value = "userId") final int userId,
+                                                 @PathVariable(value = "projectId") final int projectId) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return returnResInstance(HttpStatus.OK, awsConnectionService.testConnection(awsDatasourceRequest));
+    }
+
+    @GetMapping("/content/{userId}/{projectId}")
+    public ResponseEntity<Object> getFileContent(@PathVariable(value = "userId") final int userId,
+                                                 @PathVariable(value = "projectId") final int projectId,
+                                                 @RequestParam(value = "bucket") final String bucket,
+                                                 @RequestParam(value = "file") final String file,
+                                                 @RequestParam(value = "region") final String region,
+                                                 @RequestParam(value = "accessType") final String accessType) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        validatorUtils.checkProject(projectId);
+        BucketFileContent content = awsConnectionService.getContent(bucket, file, region, accessType);
+        return ResponseEntity.status(HttpStatus.OK).body(content);
+    }
+
+    @GetMapping("/searchConnection/{userId}/{projectId}/{datasourceName}")
+    public ResponseEntity<List<AwsDatasourceResponse>> searchConnection(
+            @PathVariable(value = "userId") final int userId,
+            @PathVariable(value = "projectId") final int projectId,
+            @PathVariable(value = "datasourceName") final String datasourceName)
+            throws Exception {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        QsUserV2 user = validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.searchConnection(datasourceName.trim()));
+
+    }
+
+    @GetMapping("/regions/{userId}/{projectId}")
+    public ResponseEntity<List<String>> getRegions(@PathVariable(value = "userId") final int userId,
+                                                   @PathVariable(value = "projectId") final int projectId) {
+
+        dbUtil.changeSchema(PUBLIC_SCHEMA);
+        validatorUtils.checkUser(userId);
+        Projects project = validatorUtils.checkProject(projectId);
+        dbUtil.changeSchema(project.getDbSchemaName());
+        return ResponseEntity.status(HttpStatus.OK).body(awsConnectionService.getRegions());
+    }
+    private ResponseEntity<Object> returnResInstance(HttpStatus code, String message) {
+        HashMap<String, Object> genericResponse = new HashMap<>();
+        genericResponse.put("code", code.value());
+        genericResponse.put("message", message);
+        return ResponseEntity.status(code).body(genericResponse);
+    }
+}

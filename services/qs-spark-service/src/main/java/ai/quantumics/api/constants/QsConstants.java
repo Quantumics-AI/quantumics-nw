@@ -8,12 +8,15 @@
 
 package ai.quantumics.api.constants;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -69,6 +72,7 @@ public class QsConstants {
   public static final String ENG_DB = "_eng" + db + "_";
   
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+  public static final String LOCAL_DATE_FORMAT = "dd-MM-yy";
   public static final String ADMIN_ROLE = "Admin";
   
   public static final String FILTERROWS = "filterRows";
@@ -95,19 +99,56 @@ public class QsConstants {
   
   // ANALYTICS Constants
   public static final String PII_DETECTION = "pii";
-  public static final String PII_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/PII_Detection.py";
+  public static final String PII_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/pii_detection.py";
   public static final String OUTLIERS_DETECTION = "outliers";
 
-  public static final String COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/Column_Value_Freq.py";
+  public static final String COLUMN_VAL_FREQ_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/column_value_freq.py";
 
-  public static final String FILE_STATS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/File_Statistics.py";
-  public static final String OUTLIERS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/Outliers_Detection.py";
-  public static final String DELTA_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/Delta_Detection.py";
-  public static final String PII_COL_DETECTION_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/PII_Column_Detection.py";
+  public static final String FILE_STATS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/file_statistics.py";
+  public static final String OUTLIERS_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/outliers_detection.py";
+  public static final String DELTA_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/delta_detection.py";
+  public static final String PII_COL_DETECTION_PYTHON_FILE_REL_LOC = "ai/quantumics/ml/pii_column_detection.py";
   public static final String QS_LIVY_TEMPLATE_ENG_NAME = "ai/quantumics/ml/etl_livy_template_eng.py";
-  public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/Write_Xlsx_To_Csv.py";
+  public static final String SAVE_XLSX_FILE_PYTHON_SCRIPT_REL_LOC = "ai/quantumics/ml/write_xlsx_to_csv.py";
   public static final String QS_LIVY_TEMPLATE_NAME = "ai/quantumics/ml/etl_livy_template.py";
-  
+  public static final String DQ_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/dq_row_count_template.py";
+  public static final String ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/row_count_template.py";
+  public static final String DQ_COLUMN_SUM_TEMPLATE_NAME = "ai/quantumics/ml/dq_sum_of_column_template.py";
+  public static final String DQ_NULL_VALUE_TEMPLATE_NAME = "ai/quantumics/ml/dq_null_value_template.py";
+  public static final String DQ_ZERO_ROW_COUNT_TEMPLATE_NAME = "ai/quantumics/ml/dq_zero_row_count_template.py";
+  public static final String DQ_DUPLICATE_VALUE_ROW_TEMPLATE_NAME = "ai/quantumics/ml/dq_duplicate_value_row_template.py";
+  public static final String DQ_DUPLICATE_VALUE_COLUMN_TEMPLATE_NAME = "ai/quantumics/ml/dq_duplicate_value_column_template.py";
+  public static final String DQ_DATA_PROFILE_TABLE_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/dq_data_profile_table_level_template.py";
+  public static final String DQ_DATA_PROFILE_COLUMN_LEVEL_TEMPLATE_NAME = "ai/quantumics/ml/dq_data_profile_column_level_template.py";
+
+  public static final String RULE_OUTPUT_FOLDER = "ruleoutput";
+  public static final String SOURCE_BUCKET = "$SOURCE_BUCKET";
+  public static final String APP_RULE_DETAILS = "$APP_RULE_DETAILS";
+  public static final String SOURCE_PATH = "$SOURCE_PATH";
+  public static final String TARGET_BUCKET = "$TARGET_BUCKET";
+  public static final String TARGET_PATH = "$TARGET_PATH";
+  public static final String S3_OUTPUT_PATH = "$S3_OUTPUT_PATH";
+  public static final String RULE_TYPE_NAME = "$RULE_TYPE_NAME";
+  public static final String LEVEL_NAME = "$LEVEL_NAME";
+  public static final String ACCEPTANCE_PER = "$ACCEPTANCE_PER";
+  public static final String COLUMNS_DETAILS = "$COLUMNS";
+  public static final String DATA_COMPLETENESS = "Data Completeness";
+  public static final String ROW_COUNT = "Row count check";
+  public static final String SUM_OF_COLUMN_VALUE = "Sum of column value";
+  public static final String DATA_PROFILER = "Data Profiler";
+  public static final String TABLE_LEVEL = "Table Level";
+  public static final String COLUMN_LEVEL = "Column level";
+  public static final String NULL_VALUE = "Null Value";
+  public static final String ZERO_ROW_CHECK = "Zero Row Check";
+  public static final String DUPLICATE_VALUE = "Duplicate Value";
+  public static final String DUPLICATE_ROW = "Duplicate Row";
+  public static final String DUPLICATE_COLUMN_VALUE = "Column";
+  public static final String DUPLICATE_MULTI_COLUMN_VALUE = "Multiple Column";
+  public static final String THRESHOLD_ERROR = "Batch job aborted, as the job execution time exceeded the threshold. Couldn't capture the batch job log";
+
+  public static final String RULE_LEVEL_ALL = "All";
+  public static final String ACTIVE_RULE = "Active";
+  public static final String RULE_TYPE_NOT_FOUND = "No Rule Type found";
   // Email Template Actions
   public static final String USER_NAME_PLACE_HOLDER = "{USER_NAME}";
   public static final String REST_PWD_LINK_PLACE_HOLDER = "{RESET_PASSWORD_LINK}";
@@ -202,7 +243,7 @@ public class QsConstants {
   public static final String STANDARD_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
   public static final TimeZone utc = TimeZone.getTimeZone("UTC");
   public static final SimpleDateFormat formatter = new SimpleDateFormat(STANDARD_DATE_FORMAT);
-  
+  public static final String europe_london_timezone = "Europe/London";
   public static final String[] NEW_COL_GENERATING_RULES = {"countMatch", "mergeRule", "manageColumns", "extractColumnValues", "split"};
   
   // Cleansing Rule Types
@@ -225,7 +266,14 @@ public class QsConstants {
   public static final String METADATE = "metadata";
   
   public static final String EMPTY = " ";
-  
+  public static final String SPARK_EXECUTOR_MEMORY = "executorMemory";
+  public static final String SPARK_DRIVER_MEMORY = "driverMemory";
+  public static final String SPARK_EXECUTOR_CORES = "executorCores";
+  public static final String SPARK_EXECUTOR_INSTANCES = "numExecutors";
+  public static final String PARQUET_TIMESTAMP = "TIMESTAMP";
+  public static final String PARQUET_DATE = "DATE";
+  public static final String PARQUET_DATE_PATTERN = "yyyy-MM-dd";
+  public static final String PARQUET_TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
   private QsConstants() {}
   
   public static Date getCurrentUtcDate() {
@@ -243,5 +291,22 @@ public class QsConstants {
     format1.setTimeZone(QsConstants.utc);
     Date newDate = format1.parse(date);
     return newDate;
+  }
+
+  public static LocalDate convertToLocalDate(String dateString) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LOCAL_DATE_FORMAT);
+    LocalDate localDate = LocalDate.now();
+    if(StringUtils.isNotEmpty(dateString)) {
+      localDate = LocalDate.parse(dateString, formatter);
+    }
+    return localDate;
+  }
+
+  public static String convertToDDMMYYYY(LocalDate date) {
+    // Define the desired date format
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+
+    // Format the LocalDate object to a String
+    return date.format(formatter);
   }
 }

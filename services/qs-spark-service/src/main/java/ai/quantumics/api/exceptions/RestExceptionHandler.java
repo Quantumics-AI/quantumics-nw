@@ -10,6 +10,9 @@ package ai.quantumics.api.exceptions;
 
 import javax.persistence.EntityNotFoundException;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import org.hibernate.exception.ConstraintViolationException;
+import com.amazonaws.services.securitytoken.model.AWSSecurityTokenServiceException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +26,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+import static ai.quantumics.api.constants.DatasourceConstants.CONNECTION_FAILED;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 @Slf4j
@@ -87,13 +93,58 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	  HttpHeaders headers, 
 	  HttpStatus status, 
 	  WebRequest request) {
+		List<String> errorList = new ArrayList<>();
+		ex.getBindingResult().getFieldErrors().forEach(error -> {
+		errorList.add(error.getDefaultMessage());
+	});
+
 	    ApiError apiError = 
-	      new ApiError(HttpStatus.BAD_REQUEST, "Please provide valid input!");
+	      new ApiError(HttpStatus.BAD_REQUEST, errorList.toString());
 	    return handleExceptionInternal(
 	      ex, apiError, headers, apiError.getStatus(), request);
 	}
 	
 	
+	@ExceptionHandler(InvalidAccessTypeException.class)
+	protected ResponseEntity<Object> invalidAccessTypeException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
+	@ExceptionHandler(DatasourceNotFoundException.class)
+	protected ResponseEntity<Object> datasourceNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
+	@ExceptionHandler(BucketNotFoundException.class)
+	protected ResponseEntity<Object> bucketNotFoundException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
+	@ExceptionHandler(AmazonS3Exception.class)
+	protected ResponseEntity<Object> amazonS3xception(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+		apiError.setMessage(ex.getLocalizedMessage());
+		return buildResponseEntity(apiError);
+	}
+
+	@ExceptionHandler(AWSSecurityTokenServiceException.class)
+	protected ResponseEntity<Object> securityTokenException(Exception ex) {
+		log.error(ex.getLocalizedMessage());
+		ApiError apiError = new ApiError(HttpStatus.FORBIDDEN);
+		apiError.setMessage(CONNECTION_FAILED);
+		return buildResponseEntity(apiError);
+	}
+
 	@ExceptionHandler(Exception.class)
 	protected ResponseEntity<Object> genericException(Exception ex) {
 		log.error(ex.getLocalizedMessage());

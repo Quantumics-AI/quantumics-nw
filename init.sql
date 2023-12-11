@@ -924,6 +924,103 @@ BEGIN
             CONSTRAINT qsp_home_kpi_pkey PRIMARY KEY (kpi_id)
             )';
 
+        EXECUTE '
+	    CREATE TABLE '||schemaName||'.qsp_aws_datasource (
+	    id integer NOT NULL GENERATED ALWAYS AS IDENTITY,
+        connection_name character varying(50) CHECK (LENGTH(connection_name) >= 3 AND LENGTH(connection_name) <= 50) NOT NULL,
+        sub_data_source varchar(255) NOT NULL,
+        access_type varchar(255) NOT NULL,
+        bucket_name varchar(255) NOT NULL,
+        region varchar(20) NOT NULL,
+        user_id int4 NOT NULL,
+        project_id int4 NOT NULL,
+        active boolean default true,
+        created_by varchar(255) NOT NULL,
+        created_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        modified_by varchar(255) NULL,
+        modified_date timestamp without time zone NULL
+	)';
+
+	EXECUTE '
+            CREATE TABLE '||schemaName||'.qsp_rule (
+            rule_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+			source_and_target boolean DEFAULT false,
+			rule_name varchar(50) NOT NULL,
+			rule_description varchar(150) NOT NULL,
+			source_data text COLLATE pg_catalog."default",
+			target_data text COLLATE pg_catalog."default",
+			rule_details text COLLATE pg_catalog."default",
+			created_by character varying(100) COLLATE pg_catalog."default",
+			modified_by character varying(100) COLLATE pg_catalog."default",
+    		modified_date timestamp without time zone,
+    		created_date timestamp without time zone,
+    		user_id integer NOT NULL,
+    		status varchar(10) NOT NULL,
+    		source_datasource_id int4 NULL,
+    		target_datasource_id int4 NULL,
+    		source_file_pattern varchar(100) NOT NULL,
+    		source_bucket_name varchar(100) NOT NULL,
+    		source_feed_name varchar(100) NOT NULL,
+    		source_file_name varchar(100) NOT NULL,
+    		target_file_pattern varchar(100) NULL,
+    		target_bucket_name varchar(100) NULL,
+    		target_feed_name varchar(100) NULL,
+    		target_file_name varchar(100) NULL,
+    		rule_type_name varchar(100) NOT NULL,
+    		level_name varchar(100) NOT NULL,
+    		CONSTRAINT qsp_rule_pkey PRIMARY KEY (rule_id)
+            )';
+
+	EXECUTE '
+            CREATE TABLE '||schemaName||'.qsp_rule_type (
+            id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+			rule_type_name varchar(255) NOT NULL,
+			level_name varchar(255),
+			column_level boolean default false,
+			active boolean default true,
+			source_only boolean default false,
+			creation_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+			)';
+
+	EXECUTE '
+            CREATE TABLE '||schemaName||'.qsp_rule_job (
+            job_id int4 NOT NULL GENERATED ALWAYS AS IDENTITY,
+    		rule_id integer NOT NULL,
+    		job_status varchar(15) NOT NULL,
+            job_output text COLLATE pg_catalog."default",
+    		created_by character varying(100) COLLATE pg_catalog."default",
+    		modified_by character varying(100) COLLATE pg_catalog."default",
+        	modified_date timestamp without time zone,
+        	created_date timestamp without time zone,
+        	user_id integer NOT NULL,
+        	active boolean default true,
+        	batch_job_log text COLLATE pg_catalog."default",
+        	batch_job_id integer,
+        	business_date DATE,
+        	job_submitted_date timestamp without time zone,
+        	job_finished_date timestamp without time zone,
+        	CONSTRAINT qsp_rule_job_pkey PRIMARY KEY (job_id)
+            )';
+
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Row count check');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Completeness', 'Sum of column value');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Table Level');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,false,CURRENT_TIMESTAMP);', schemaName, 'Data Profiler', 'Column level');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Duplicate Row');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
+	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
+	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Zero Row Check', null);
+
 	--- Table Creation completed..
 
 	--- Trigger Creation started..
@@ -1109,7 +1206,6 @@ ALTER PROCEDURE public.insert_eng_flow_job_result_rows(character varying, intege
 
 INSERT INTO public.qs_datasource_types (data_source_type,data_source_name,data_source_image,active,creation_date) VALUES
 	 ('LocalFile','Local File','folder.png',true,'2021-01-30 13:58:07.772487'),
-	 ('api','API','api.png',true,'2021-02-13 12:11:09'),
 	 ('DB','PgSQL','pgsql.png',true,'2021-02-13 12:11:09');
 
 
