@@ -315,6 +315,7 @@ public class RuleJobServiceImpl implements RuleJobService {
         ruleDetails.setRuleName(qsRule.getRuleName());
         ruleDetails.setRuleDescription(qsRule.getRuleDescription());
         ruleDetails.setSourceAndTarget(qsRule.isSourceAndTarget());
+        ruleDetails.setRuleConfig(qsRule.getRuleConfig());
         ruleDetails.setSourceData(gson.fromJson(qsRule.getSourceData(), DataSourceDetails.class));
         if(ruleDetails.getSourceData() != null) {
             String sourceFilePath = qsRule.getSourceFeedName() + "/" + QsConstants.convertToDDMMYYYY(ruleJob.getBusinessDate()) + "/" + qsRule.getSourceFileName();
