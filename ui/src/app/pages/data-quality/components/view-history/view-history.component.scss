@@ -326,7 +326,7 @@
 
 .list-height {
     // height: calc(100vh - 250px);
-    height: 63vh;
+    height: 36vh;
 }
 
 // filter rule type 
@@ -490,4 +490,11 @@
 
 .mr-t--24 {
     margin-top: -24px;
+}
+
+.vr-l {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
 }

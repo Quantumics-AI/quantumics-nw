@@ -19,6 +19,7 @@ export class BusinessDateComponent {
   public selectedBusinessDate: NgbDateStruct;
   // selectedBusinessDate: NgbDateStruct;
   maxDate: NgbDateStruct;
+  public resultArray: { ruleId: number, businessDate: string }[] = [];
 
   constructor(
     public modal: NgbActiveModal,
@@ -52,12 +53,22 @@ export class BusinessDateComponent {
     const formattedDate = this.getFormattedDate();
     const lastTwoDigitsOfYear = formattedDate.slice(-2);
 
-    const request = {
-      ruleIds : this.ruleIds.ruleIds,
-      businessDate : `${formattedDate.substring(0, 6)}${lastTwoDigitsOfYear}`
-    };
+    // const request = {
+    //   ruleIds : this.ruleIds.ruleIds,
+    //   businessDate : `${formattedDate.substring(0, 6)}${lastTwoDigitsOfYear}`
+    // };
 
-    console.log(request);
+    this.resultArray = this.ruleIds.ruleIds.map(rule => ({
+      ruleId: rule,
+      businessDate: `${formattedDate.substring(0, 6)}${lastTwoDigitsOfYear}`
+    }));
+
+    const request = {
+      rules: this.resultArray
+    }
+
+
+    console.log("run rule object", request);
 
     this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((response) => {
       // this.loading = false;

@@ -103,9 +103,14 @@ export class BrowseFileComponent implements OnInit {
   }
 
   public getBrowseFileData(): void {
+    this.loading = true;
     this.ruleCreationService.getBrowseFile(this.userId, +this.projectId, this.bucketName, this.regionName, this.accesType).subscribe((res) => {
       
       this.fileStructure = res;
+      this.loading = false;
+    }, (error) => {
+      this.snakbar.open(error);
+      this.loading = false;
     })
   }
 

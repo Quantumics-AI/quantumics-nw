@@ -42,6 +42,9 @@
                                         <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
                                         Rule name is mandatory
                                     </div>
+                                    <div class="text-error" *ngIf="fg.get('ruleName').hasError('minlength') && !invalidCapitalPattern">
+                                        <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; Rule name must be between 3 and 50 characters long.
+                                    </div>
                                 </div>
                                 <div class="text-error" *ngIf="invalidPattern">
                                     <span><img src="assets/img/side-bar/alert.svg"></span>&nbsp; 
@@ -183,6 +186,18 @@
                                         formControlName="region" #region readonly>
                                     </div>
                                 </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="inputName" class="p2">File Pattern*</label>
+                                        <!-- <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                        formControlName="sourcePatternPath" #patternPath readonly> -->
+                                        <p class="p2 fs-12">s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME</p>
+                                        <div class="text-error fs-12" *ngIf="isPattern"> 
+                                            Please check, the selected file is not aligned with the File Pattern
+                                        </div>
+                                    </div>
+                                </div>
     
                                 <div class="col-12">
                                     <div class="form-group">
@@ -207,16 +222,7 @@
                                     </div>
                                     
                                 </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="inputName" class="p2">File Pattern*</label>
-                                        <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
-                                        formControlName="sourcePatternPath" #patternPath readonly>
-                                        <div class="text-error fs-12" *ngIf="isPattern"> 
-                                            Please check, the selected file is not aligned with the File Pattern
-                                        </div>
-                                    </div>
-                                </div>
+                                
                             </ng-container>
                             <ng-template #sourceAndTarget>
                                 <div class="col-6 mt-3">
@@ -278,6 +284,14 @@
                                                 <input type="text" class="form-control input-design" placeholder="Region name" 
                                                 formControlName="region" #region readonly>
                                             </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="inputName" class="p2">File Pattern*</label>
+                                                <!-- <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                                formControlName="sourcePatternPath" #patternPath readonly> -->
+                                                <p class="p2 fs-12">s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME</p>
+                                            </div>
+
                                             <div class="form-group">
                                                 <label for="filePath" class="p2">File Path*</label>
                                                 <div class="input-group mr">
@@ -298,13 +312,6 @@
                                                         (click)="browseSourceOne('source-1')" [disabled]="!selectedBucketOne">Choose File</button>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            
-
-                                            <div class="form-group">
-                                                <label for="inputName" class="p2">File Pattern*</label>
-                                                <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
-                                                formControlName="sourcePatternPath" #patternPath readonly>
                                             </div>
 
                                         </div>
@@ -371,6 +378,13 @@
                                             </div>
 
                                             <div class="form-group">
+                                                <label for="inputName" class="p2">File Pattern*</label>
+                                                <!-- <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
+                                                formControlName="sourcePatternPathTwo" #patternPathTwo readonly> -->
+                                                <p class="p2 fs-12">s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME</p>
+                                            </div>
+
+                                            <div class="form-group">
                                                 <label for="filePath" class="p2">File Path*</label>
                                                 <div class="input-group mr">
                                                     <div class="custom-file">
@@ -390,13 +404,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
-
-                                            <div class="form-group">
-                                                <label for="inputName" class="p2">File Pattern*</label>
-                                                <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
-                                                formControlName="sourcePatternPathTwo" #patternPathTwo readonly>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -408,7 +415,7 @@
                         </div>
                     </div>
                     
-                    <!--  -->
+                    <!-- Rule Types -->
                     <p class="rule-t p2">Rule Types*:</p>
 
                     <ng-container *ngFor="let item of ruleTypesData; let i = index;">
@@ -612,12 +619,28 @@
                             </div>
                           </div>
                         </div>
-                      </ng-container>
+                    </ng-container>
+                    <p class="rule-t p2">Run Rule Configuration*:</p>
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label p2 fw-500" for="inlineCheckbox1">Day</label>
+                    </div>
+                    <ng-container *ngFor="let d of ruleDays">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="{{d.day}}" [checked]="d.isChecked"
+                            [value]="d.day" (change)="checkedDays($event, d.day)">
+                            <label class="form-check-label p2" for="{{d.day}}">{{d.label}}</label>
+                        </div>
+                    </ng-container>
+                    <!-- Display error message if no checkbox is selected -->
+                    <div *ngIf="!anyCheckboxSelected()">
+                        <p class="text-error mr-b-0">Please select atleast one day for running the rule</p>
+                    </div>
+                    
                     <div class="mt-40">
                         <div class="text-center">
                             <button type="button" class="btn btn-outline-success connectionBtns"
                                 (click)="saveRuleFunction();" [ngClass]="{'validBtn': !fg.invalid}" 
-                                [disabled]="fg.invalid || alreadyExist || isPattern">Save</button>
+                                [disabled]="fg.invalid || alreadyExist || isPattern || !anyCheckboxSelected()">Save</button>
                         </div>
                     </div>
                 </div>

@@ -42,6 +42,7 @@ export class ViewRunningRulesComponent implements OnInit {
   public reRunStatus: boolean;
   public selectedReRunJobIds: number[] = [];
   selectedBusinessDate: string | null = null;
+  public selectedRules = [];
 
   constructor(
     // public modal: NgbActiveModal,
@@ -221,12 +222,12 @@ export class ViewRunningRulesComponent implements OnInit {
   public reRunRuleFunction(): void {
     this.loading = true;
     const request = {
-      ruleIds: this.selectedReRunJobIds,
-      businessDate: this.selectedBusinessDate
+      rules: this.selectedRules
     }
 
     this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
       this.loading = false;
+      this.selectedRules = [];
       this.selectedReRunJobIds = [];
       this.snakbar.open(res.message);
       this.getRulJobs();
@@ -311,7 +312,18 @@ export class ViewRunningRulesComponent implements OnInit {
   }
 
   selectReRule(event: any, d: any): void {
-    // const jobId = d.jobId;
+    if (event.target.checked) {
+      // If checkbox is checked, add the rule to the selectedRules array
+      this.selectedRules.push({
+        ruleId: d.ruleId,
+        businessDate: d.businessDate
+      });
+    } else {
+      // If checkbox is unchecked, remove the rule from the selectedRules array
+      this.selectedRules = this.selectedRules.filter(selectedRule => selectedRule.ruleId !== d.ruleId);
+    }
+
+    // const jobId = d.ruleId;
 
     // // Clear the array before adding the new jobId
     // this.selectedReRunJobIds = [];
@@ -319,30 +331,20 @@ export class ViewRunningRulesComponent implements OnInit {
     // if (event.target.checked) {
     //   // Checkbox is checked, add jobId to the selectedJobIds array
     //   this.selectedReRunJobIds.push(jobId);
+
+    //   // Find the object with the selected jobId
+    //   const selectedJob = this.runningList.find(job => job.ruleId === jobId);
+
+    //   // Extract the businessDate from the selected object
+    //   if (selectedJob) {
+    //     this.selectedBusinessDate = selectedJob.businessDate;
+    //   } else {
+    //     this.selectedBusinessDate = null;
+    //   }
+    // } else {
+    //   // Checkbox is unchecked, reset the selectedBusinessDate
+    //   this.selectedBusinessDate = null;
     // }
-
-    const jobId = d.ruleId;
-
-    // Clear the array before adding the new jobId
-    this.selectedReRunJobIds = [];
-
-    if (event.target.checked) {
-      // Checkbox is checked, add jobId to the selectedJobIds array
-      this.selectedReRunJobIds.push(jobId);
-
-      // Find the object with the selected jobId
-      const selectedJob = this.runningList.find(job => job.ruleId === jobId);
-
-      // Extract the businessDate from the selected object
-      if (selectedJob) {
-        this.selectedBusinessDate = selectedJob.businessDate;
-      } else {
-        this.selectedBusinessDate = null;
-      }
-    } else {
-      // Checkbox is unchecked, reset the selectedBusinessDate
-      this.selectedBusinessDate = null;
-    }
     
   }
 

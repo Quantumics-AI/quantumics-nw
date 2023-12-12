@@ -67,6 +67,17 @@ export class EditRuleComponent implements OnInit {
   public connectionPageSize: number = 10000;
   public selectedStatusValue: string;
   public editableForm: boolean = false;
+  public selectedDaysString: string;
+  public selectedDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  public ruleDays = [
+    {id: 1, day: 'Mon', label: 'Mon', isChecked: false},
+    {id: 2, day: 'Tue', label: 'Tue', isChecked: false},
+    {id: 3, day: 'Wed', label: 'Wed', isChecked: false},
+    {id: 4, day: 'Thu', label: 'Thu', isChecked: false},
+    {id: 5, day: 'Fri', label: 'Fri', isChecked: false},
+    {id: 6, day: 'Sat', label: 'Sat', isChecked: false},
+    {id: 7, day: 'Sun', label: 'Sun', isChecked: false}
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -126,7 +137,9 @@ export class EditRuleComponent implements OnInit {
       percentage: new FormControl({ value: '', disabled: true }),
       //
       status: new FormControl('', Validators.required),
-      dummyValidator: ['', [alwaysInvalid]]
+      dummyValidator: ['', [alwaysInvalid]],
+      //Rule configuration
+      ruleRunDays: new FormControl('', Validators.required)
     });
 
     this.getDataConnection();
@@ -174,7 +187,10 @@ export class EditRuleComponent implements OnInit {
       // status
       this.fg.controls.status.setValue(this.fetchEditRule?.status);
       this.fg.controls.percentage.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.acceptance);
-      
+
+      //Rule configuration
+      this.selectedDaysString = this.fetchEditRule?.ruleRunDays;
+      this.fg.controls.ruleRunDays.setValue(this.selectedDaysString);
       // this.fg.controls.status.setValue(result?.status)
       // this.fg.controls.synonymTerm.setValue(result?.synonymTerm);
       //Types
@@ -208,11 +224,19 @@ export class EditRuleComponent implements OnInit {
         // this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns;
       }, 5000); // 5000 milliseconds (5 seconds)
       
+      this.initializeCheckedDays();
     }, (error) => {
 
     })
 
     
+  }
+
+  initializeCheckedDays() {
+    const selectedDaysArray = this.selectedDaysString.split(',');
+    this.ruleDays.forEach(day => {
+      day.isChecked = selectedDaysArray.includes(day.day);
+    });
   }
 
   public getDataConnection(): void {
@@ -451,6 +475,36 @@ export class EditRuleComponent implements OnInit {
     // this.router.navigate([`projects/${this.projectId}/data-quality`]);
   }
 
+  checkedDays(event: any, day: string): void {
+    this.editableForm = true;
+    // Update the isChecked property of the corresponding day object
+    const selectedDay = this.ruleDays.find(d => d.day === day);
+    if (selectedDay) {
+      selectedDay.isChecked = event.target.checked;
+    }
+
+    // Update the selectedDaysString based on the checked checkboxes
+    this.selectedDaysString = this.getSelectedDaysString();
+    console.log(this.selectedDaysString);
+    this.fg.controls.ruleRunDays.setValue(this.selectedDaysString);
+    
+  }
+
+  getSelectedDaysString(): string {
+    // Get an array of selected days
+    const selectedDays = this.ruleDays
+      .filter(d => d.isChecked)
+      .map(d => d.day);
+  
+    // Join the selected days into a comma-separated string
+    return selectedDays.join(',');
+  }
+
+  // Function to check if any checkbox is selected
+  anyCheckboxSelected(): boolean {
+    return this.ruleDays.some(d => d.isChecked);
+  }
+
   public updateData(): void {
     // const value = this.fg.get('ruleName').value;
     // const titleCaseValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
@@ -490,7 +544,8 @@ export class EditRuleComponent implements OnInit {
     
         },
         userId : this.userId,
-        status: this.fg.controls.status.value   
+        status: this.fg.controls.status.value,
+        ruleRunDays: this.selectedDaysString
       }
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
@@ -520,7 +575,8 @@ export class EditRuleComponent implements OnInit {
       
           },
           userId : this.userId,
-          status: this.fg.controls.status.value   
+          status: this.fg.controls.status.value,
+          ruleRunDays: this.selectedDaysString
         }
       } else {
         this.saveRulePayload = {
@@ -548,11 +604,10 @@ export class EditRuleComponent implements OnInit {
       
           },
           userId : this.userId,
-          status: this.fg.controls.status.value   
+          status: this.fg.controls.status.value,
+          ruleRunDays: this.selectedDaysString
         }
       }
-      
-
       // console.log("FALSE -- Rule save payload:", JSON.stringify(req));
     }
 
