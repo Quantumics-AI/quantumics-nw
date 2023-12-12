@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, ValidatorFn, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { Quantumfacade } from 'src/app/state/quantum.facade';
 import { Location } from '@angular/common';
 import { BrowseFileComponent } from '../browse-file/browse-file.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
-
+// import { ruleDays } from '../../models/rule-filter.model';
 
 function acceptancePercentageValidator(control: FormControl) {
   const inputValue = control.value;
@@ -89,6 +89,17 @@ export class DataQualityCreateComponent implements OnInit {
   public selectedSubColumn: string;
   public patternPath: string;
   public isPattern: boolean;
+  public selectedDaysString: string = "Mon,Tue,Wed,Thu,Fri";
+  public selectedDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  public ruleDays = [
+    {id: 1, day: 'Mon', label: 'Mon', isChecked: true},
+    {id: 2, day: 'Tue', label: 'Tue', isChecked: true},
+    {id: 3, day: 'Wed', label: 'Wed', isChecked: true},
+    {id: 4, day: 'Thu', label: 'Thu', isChecked: true},
+    {id: 5, day: 'Fri', label: 'Fri', isChecked: true},
+    {id: 6, day: 'Sat', label: 'Sat', isChecked: false},
+    {id: 7, day: 'Sun', label: 'Sun', isChecked: false}
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -123,7 +134,7 @@ export class DataQualityCreateComponent implements OnInit {
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
     this.fg = this.fb.group({ 
       // '^[A-Za-z\\s!@#$%^&*()\\-_+=\\[\\]{}|;:\'",.<>?/]*$' ---- Validators.minLength(10), Validators.maxLength(150),
-      ruleName: ['', [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
+      ruleName: ['', [Validators.required, Validators.pattern(/^[A-Z]([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]*$/), Validators.minLength(3)]],
       ruleDescription: ['', [Validators.required, Validators.pattern(ruleDescriptionPattern)]],
       sourceAndTarget: [true],
       //source
@@ -151,7 +162,8 @@ export class DataQualityCreateComponent implements OnInit {
       selectColumnAttribute: [''],
       selectMultipleAttribute: new FormControl(''),
       acceptancePercentage: new FormControl(0, [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
-      //
+      //Rule configuration
+      ruleRunDays: new FormControl(this.selectedDaysString, Validators.required)
     });
     if(this.columnDataType){
       this.columnDataType = this.removeDuplicates(this.columnDataType, "columnName");
@@ -511,6 +523,35 @@ export class DataQualityCreateComponent implements OnInit {
     
   }
 
+  checkedDays(event: any, day: string): void {
+    // Update the isChecked property of the corresponding day object
+  const selectedDay = this.ruleDays.find(d => d.day === day);
+  if (selectedDay) {
+    selectedDay.isChecked = event.target.checked;
+  }
+
+  // Update the selectedDaysString based on the checked checkboxes
+  this.selectedDaysString = this.getSelectedDaysString();
+  console.log(this.selectedDaysString);
+  this.fg.controls.ruleRunDays.setValue(this.selectedDaysString);
+    
+  }
+
+  getSelectedDaysString(): string {
+    // Get an array of selected days
+    const selectedDays = this.ruleDays
+      .filter(d => d.isChecked)
+      .map(d => d.day);
+  
+    // Join the selected days into a comma-separated string
+    return selectedDays.join(',');
+  }
+
+  // Function to check if any checkbox is selected
+  anyCheckboxSelected(): boolean {
+    return this.ruleDays.some(d => d.isChecked);
+  }
+
   // browse table 
   public browseTable(): void {
     this.router.navigate([`projects/${this.projectId}/data-quality/create/table`]);
@@ -550,34 +591,45 @@ export class DataQualityCreateComponent implements OnInit {
   // }
 
   modelChangeRuleName(str) {
-    // const re = /^[a-zA-Z0-9_]+$/;
+    const ruleNameControl = this.fg.controls.ruleName;
 
-    if (this.fg.controls.ruleName.value != "") {
+    if (ruleNameControl.value !== "") {
+        const validCapital = String(str).match(/^([A-Z])/);
 
-      const validCapital = String(str).match(/^([A-Z])/);
-      
-      if (validCapital == null) {
-        this.invalidCapitalPattern = true;
-      } else {
-        this.invalidCapitalPattern = false;
-        const validWorkSpaceName = String(str)
-        .match(
-          /^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/
-        );
-
-        if (validWorkSpaceName == null) {
-          this.invalidPattern = true;
-
+        if (validCapital == null) {
+            this.invalidCapitalPattern = true;
+            this.invalidPattern = false;
         } else {
-          this.invalidPattern = false;
+            this.invalidCapitalPattern = false;
+
+            if (str.length < 3) {
+              const validWorkSpaceName = String(str)
+              .match(/^[A-Z]([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]*$/);
+
+              if (validWorkSpaceName == null) {
+                  this.invalidPattern = true;
+              } else {
+                  this.invalidPattern = false;
+              }
+            } else {
+                const validWorkSpaceName = String(str)
+                    .match(/^[A-Z]([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]*$/);
+
+                if (validWorkSpaceName == null) {
+                    this.invalidPattern = true;
+                } else {
+                    this.invalidPattern = false;
+                }
+            }
         }
-      }
     } else {
-      this.invalidPattern = false;
-      this.invalidCapitalPattern = false;
+        this.invalidPattern = false;
+        this.invalidCapitalPattern = false;
     }
 
-  }
+    // Trigger the validation manually to update the error status
+    ruleNameControl.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+}
 
   modelChangeDescription(str) {
     if(this.fg.controls.ruleDescription.value != ""){
@@ -675,7 +727,8 @@ export class DataQualityCreateComponent implements OnInit {
             }
     
         },
-        userId : this.userId    
+        userId : this.userId,
+        ruleRunDays: this.selectedDaysString
       }
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
@@ -703,7 +756,8 @@ export class DataQualityCreateComponent implements OnInit {
               }
       
           },
-          userId : this.userId    
+          userId : this.userId,
+          ruleRunDays: this.selectedDaysString  
         }
       } else {
         this.saveRulePayload = {
@@ -729,7 +783,8 @@ export class DataQualityCreateComponent implements OnInit {
               }
       
           },
-          userId : this.userId    
+          userId : this.userId,
+          ruleRunDays: this.selectedDaysString 
         }
       }
       // console.log("FALSE -- Rule save payload:", JSON.stringify(req));

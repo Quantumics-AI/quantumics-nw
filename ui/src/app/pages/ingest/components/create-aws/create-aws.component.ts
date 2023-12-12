@@ -82,7 +82,7 @@ export class CreateAwsComponent {
     this.projectId = +this.activatedRoute.parent.snapshot.paramMap.get('projectId');
       //End space allowed    /^([A-Z]).*([A-Za-z0-9_:-]+\s*)*[A-Za-z0-9_:-]+\s*$/
     this.fg = this.fb.group({
-      dataSourceName: ['', [Validators.required, Validators.pattern(/^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/)]],
+      dataSourceName: ['', [Validators.required, Validators.pattern(/^[A-Z]([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]*$/)]],
       connectionType: [{ value: 'PROFILE', disabled: true }],
       bucket: ['', [Validators.required]],
       region: ['', [Validators.required]],
@@ -227,33 +227,48 @@ export class CreateAwsComponent {
   }
 
   modelChangeDataSourceName(str) {
-    // const re = /^[a-zA-Z0-9_]+$/;
+    // const re = /^[a-zA-Z0-9_]+$/;  /^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/
+
     this.alreadyExist = false;
-    this.connection = false;
-    if (this.fg.controls.dataSourceName.value != "") {
+    this.connection = false; 
+    const ruleNameControl = this.fg.controls.dataSourceName;
 
-      const validCapital = String(str).match(/^([A-Z])/);
-      
-      if (validCapital == null) {
-        this.invalidCapitalPattern = true;
-      } else {
-        this.invalidCapitalPattern = false;
-        const validWorkSpaceName = String(str)
-        .match(
-          /^([A-Z]).([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]+$/
-        );
+    if (ruleNameControl.value !== "") {
+        const validCapital = String(str).match(/^([A-Z])/);
 
-        if (validWorkSpaceName == null) {
-          this.invalidPattern = true;
-
+        if (validCapital == null) {
+            this.invalidCapitalPattern = true;
+            this.invalidPattern = false;
         } else {
-          this.invalidPattern = false;
+            this.invalidCapitalPattern = false;
+
+            if (str.length < 3) {
+              const validWorkSpaceName = String(str)
+              .match(/^[A-Z]([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]*$/);
+
+              if (validWorkSpaceName == null) {
+                  this.invalidPattern = true;
+              } else {
+                  this.invalidPattern = false;
+              }
+            } else {
+                const validWorkSpaceName = String(str)
+                    .match(/^[A-Z]([A-Za-z0-9_:-]+\s)*[A-Za-z0-9_:-]*$/);
+
+                if (validWorkSpaceName == null) {
+                    this.invalidPattern = true;
+                } else {
+                    this.invalidPattern = false;
+                }
+            }
         }
-      }
     } else {
-      this.invalidPattern = false;
-      this.invalidCapitalPattern = false;
+        this.invalidPattern = false;
+        this.invalidCapitalPattern = false;
     }
+
+    // Trigger the validation manually to update the error status
+    ruleNameControl.updateValueAndValidity({ onlySelf: true, emitEvent: false });
 
   }
 
