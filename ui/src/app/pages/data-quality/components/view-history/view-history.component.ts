@@ -26,7 +26,7 @@ export class ViewHistoryComponent implements OnInit {
   private unsubscribe: Subject<void> = new Subject<void>();
   public loading:boolean;
   public runningList: any;
-
+  public fg: FormGroup;
   public cancelBtn: boolean;
   public outputData: any;
   public startIndex: number = 0;
@@ -44,6 +44,7 @@ export class ViewHistoryComponent implements OnInit {
   public selectedLevels: { [ruleTypeName: string]: string } = {};
   public ruleTypeList: any;
   public filterPayload: any;
+  public statusPayload: any;
   public statusFilterList = [
     {
       id: 1, status: 'Completed',
@@ -73,7 +74,8 @@ export class ViewHistoryComponent implements OnInit {
   public areDatesSelected: boolean = false;
   // selectedBusinessDate: NgbDateStruct;
   maxDate: NgbDateStruct;
-  public selectedDate: string;
+  public selectedFromDate: string;
+  public selectedToDate: string;
   public resultArray: { ruleId: number, businessDate: string }[] = [];
   public selectedRules = [];
 
@@ -104,6 +106,10 @@ export class ViewHistoryComponent implements OnInit {
     this.getRulJobs();
     this.getRuleTypeList();
     this.onSelectBusinesDate(this.selectedbusinessDate);
+
+    this.fg = this.fb.group({
+      feedName: new FormControl (''),
+    });
   }
 
   public getRulJobs(): void {
@@ -470,8 +476,8 @@ export class ViewHistoryComponent implements OnInit {
     
   }
 
-  public onSelectStatusLevelName(id: string): void {
-    
+  public onSelectStatusLevelName(status: string, statusLevel: string): void {
+    this.selectedStatusLevels[status] = statusLevel;
   }
 
   // Filter by business date 
@@ -519,8 +525,9 @@ export class ViewHistoryComponent implements OnInit {
     // Logic to set yesterday's date in DD-MM-YYYY format
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    this.selectedDate = this.formatDate(yesterday);
-    console.log("Date Yesterday", this.selectedDate);
+    this.selectedFromDate = this.formatDate(yesterday);
+    this.selectedToDate = this.formatDate(yesterday);
+    console.log("Date Yesterday", this.selectedFromDate , this.selectedToDate);
     
   }
 
@@ -533,8 +540,9 @@ export class ViewHistoryComponent implements OnInit {
     const lastSunday = new Date(today);
     lastSunday.setDate(today.getDate() - today.getDay()); // Setting it to last Sunday
 
-    this.selectedDate = `${this.formatDate(lastMonday)} and ${this.formatDate(lastSunday)}`;
-    console.log("Date Last week", this.selectedDate);
+    this.selectedFromDate = `${this.formatDate(lastMonday)}`;
+    this.selectedToDate = `${this.formatDate(lastSunday)}`;
+    console.log("Date Last week", this.selectedFromDate , this.selectedToDate);
   }
 
   private setThisMonthDates(): void {
@@ -543,8 +551,9 @@ export class ViewHistoryComponent implements OnInit {
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    this.selectedDate = `${this.formatDate(firstDayOfMonth)} - ${this.formatDate(lastDayOfMonth)}`;
-    console.log("Date this month", this.selectedDate);
+    this.selectedFromDate = `${this.formatDate(firstDayOfMonth)}`;
+    this.selectedToDate = `${this.formatDate(lastDayOfMonth)}`;
+    console.log("Date this month", this.selectedFromDate , this.selectedToDate);
   }
 
   private formatDate(date: Date): string {
@@ -594,6 +603,54 @@ export class ViewHistoryComponent implements OnInit {
     return true; // Default to true if dates are not selected yet
   }
 
+  public transformDataToRuleTypes(data: any): any[] {
+    return Object.keys(data).map((key) => {
+      let ruleLevel = data[key];
+      // Check if the key is "Null Value" or "Zero Row Check" and set ruleLevel to ""
+      if (key === "Null Value" || key === "Zero Row Check") {
+        ruleLevel = "";
+      }
+
+      return {
+        "ruleTypeName": key,
+        "ruleLevel": ruleLevel
+      };
+    });
+  }
+
+  public transformDataToStatus(data: any): any[] {
+    return Object.keys(data).map((key) => {
+      let statusLevel = data[key];
+      // Check if the key is "Null Value" or "Zero Row Check" and set ruleLevel to ""
+      if (key != "Completed") {
+        statusLevel = "";
+      }
+
+      return {
+        "selectedStatus": key,
+        "selectedStatusResult": statusLevel
+      };
+    });
+  }
+
+  public applyFilter(): void {
+    this.filterPayload = this.transformDataToRuleTypes(this.selectedLevels);
+    this.statusPayload = this.transformDataToStatus(this.selectedStatusLevels);
+    console.log("rule type - ", this.filterPayload);
+    console.log("Status", this.statusPayload);
+
+    const req = {
+      ruleTypes: this.filterPayload,
+      ruleJobStatus: this.statusPayload,
+      fromDate: this.selectedFromDate,
+      toDate: this.selectedToDate,
+      feedName: this.fg.controls.feedName.value,
+    }
+    
+    console.log("Final Payload -", req);
+    
+  }
+
   checkFromDate(): boolean {
     if (this.selectedFromBusinessDate && this.selectedToBusinessDate) {
       const fromDate = new Date(this.selectedFromBusinessDate.year, this.selectedFromBusinessDate.month - 1, this.selectedFromBusinessDate.day);
@@ -610,7 +667,7 @@ export class ViewHistoryComponent implements OnInit {
         const day = this.selectedFromBusinessDate.day.toString().padStart(2, '0');
         const month = this.selectedFromBusinessDate.month.toString().padStart(2, '0');
         const year = this.selectedFromBusinessDate.year;
-
+        this.selectedFromDate = `${day}-${month}-${year}`;
         return `${day}-${month}-${year}`;
     }
     return '';
@@ -621,7 +678,7 @@ export class ViewHistoryComponent implements OnInit {
         const day = this.selectedToBusinessDate.day.toString().padStart(2, '0');
         const month = this.selectedToBusinessDate.month.toString().padStart(2, '0');
         const year = this.selectedToBusinessDate.year;
-
+        this.selectedToDate = `${day}-${month}-${year}`;
         return `${day}-${month}-${year}`;
     }
     return '';

@@ -26,7 +26,7 @@
                         <div class="col mx-w pd-l-15">
                             <div class="df">
                                 <div class="form-check form-check-inline align-start">
-                                    <label class="form-check-label rules" for="inlineCheckbox1">Rule type</label>
+                                    <label class="form-check-label rules fw-500" for="inlineCheckbox1">Rule type:</label>
                                 </div>
                                 <ul class="list-group">
                                     <li class="list-group-item pd-0 br-n bg-c" *ngFor="let item of ruleTypeList; let i = index">
@@ -57,7 +57,7 @@
                         <div class="col mx-w">
                             <div class="df">
                                 <div class="form-check form-check-inline align-start">
-                                    <label class="form-check-label rules" for="inlineCheckbox1">Status</label>
+                                    <label class="form-check-label rules fw-500" for="inlineCheckbox1">Status:</label>
                                 </div>
                                 <ul class="list-group">
                                     <li class="list-group-item pd-0 br-n bg-c" *ngFor="let item of statusFilterList; let i = index">
@@ -70,7 +70,7 @@
                                             <div class="form-check form-check-inline" 
                                             *ngIf="item.status == 'Completed' && item.checked">
                                                 <select class="form-control input-design bg-w h-32 rules" #ds [(ngModel)]="selectedStatusLevels[item.status]"
-                                                (change)="onSelectStatusLevelName(ds.value)">
+                                                (change)="onSelectStatusLevelName(item.status, ds.value)">
                                                     <option value="All">All</option>
                                                     <option *ngFor="let level of item.level" [value]="level.name">{{level.name}}</option>
                                                 </select>
@@ -82,7 +82,7 @@
                         </div>
                         <div class="col">
                             <div class="form-check form-check-inline">
-                                <label class="form-check-label rules" for="inlineCheckbox1">Business Date</label>
+                                <label class="form-check-label rules fw-500" for="inlineCheckbox1">Business Date:</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <select class="form-control input-design bg-w h-32 rules" #bd [(ngModel)]="selectedbusinessDate"
@@ -146,17 +146,17 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <div class="mt-3" [ngClass]="{'mr-t-40': !isValidDateRange || !isValidFromDate}">
+                            <div [formGroup]="fg" class="mt-3" [ngClass]="{'mr-t-40': !isValidDateRange || !isValidFromDate}">
                                 <div class="form-check form-check-inline">
-                                    <label class="form-check-label rules" for="inlineCheckbox1">Feed Name</label>
+                                    <label class="form-check-label rules fw-500" for="inlineCheckbox1">Feed Name:</label>
                                 </div>
                                 <div class="form-check form-check-inline mr-l-15">
-                                    <input type="text" class="form-check-input input-design h-32 bg-w w-140 br-4" name="" id=""
-                                    maxlength="100">
+                                    <input type="text" class="form-check-input form-control input-design h-32 bg-w w-140 br-4" name="" id=""
+                                    maxlength="100" formControlName="feedName" #feedName>
                                 </div>
                             </div>
                             <div class="mr-t-24 pull-right">
-                                <button class="btn btn-design" [disabled]="areDatesSelected || isValidDateRange || isValidFromDate">Okay</button>
+                                <button class="btn btn-design" [disabled]="!areDatesSelected || !isValidDateRange || !isValidFromDate" (click)="applyFilter()">Okay</button>
                             </div>
                         </div>
                     </div>
