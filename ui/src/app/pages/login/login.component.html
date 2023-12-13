@@ -18,16 +18,16 @@
                                     formControlName="email">
                             </div>
                             <div class="input-group mb-3">
-                                <!-- <div class="form-group"> -->
-                                    <input [type]="fieldTextType ? 'text' : 'password'" id="password" class="form-control l-input l-border" placeholder="Password"
+                                <!-- <div class="form-group">  removed this class from input "l-border"-->
+                                    <input [type]="fieldTextType ? 'text' : 'password'" id="password" class="form-control l-input" placeholder="Password"
                                         formControlName="password" maxlength="30">
                                 <!-- </div> -->
-                                <div class="input-group-append">
+                                <!-- <div class="input-group-append">
                                     <span class="input-group-text eye-icon" id="basic-addon2" (click)="toggleShow()">
                                         <img src="assets/img/open-eye.svg" alt=""  [hidden]="showPassword">
                                         <img src="assets/img/close-eye.svg" alt="" [hidden]="!showPassword">
                                     </span>
-                                </div>
+                                </div> -->
                             </div>
                             
                             <div class="mb-4">

@@ -199,7 +199,7 @@ public class AwsConnectionServiceImpl implements AwsConnectionService {
         Page<AWSDatasource> dataSources;
         Pageable paging = PageRequest.of(page-1, pageSize);
         if (filter){
-            dataSources = awsConnectionRepo.findByActiveTrueAndConnectionNameStartingWithIgnoreCaseOrActiveTrueAndConnectionNameEndingWithIgnoreCaseOrderByCreatedDateDesc(datasourceName, datasourceName, paging);
+            dataSources = awsConnectionRepo.findByActiveTrueAndConnectionNameContainingIgnoreCaseOrderByCreatedDateDesc(datasourceName, paging);
         }else{
             dataSources = awsConnectionRepo.findByConnectionNameIgnoreCaseAndActiveTrueOrderByCreatedDateDesc(datasourceName, paging);
         }

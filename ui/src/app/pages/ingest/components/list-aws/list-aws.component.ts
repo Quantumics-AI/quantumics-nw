@@ -46,7 +46,7 @@ export class ListAwsComponent {
 
   public connectionCount: any;
   public pageNumebr: number = 1;
-  public pageLength: number = 10;
+  public pageLength: number = 100;
   buttonDisabled: boolean = true;
   searchSuccessClass: string = 'search-success-btn';
   searchInvalidClass: string = 'search-disable-btn';

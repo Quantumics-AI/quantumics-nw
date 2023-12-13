@@ -7,8 +7,9 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class RuleJobRequest {
+public class RuleData {
 
-  private List<RuleData> rules;
-
+  private Integer ruleId;
+  private String businessDate;
+  
 }

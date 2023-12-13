@@ -74,6 +74,8 @@ export class ViewHistoryComponent implements OnInit {
   // selectedBusinessDate: NgbDateStruct;
   maxDate: NgbDateStruct;
   public selectedDate: string;
+  public resultArray: { ruleId: number, businessDate: string }[] = [];
+  public selectedRules = [];
 
   constructor(
     // public modal: NgbActiveModal,
@@ -259,23 +261,23 @@ export class ViewHistoryComponent implements OnInit {
   }
 
   public reRunRuleFunction(): void {
-    console.log(this.selectedReRunJobIds);
+    // console.log(this.selectedReRunJobIds);
     
-    // this.loading = true;
-    // const request = {
-    //   ruleIds: this.selectedReRunJobIds,
-    //   businessDate: this.selectedBusinessDate
-    // }
+    this.loading = true;
+    const request = {
+      rules: this.selectedRules
+    }
 
-    // this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
-    //   this.loading = false;
-    //   this.selectedReRunJobIds = [];
-    //   this.snakbar.open(res.message);
-    //   this.getRulJobs();
-    // }, (error) => {
-    //   this.loading = false;
-    //   this.snakbar.open(error);
-    // });
+    this.ruleCreationService.runRule(this.userId, this.projectId, request).subscribe((res) => {
+      this.loading = false;
+      this.selectedRules = [];
+      this.selectedReRunJobIds = [];
+      this.snakbar.open(res.message);
+      this.getRulJobs();
+    }, (error) => {
+      this.loading = false;
+      this.snakbar.open(error);
+    });
     
     // const modalRef = this.modalService.open(ConfirmationComponent, { size: 'md modal-dialog-centered', scrollable: false});
     // modalRef.result.then((result) => {
@@ -353,45 +355,34 @@ export class ViewHistoryComponent implements OnInit {
   }
 
   selectReRule(event: any, d: any): void {
-    const jobId = d.ruleId;
-
-    // Clear the array before adding the new jobId
-    // this.selectedReRunJobIds = [];
-
-    if (event.target.checked) {
-      // Checkbox is checked, add jobId to the selectedJobIds array
-      this.selectedReRunJobIds.push(jobId);
-    } else {
-      const i = this.selectedReRunJobIds.indexOf(jobId);
-      if (i !== -1) {
-        this.selectedReRunJobIds.splice(i, 1);
-      }
-    }
-
-    // added following logic for single select
-
     // const jobId = d.ruleId;
 
     // // Clear the array before adding the new jobId
-    // this.selectedReRunJobIds = [];
+    // // this.selectedReRunJobIds = [];
 
     // if (event.target.checked) {
     //   // Checkbox is checked, add jobId to the selectedJobIds array
     //   this.selectedReRunJobIds.push(jobId);
-
-    //   // Find the object with the selected jobId
-    //   const selectedJob = this.runningList.find(job => job.ruleId === jobId);
-
-    //   // Extract the businessDate from the selected object
-    //   if (selectedJob) {
-    //     this.selectedBusinessDate = selectedJob.businessDate;
-    //   } else {
-    //     this.selectedBusinessDate = null;
-    //   }
     // } else {
-    //   // Checkbox is unchecked, reset the selectedBusinessDate
-    //   this.selectedBusinessDate = null;
+    //   const i = this.selectedReRunJobIds.indexOf(jobId);
+    //   if (i !== -1) {
+    //     this.selectedReRunJobIds.splice(i, 1);
+    //   }
     // }
+
+    if (event.target.checked) {
+      // If checkbox is checked, add the rule to the selectedRules array
+      this.selectedRules.push({
+        ruleId: d.ruleId,
+        businessDate: d.businessDate
+      });
+    } else {
+      // If checkbox is unchecked, remove the rule from the selectedRules array
+      this.selectedRules = this.selectedRules.filter(selectedRule => selectedRule.ruleId !== d.ruleId);
+    }
+
+    // Log the selected rules (you can remove this in your final implementation)
+    console.log('Selected Rules:', this.selectedRules);
     
   }
 

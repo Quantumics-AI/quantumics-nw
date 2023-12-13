@@ -461,6 +461,23 @@
                             </div>
                         </ng-container>
                         <div>
+                            <p class="rule-t p2">Run Rule Configuration*:</p>
+                            <div class="form-check form-check-inline">
+                                <label class="form-check-label p2 fw-500" for="inlineCheckbox1">Day</label>
+                            </div>
+                            <ng-container *ngFor="let d of ruleDays">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="{{d.day}}" [checked]="d.isChecked"
+                                    [value]="d.day" (change)="checkedDays($event, d.day)">
+                                    <label class="form-check-label p2" for="{{d.day}}">{{d.label}}</label>
+                                </div>
+                            </ng-container>
+                            <!-- Display error message if no checkbox is selected -->
+                            <div *ngIf="!anyCheckboxSelected()">
+                                <p class="text-error mr-b-0">Please select atleast one day for running the rule</p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
                             <p class="p2 active-s">Rule Status*</p>
                             <div class="form-group">
                                 <ng-container *ngFor="let item of ruleFilter">
@@ -483,7 +500,7 @@
                             <div class="text-center">
                                 <button type="button" class="btn btn-outline-success connectionBtns"
                                     (click)="testUpdateData();" [ngClass]="{'validBtn': !fg.invalid}" 
-                                    [disabled]="fg.invalid || alreadyExist || !editableForm">Update</button>
+                                    [disabled]="fg.invalid || alreadyExist || !editableForm || !anyCheckboxSelected()">Update</button>
                             </div>
                         </div>
                     </div>
