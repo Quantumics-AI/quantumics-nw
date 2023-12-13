@@ -60,6 +60,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
+import static ai.quantumics.api.constants.QsConstants.JOB_MATCH;
+import static ai.quantumics.api.constants.QsConstants.JOB_STATUS;
 import static ai.quantumics.api.constants.QsConstants.JOB_STATUS_ALL;
 import static ai.quantumics.api.constants.QsConstants.PUBLIC;
 import static ai.quantumics.api.constants.QsConstants.RULE_LEVEL_ALL;
@@ -319,7 +321,6 @@ public class RuleJobServiceImpl implements RuleJobService {
             dbUtil.changeSchema(project.getDbSchemaName());
             List<QsRuleJobResponse> dbResultList = null;
             List<QsRuleJobResponse> filteredResponse = new ArrayList<>();
-            List<QsRuleJobResponse> filteredResponse1 = new ArrayList<>();
             Map<String, String> ruleTypeAndLevelMap;
             Map<String, String> resultMap;
             if(CollectionUtils.isNotEmpty(ruleJobDTO.getRuleTypes()) || CollectionUtils.isNotEmpty(ruleJobDTO.getRuleJobStatus()) || StringUtils.isNotEmpty(ruleJobDTO.getFeedName()) || StringUtils.isNotEmpty(ruleJobDTO.getFromDate()) || StringUtils.isNotEmpty(ruleJobDTO.getToDate())) {
@@ -373,40 +374,43 @@ public class RuleJobServiceImpl implements RuleJobService {
     }
 
     private static boolean filterByRuleTypeAndLevel(QsRuleJobResponse result, Map<String, String> ruleTypeAndLevelMap) {
-        String ruleTypeName = result.getRuleTypeName();
-        String ruleLevel = ruleTypeAndLevelMap.get(ruleTypeName);
-
-        return ruleLevel == null || RULE_LEVEL_ALL.equals(ruleLevel) || result.getRuleLevelName().equals(ruleLevel);
+        if(!ruleTypeAndLevelMap.isEmpty()) {
+            String ruleTypeName = result.getRuleTypeName();
+            String ruleLevel = ruleTypeAndLevelMap.get(ruleTypeName);
+            return RULE_LEVEL_ALL.equals(ruleLevel) || result.getRuleLevelName().equals(ruleLevel);
+        }else{
+            return true;
+        }
     }
 
     private static boolean filterByJobStatus(QsRuleJobResponse result, Map<String, String> resultMap) {
-        String jobStatus = result.getJobStatus();
-
-        if (!"Complete".equals(jobStatus)) {
-            return true; // Include the result without additional filtering for non-Complete job status
+        if(!resultMap.isEmpty()) {
+            String jobStatus = result.getJobStatus();
+            if (!JOB_STATUS.equals(jobStatus)) {
+                return true;
+            }
+            String jobOutput = result.getJobOutput();
+            String matchValue = extractMatchValueFromJson(jobOutput);
+            String jobSubStatus = resultMap.get(jobStatus);
+            return JOB_STATUS_ALL.equals(jobSubStatus) || jobSubStatus.equals(matchValue);
+        }else{
+            return true;
         }
-
-        String jobOutput = result.getJobOutput();
-        String matchValue = extractMatchValueFromJson(jobOutput);
-
-        String jobSubStatus = resultMap.get(jobStatus);
-        System.out.println("Match Value: " + matchValue);
-        System.out.println("jobSubStatus Value:: " + jobSubStatus);
-
-        return JOB_STATUS_ALL.equals(jobSubStatus) || jobSubStatus.equals(matchValue);
     }
-
     private static String extractMatchValueFromJson(String jobOutput) {
         try {
-            // Parse the JSON string into a JsonNode
             JsonNode jsonNode = objectMapper.readTree(jobOutput);
-
-            // Extract the "match" field from the JSON
-            return jsonNode.get("match").asText();
-
+            if (jsonNode.isArray()) {
+                // If the JSON is an array, handle accordingly
+                JsonNode firstElement = jsonNode.get(0);
+                return firstElement != null ? firstElement.get(JOB_MATCH).asText() : null;
+            } else {
+                // If the JSON is an object, extract the "match" field directly
+                return jsonNode.get(JOB_MATCH).asText();
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            return null; // Return null in case of an exception during JSON parsing
+            log.info(e.getMessage());
+            return null;
         }
     }
     public <T> Page<T> getPaginatedFilteredResponse(List<T> filteredResponse, int pageNo, int pageSize) {
