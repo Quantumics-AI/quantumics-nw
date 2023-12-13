@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
+import static ai.quantumics.api.constants.QsConstants.JOB_STATUS_ALL;
 import static ai.quantumics.api.constants.QsConstants.PUBLIC;
 import static ai.quantumics.api.constants.QsConstants.RULE_LEVEL_ALL;
 
@@ -76,6 +77,7 @@ public class RuleJobServiceImpl implements RuleJobService {
     private final ControllerHelper controllerHelper;
     private final RuleJobHelper ruleJobHelper;
     private final ValidatorUtils validatorUtils;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public RuleJobServiceImpl(RuleJobRepository ruleJobRepositoryCi,
                               DbSessionUtil dbUtilCi,
@@ -316,18 +318,33 @@ public class RuleJobServiceImpl implements RuleJobService {
             final Projects project = validatorUtils.checkProject(projectId);
             dbUtil.changeSchema(project.getDbSchemaName());
             List<QsRuleJobResponse> dbResultList = null;
-            List<QsRuleJobResponse> filteredResponse = Collections.emptyList();
+            List<QsRuleJobResponse> filteredResponse = new ArrayList<>();
+            List<QsRuleJobResponse> filteredResponse1 = new ArrayList<>();
             Map<String, String> ruleTypeAndLevelMap;
+            Map<String, String> resultMap;
             if(CollectionUtils.isNotEmpty(ruleJobDTO.getRuleTypes()) || CollectionUtils.isNotEmpty(ruleJobDTO.getRuleJobStatus()) || StringUtils.isNotEmpty(ruleJobDTO.getFeedName()) || StringUtils.isNotEmpty(ruleJobDTO.getFromDate()) || StringUtils.isNotEmpty(ruleJobDTO.getToDate())) {
                 String feedName = ruleJobDTO.getFeedName();
                 String fromDate = ruleJobDTO.getFromDate();
                 String toDate = ruleJobDTO.getToDate();
                 List<RuleTypes> ruleTypes = ruleJobDTO.getRuleTypes();
                 List<JobStatus> jobStatus = ruleJobDTO.getRuleJobStatus();
+                List<String> ruleTypeNames = null;
+                List<String> ruleJobStatus = null;
 
-                ruleTypeAndLevelMap = ruleTypes.stream().collect(Collectors.toMap(RuleTypes::getRuleTypeName, RuleTypes::getRuleLevel));
-                List<String> ruleTypeNames = ruleTypes.stream().map(RuleTypes::getRuleTypeName).collect(Collectors.toList());
-                List<String> ruleJobStatus = jobStatus.stream().map(JobStatus::getSelectedStatus).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(ruleTypes)){
+                    ruleTypeAndLevelMap = ruleTypes.stream().collect(Collectors.toMap(RuleTypes::getRuleTypeName, RuleTypes::getRuleLevel));
+                    ruleTypeNames = ruleTypes.stream().map(RuleTypes::getRuleTypeName).collect(Collectors.toList());
+
+                } else {
+                    ruleTypeAndLevelMap = Collections.emptyMap();
+                }
+                if(CollectionUtils.isNotEmpty(jobStatus)){
+                    resultMap = jobStatus.stream().collect(Collectors.toMap(JobStatus::getSelectedStatus, JobStatus::getSelectedStatusResult));
+                    ruleJobStatus = jobStatus.stream().map(JobStatus::getSelectedStatus).collect(Collectors.toList());
+
+                } else {
+                    resultMap = Collections.emptyMap();
+                }
                 if(StringUtils.isNotEmpty(fromDate) && StringUtils.isNotEmpty(toDate)) {
                     LocalDate startDate = QsConstants.convertToLocalDate(fromDate);
                     LocalDate endDate = QsConstants.convertToLocalDate(toDate);
@@ -335,11 +352,11 @@ public class RuleJobServiceImpl implements RuleJobService {
                 } else{
                     dbResultList = ruleJobRepository.getFilteredRuleJobsExcludeBusinessDate(feedName, ruleTypeNames, ruleJobStatus);
                 }
+
                 filteredResponse = dbResultList.stream()
-                        .filter(dbResult -> {
-                            String ruleLevel = ruleTypeAndLevelMap.get(dbResult.getRuleTypeName());
-                            return RULE_LEVEL_ALL.equals(ruleLevel) || dbResult.getRuleLevelName().equals(ruleLevel);
-                        }).collect(Collectors.toList());
+                        .filter(result -> filterByRuleTypeAndLevel(result, ruleTypeAndLevelMap))
+                        .filter(result -> filterByJobStatus(result, resultMap))
+                        .collect(Collectors.toList());
             }else{
                 filteredResponse = ruleJobRepository.findByActiveTrueOrderByModifiedDateDesc();
             }
@@ -353,6 +370,44 @@ public class RuleJobServiceImpl implements RuleJobService {
             response.put("message", "Error -" + exception.getMessage());
         }
         return ResponseEntity.ok().body(response);
+    }
+
+    private static boolean filterByRuleTypeAndLevel(QsRuleJobResponse result, Map<String, String> ruleTypeAndLevelMap) {
+        String ruleTypeName = result.getRuleTypeName();
+        String ruleLevel = ruleTypeAndLevelMap.get(ruleTypeName);
+
+        return ruleLevel == null || RULE_LEVEL_ALL.equals(ruleLevel) || result.getRuleLevelName().equals(ruleLevel);
+    }
+
+    private static boolean filterByJobStatus(QsRuleJobResponse result, Map<String, String> resultMap) {
+        String jobStatus = result.getJobStatus();
+
+        if (!"Complete".equals(jobStatus)) {
+            return true; // Include the result without additional filtering for non-Complete job status
+        }
+
+        String jobOutput = result.getJobOutput();
+        String matchValue = extractMatchValueFromJson(jobOutput);
+
+        String jobSubStatus = resultMap.get(jobStatus);
+        System.out.println("Match Value: " + matchValue);
+        System.out.println("jobSubStatus Value:: " + jobSubStatus);
+
+        return JOB_STATUS_ALL.equals(jobSubStatus) || jobSubStatus.equals(matchValue);
+    }
+
+    private static String extractMatchValueFromJson(String jobOutput) {
+        try {
+            // Parse the JSON string into a JsonNode
+            JsonNode jsonNode = objectMapper.readTree(jobOutput);
+
+            // Extract the "match" field from the JSON
+            return jsonNode.get("match").asText();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Return null in case of an exception during JSON parsing
+        }
     }
     public <T> Page<T> getPaginatedFilteredResponse(List<T> filteredResponse, int pageNo, int pageSize) {
         int responseSize = filteredResponse.size();
