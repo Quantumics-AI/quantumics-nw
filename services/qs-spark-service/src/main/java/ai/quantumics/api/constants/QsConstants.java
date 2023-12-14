@@ -147,6 +147,9 @@ public class QsConstants {
   public static final String THRESHOLD_ERROR = "Batch job aborted, as the job execution time exceeded the threshold. Couldn't capture the batch job log";
 
   public static final String RULE_LEVEL_ALL = "All";
+  public static final String JOB_STATUS_ALL = "All";
+  public static final String JOB_STATUS = "Complete";
+  public static final String JOB_MATCH = "match";
   public static final String ACTIVE_RULE = "Active";
   public static final String RULE_TYPE_NOT_FOUND = "No Rule Type found";
   // Email Template Actions
