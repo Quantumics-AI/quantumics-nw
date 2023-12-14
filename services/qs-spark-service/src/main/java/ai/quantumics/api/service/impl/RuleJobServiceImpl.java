@@ -22,8 +22,8 @@ import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
 import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.JobStatus;
-import ai.quantumics.api.req.RuleJobDTO;
 import ai.quantumics.api.req.RuleData;
+import ai.quantumics.api.req.RuleJobDTO;
 import ai.quantumics.api.req.RuleJobRequest;
 import ai.quantumics.api.req.RuleTypes;
 import ai.quantumics.api.req.RunRuleJobRequest;
@@ -46,9 +46,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -331,7 +328,7 @@ public class RuleJobServiceImpl implements RuleJobService {
     }
 
     @Override
-    public ResponseEntity<Object> getFilteredRuleJobs(int userId, int projectId, RuleJobDTO ruleJobDTO, int page, int pageSize) {
+    public ResponseEntity<Object> getFilteredRuleJobs(int userId, int projectId, RuleJobDTO ruleJobDTO) {
         final Map<String, Object> response = new HashMap<>();
         try {
             dbUtil.changeSchema(PUBLIC_SCHEMA);
@@ -380,11 +377,10 @@ public class RuleJobServiceImpl implements RuleJobService {
             }else{
                 filteredResponse = ruleJobRepository.findByActiveTrueOrderByModifiedDateDesc();
             }
-            Page<QsRuleJobResponse> paginatedFilteredResponse = getPaginatedFilteredResponse(filteredResponse, page-1, pageSize);
             response.put("code", HttpStatus.SC_OK);
             response.put("message", "Filtered Rule Jobs Listed Successfully");
             response.put("projectName", project.getProjectDisplayName());
-            response.put("result", paginatedFilteredResponse);
+            response.put("result", filteredResponse);
         } catch (Exception exception) {
             response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
             response.put("message", "Error -" + exception.getMessage());
@@ -431,17 +427,6 @@ public class RuleJobServiceImpl implements RuleJobService {
             log.info(e.getMessage());
             return null;
         }
-    }
-    public <T> Page<T> getPaginatedFilteredResponse(List<T> filteredResponse, int pageNo, int pageSize) {
-        int responseSize = filteredResponse.size();
-        int start = pageNo * pageSize;
-        PageRequest pageRequest = PageRequest.of(pageNo, pageSize);
-        //Added equals condition to avoid extra calculations
-        if (start >= responseSize) {
-            return new PageImpl<>(List.of(), pageRequest, 0);
-        }
-        int end = Math.min((start + pageSize), responseSize);
-        return new PageImpl<>(filteredResponse.subList(start, end), pageRequest, filteredResponse.size());
     }
     public RuleDetails convertToRuleDetails(QsRule qsRule, QsRuleJob ruleJob) {
         Gson gson = new Gson();

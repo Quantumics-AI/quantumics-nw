@@ -124,9 +124,7 @@ public class RuleJobController {
   public ResponseEntity<Object> getFilteredRuleJobs(
           @RequestBody final RuleJobDTO ruleJobDTO,
           @PathVariable(value = "userId") final int userId,
-          @PathVariable(value = "projectId") final int projectId,
-          @RequestParam(name = "page", required = true) int page,
-          @RequestParam(name = "size", required = true) int size) {
-    return ruleJobService.getFilteredRuleJobs(userId, projectId, ruleJobDTO, page, size);
+          @PathVariable(value = "projectId") final int projectId) {
+    return ruleJobService.getFilteredRuleJobs(userId, projectId, ruleJobDTO);
   }
 }
