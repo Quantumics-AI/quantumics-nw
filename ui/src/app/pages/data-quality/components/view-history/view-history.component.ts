@@ -355,7 +355,7 @@ export class ViewHistoryComponent implements OnInit {
       // If checkbox is checked, add the rule to the selectedRules array
       this.selectedRules.push({
         ruleId: d.ruleId,
-        businessDate: d.businessDate
+        businessDate:  this.changeFormatDate(d.businessDate)
       });
     } else {
       // If checkbox is unchecked, remove the rule from the selectedRules array
@@ -690,6 +690,7 @@ export class ViewHistoryComponent implements OnInit {
       this.loading = false;
       this.filtered = true;
       this.historyList = response?.result;
+      this.reRunStatus = this.historyList.some(item => item.jobStatus === 'Failed' || item.jobStatus === 'Cancelled');
       
     }, (error) => {
       this.loading = false;
