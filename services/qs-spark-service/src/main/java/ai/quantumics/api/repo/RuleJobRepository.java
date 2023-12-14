@@ -9,7 +9,11 @@
 package ai.quantumics.api.repo;
 
 import ai.quantumics.api.model.QsRuleJob;
+import ai.quantumics.api.model.QsRuleJobResponse;
+import ai.quantumics.api.util.QsRuleJobQueries;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -23,4 +27,12 @@ public interface RuleJobRepository extends JpaRepository<QsRuleJob, Integer> {
     List<QsRuleJob> findAllByActiveTrueOrderByModifiedDateDesc();
     List<QsRuleJob> findByRuleIdAndActiveIsTrueAndJobStatusInAndBusinessDate(int ruleId, List<String> statuses, LocalDate businessDate);
     List<QsRuleJob> findByRuleIdAndActiveIsTrueAndJobStatusIn(int ruleId, List<String> statuses);
+    @Query(QsRuleJobQueries.GET_FILTERED_DATA)
+    List<QsRuleJobResponse> getFilteredRuleJobs(@Param("feedName") String feedName, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+                                                 @Param("ruleTypeNames") List<String> ruleTypeNames, @Param("ruleJobStatus") List<String> ruleJobStatus);
+    @Query(QsRuleJobQueries.GET_FILTERED_DATA_EXCLUDE_BUSINESS_DATE)
+    List<QsRuleJobResponse> getFilteredRuleJobsExcludeBusinessDate(@Param("feedName") String feedName, @Param("ruleTypeNames") List<String> ruleTypeNames, @Param("ruleJobStatus") List<String> ruleJobStatus);
+
+    @Query(QsRuleJobQueries.GET_ALL_DATA)
+    List<QsRuleJobResponse> findByActiveTrueOrderByModifiedDateDesc();
 }

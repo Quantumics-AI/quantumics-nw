@@ -11,6 +11,7 @@ package ai.quantumics.api.controller;
 
 import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.req.CancelJobRequest;
+import ai.quantumics.api.req.RuleJobDTO;
 import ai.quantumics.api.req.RuleJobRequest;
 import ai.quantumics.api.req.RunRuleJobRequest;
 import ai.quantumics.api.service.RuleJobService;
@@ -21,7 +22,14 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.spring.web.json.Json;
 
 import java.util.List;
@@ -109,5 +117,16 @@ public class RuleJobController {
   @GetMapping("/getRuleJobStatus")
   public ResponseEntity<List<String>> getRuleJobStatus() {
     return ResponseEntity.status(HttpStatus.OK).body(RuleJobStatus.getStatusList());
+  }
+  @ApiOperation(value = "RuleJobs", response = Json.class)
+  @PutMapping("/filter/{userId}/{projectId}")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "List Filtered Rule jobs for Project ID")})
+  public ResponseEntity<Object> getFilteredRuleJobs(
+          @RequestBody final RuleJobDTO ruleJobDTO,
+          @PathVariable(value = "userId") final int userId,
+          @PathVariable(value = "projectId") final int projectId,
+          @RequestParam(name = "page", required = true) int page,
+          @RequestParam(name = "size", required = true) int size) {
+    return ruleJobService.getFilteredRuleJobs(userId, projectId, ruleJobDTO, page, size);
   }
 }
