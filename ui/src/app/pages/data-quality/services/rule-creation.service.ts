@@ -106,4 +106,9 @@ export class RuleCreationService {
   public filterRuleData(userId:number, projectId:number, status: string, pageNumber: number, sizeLength: number, data: any): Observable<any> {
     return this.http.put(`/QuantumSparkServiceAPI/api/v1/qsrules/filter/${userId}/${projectId}?status=${status}&page=${pageNumber}&size=${sizeLength}`, data);
   }
+
+  // Rule history - filter
+  public filterHistoryData(userId:number, projectId:number, data: any): Observable<any> {
+    return this.http.put(`/QuantumSparkServiceAPI/api/v1/rulejob/filter/${userId}/${projectId}`, data);
+  }
 }
