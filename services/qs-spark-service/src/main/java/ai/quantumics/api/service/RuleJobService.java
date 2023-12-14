@@ -22,5 +22,5 @@ public interface RuleJobService {
     ResponseEntity<Object> getRowCount(String bucketName, String filePath, int userId, int projectId);
 
     ResponseEntity<Object> runBatchRuleJob(RunRuleJobRequest ruleJobRequest);
-    ResponseEntity<Object> getFilteredRuleJobs(int userId, int projectId, RuleJobDTO ruleJobDTO, int page, int size);
+    ResponseEntity<Object> getFilteredRuleJobs(int userId, int projectId, RuleJobDTO ruleJobDTO);
 }
