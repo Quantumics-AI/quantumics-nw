@@ -38,7 +38,7 @@ public class QsRuleJob {
   private int batchJobId;
   private int userId;
   private boolean active;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yy")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
   private LocalDate businessDate;
   private Date jobSubmittedDate;
   private Date jobFinishedDate;
