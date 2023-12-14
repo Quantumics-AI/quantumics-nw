@@ -8,7 +8,6 @@
 
 package ai.quantumics.api.service.impl;
 
-import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
