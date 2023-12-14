@@ -1014,11 +1014,11 @@ BEGIN
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
 	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Null Value', null);
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
-	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Duplicate Row');
+	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Rows');
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
-	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Column');
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Single Column');
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
-	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Column');
+	    values (%L,%L,true,true,true,CURRENT_TIMESTAMP);', schemaName, 'Duplicate Value', 'Multiple Columns');
 	EXECUTE format('INSERT INTO %I.qsp_rule_type(rule_type_name, level_name, column_level, active, source_only, creation_date)
 	    values (%L,%L,false,true,true,CURRENT_TIMESTAMP);', schemaName, 'Zero Row Check', null);
 
