@@ -56,7 +56,7 @@ export class ViewHistoryComponent implements OnInit {
     },
     {id: 2, status: 'Failed', checked: false,},
     {id: 3, status: 'Cancelled', checked: false,},
-    {id: 4, status: 'Inprogress', checked: false,},
+    {id: 4, status: 'Inprocess', checked: false,},
     {id: 5, status: 'Not Started', checked: false,},
     {id: 6, status: 'InQueue', checked: false,}
   ];
