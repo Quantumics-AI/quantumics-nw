@@ -38,8 +38,8 @@
                                             </div>
                                                 <div class="form-check form-check-inline" 
                                                 *ngIf="item.ruleTypeName != 'Null Value' && item.ruleTypeName != 'Zero Row Check' && item.checked">
-                                                    <select class="form-control input-design bg-w h-32 rules" #dc [(ngModel)]="selectedLevels[item.ruleTypeName]"
-                                                    (change)="onSelectLevelName(dc.value)">
+                                                    <select class="form-control input-design bg-w h-32 rules rule-select" #dc [(ngModel)]="selectedLevels[item.ruleTypeName]"
+                                                    (change)="onSelectLevelName(dc.value)" title="{{selectedLevels[item.ruleTypeName]}}">
                                                         <option value="All">All</option>
                                                         <option *ngFor="let level of item.level" [value]="level.levelName">{{level.levelName}}</option>
                                                     </select>
@@ -67,9 +67,9 @@
                                                 [(ngModel)]="item.checked" (change)="onCheckboxChangeStatus(item)">
                                                 <label class="form-check-label rules" for="inlineCheckbox{{i}}">{{item.status}}</label>
                                             </div>
-                                            <div class="form-check form-check-inline" 
+                                            <div class="form-check form-check-inline mr-0" 
                                             *ngIf="item.status == 'Complete' && item.checked">
-                                                <select class="form-control input-design bg-w h-32 rules" #ds [(ngModel)]="selectedStatusLevels[item.status]"
+                                                <select class="form-control input-design bg-w h-32 rules rule-status" #ds [(ngModel)]="selectedStatusLevels[item.status]"
                                                 (change)="onSelectStatusLevelName(item.status, ds.value)">
                                                     <option value="All">All</option>
                                                     <option *ngFor="let level of item.level" [value]="level.value">{{level.name}}</option>
