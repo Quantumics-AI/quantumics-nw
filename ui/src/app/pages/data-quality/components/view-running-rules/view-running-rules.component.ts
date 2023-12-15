@@ -43,6 +43,7 @@ export class ViewRunningRulesComponent implements OnInit {
   public selectedReRunJobIds: number[] = [];
   selectedBusinessDate: string | null = null;
   public selectedRules = [];
+  public statusBody: any = ["Not Started","Inprocess"];
 
   constructor(
     // public modal: NgbActiveModal,
@@ -74,7 +75,7 @@ export class ViewRunningRulesComponent implements OnInit {
     const refreshPage = () => {
         this.autoRefresh();
     };
-    this.ruleCreationService.getRuleJobs(this.userId, this.projectId).subscribe((response) => {
+    this.ruleCreationService.runningRulesData(this.userId, this.projectId, this.statusBody).subscribe((response) => {
       console.log("Rule data:", response);
       if (response?.code != 500) {
         this.runningList = response?.result;
@@ -82,28 +83,7 @@ export class ViewRunningRulesComponent implements OnInit {
         // Check if there is at least one object with jobStatus "Inprocess"
         const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
         this.reRunStatus = this.runningList.some(item => item.jobStatus === 'Failed' || item.jobStatus === 'Cancelled');
-        // If there is an in-process job, show the button; otherwise, hide it
-        // Loop through the updated runningList and update selectedJobIds array
-        // this.runningList.forEach(view => {
-        //   const jobId = view.jobId;
-        //   if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
-        //     if(this.selectedJobIds.length != 0) {
-        //       // Check if jobId is already in the selectedJobIds array
-        //       if (!this.selectedJobIds.includes(jobId)) {
-        //         // If not, add it to the selectedJobIds array
-        //         this.selectedJobIds.push(jobId);
-        //       }
-        //     }
-            
-        //   } else {
-        //     // Check if jobId is in the selectedJobIds array
-        //     const index = this.selectedJobIds.indexOf(jobId);
-        //     if (index !== -1) {
-        //       // If it is, remove it from the selectedJobIds array
-        //       this.selectedJobIds.splice(index, 1);
-        //     }
-        //   }
-        // });
+        
 
         this.runningList.forEach(view => {
           const jobId = view.jobId;

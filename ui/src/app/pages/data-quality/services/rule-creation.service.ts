@@ -111,4 +111,10 @@ export class RuleCreationService {
   public filterHistoryData(userId:number, projectId:number, data: any): Observable<any> {
     return this.http.put(`/QuantumSparkServiceAPI/api/v1/rulejob/filter/${userId}/${projectId}`, data);
   }
+
+  // Rule running 
+  public runningRulesData(userId:number, projectId:number, statusBody: any): Observable<any> {
+    const statusParam = statusBody.join(',');
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/rulejob/${userId}/${projectId}?status=${statusParam}`);
+  }
 }
