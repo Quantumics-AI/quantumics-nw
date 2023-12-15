@@ -14,11 +14,13 @@ import ai.quantumics.api.req.RuleJobRequest;
 import ai.quantumics.api.req.RunRuleJobRequest;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface RuleJobService {
     ResponseEntity<Object> runRuleJob(RuleJobRequest ruleJobRequest, int userId, int projectId);
     ResponseEntity<Object> cancelRuleJobs(CancelJobRequest ruleJobRequest, int userId, int projectId);
 
-    ResponseEntity<Object> fetchRuleJobList(int userId, int projectId);
+    ResponseEntity<Object> fetchRuleJobList(int userId, int projectId, List<String> status);
     ResponseEntity<Object> getRowCount(String bucketName, String filePath, int userId, int projectId);
 
     ResponseEntity<Object> runBatchRuleJob(RunRuleJobRequest ruleJobRequest);
