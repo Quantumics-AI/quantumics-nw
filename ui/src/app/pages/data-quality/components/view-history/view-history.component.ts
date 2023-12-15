@@ -58,7 +58,7 @@ export class ViewHistoryComponent implements OnInit {
     {id: 3, status: 'Cancelled', checked: false,},
     {id: 4, status: 'Inprocess', checked: false,},
     {id: 5, status: 'Not Started', checked: false,},
-    {id: 6, status: 'InQueue', checked: false,}
+    // {id: 6, status: 'InQueue', checked: false,}
   ];
   public selectedStatusLevels: { [status: string]: string } = {};
   public selectedbusinessDate = 'Yesterday';
