@@ -12,6 +12,7 @@ import { ViewResultComponent } from '../view-result/view-result.component';
 import { RuleCreationService } from '../../services/rule-creation.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
 import { NgbDateStruct, NgbCalendar } from '@ng-bootstrap/ng-bootstrap';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-view-history',
@@ -25,8 +26,8 @@ export class ViewHistoryComponent implements OnInit {
   certificateData: Certificate;
   private unsubscribe: Subject<void> = new Subject<void>();
   public loading:boolean;
-  public runningList: any;
-
+  public historyList: any;
+  public fg: FormGroup;
   public cancelBtn: boolean;
   public outputData: any;
   public startIndex: number = 0;
@@ -44,19 +45,20 @@ export class ViewHistoryComponent implements OnInit {
   public selectedLevels: { [ruleTypeName: string]: string } = {};
   public ruleTypeList: any;
   public filterPayload: any;
+  public statusPayload: any;
   public statusFilterList = [
     {
-      id: 1, status: 'Completed',
+      id: 1, status: 'Complete', checked: false,
       level: [
-        { name: 'Matched' },
-        { name: 'Mismatched' },
+        { name: 'Matched', value: true },
+        { name: 'Mismatched', value: false },
       ]
     },
-    {id: 2, status: 'Failed'},
-    {id: 3, status: 'Cancelled'},
-    {id: 4, status: 'Inprogress'},
-    {id: 5, status: 'Not Started'},
-    {id: 6, status: 'InQueue'}
+    {id: 2, status: 'Failed', checked: false,},
+    {id: 3, status: 'Cancelled', checked: false,},
+    {id: 4, status: 'Inprocess', checked: false,},
+    {id: 5, status: 'Not Started', checked: false,},
+    // {id: 6, status: 'InQueue', checked: false,}
   ];
   public selectedStatusLevels: { [status: string]: string } = {};
   public selectedbusinessDate = 'Yesterday';
@@ -73,9 +75,14 @@ export class ViewHistoryComponent implements OnInit {
   public areDatesSelected: boolean = false;
   // selectedBusinessDate: NgbDateStruct;
   maxDate: NgbDateStruct;
-  public selectedDate: string;
+  public selectedFromDate: string;
+  public selectedToDate: string;
   public resultArray: { ruleId: number, businessDate: string }[] = [];
   public selectedRules = [];
+  public filteredResult: any;
+  public filtered: boolean = false;
+  public disableButton: boolean = false;
+  public selectedFeedName: any;
 
   constructor(
     // public modal: NgbActiveModal,
@@ -104,45 +111,24 @@ export class ViewHistoryComponent implements OnInit {
     this.getRulJobs();
     this.getRuleTypeList();
     this.onSelectBusinesDate(this.selectedbusinessDate);
+
+    this.fg = this.fb.group({
+      feedName: new FormControl (null),
+    });
   }
 
   public getRulJobs(): void {
-    // this.loading = true;
-    // const refreshPage = () => {
-    //     this.autoRefresh();
-    // };
     this.ruleCreationService.getRuleJobs(this.userId, this.projectId).subscribe((response) => {
-      console.log("Rule data:", response);
       if (response?.code != 500) {
-        this.runningList = response?.result;
+        this.historyList = response?.result;
         this.loading = false;
+        this.filtered = false;
         // Check if there is at least one object with jobStatus "Inprocess"
-        const hasInprocessJob = this.runningList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
-        this.reRunStatus = this.runningList.some(item => item.jobStatus === 'Failed' || item.jobStatus === 'Cancelled');
-        // If there is an in-process job, show the button; otherwise, hide it
-        // Loop through the updated runningList and update selectedJobIds array
-        // this.runningList.forEach(view => {
-        //   const jobId = view.jobId;
-        //   if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
-        //     if(this.selectedJobIds.length != 0) {
-        //       // Check if jobId is already in the selectedJobIds array
-        //       if (!this.selectedJobIds.includes(jobId)) {
-        //         // If not, add it to the selectedJobIds array
-        //         this.selectedJobIds.push(jobId);
-        //       }
-        //     }
-            
-        //   } else {
-        //     // Check if jobId is in the selectedJobIds array
-        //     const index = this.selectedJobIds.indexOf(jobId);
-        //     if (index !== -1) {
-        //       // If it is, remove it from the selectedJobIds array
-        //       this.selectedJobIds.splice(index, 1);
-        //     }
-        //   }
-        // });
+        const hasInprocessJob = this.historyList.some(item => item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started');
+        this.reRunStatus = this.historyList.some(item => item.jobStatus === 'Failed' || item.jobStatus === 'Cancelled');
+        
 
-        this.runningList.forEach(view => {
+        this.historyList.forEach(view => {
           const jobId = view.jobId;
           if (view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess') {
             const isSelected = this.selectedJobIds.includes(jobId);
@@ -165,7 +151,7 @@ export class ViewHistoryComponent implements OnInit {
         //   this.cancelBtn = false;
         // }
       } else {
-        this.runningList = [];
+        this.historyList = [];
         this.loading = false;
 
       }
@@ -184,11 +170,6 @@ export class ViewHistoryComponent implements OnInit {
       this.snakbar.open(error);
       this.loading = false;
     })
-  }
-
-  public autoRefresh(): void {
-
-    this.getRulJobs();
   }
 
   public viewResult(r: any): void {
@@ -232,8 +213,8 @@ export class ViewHistoryComponent implements OnInit {
       // // Initialize an empty array to store jobIds
       // const jobIds: number[] = [];
   
-      // // Iterate through the runningList to find objects with jobStatus "Inprocess"
-      // for (const item of this.runningList) {
+      // // Iterate through the historyList to find objects with jobStatus "Inprocess"
+      // for (const item of this.historyList) {
       //     if (item.jobStatus === 'Inprocess' || item.jobStatus === 'Not Started' ) {
       //         // Push the jobIds into the array
       //         jobIds.push(item.jobId);
@@ -374,7 +355,7 @@ export class ViewHistoryComponent implements OnInit {
       // If checkbox is checked, add the rule to the selectedRules array
       this.selectedRules.push({
         ruleId: d.ruleId,
-        businessDate: d.businessDate
+        businessDate:  this.changeFormatDate(d.businessDate)
       });
     } else {
       // If checkbox is unchecked, remove the rule from the selectedRules array
@@ -453,11 +434,19 @@ export class ViewHistoryComponent implements OnInit {
     } else {
       delete this.selectedLevels[item.ruleTypeName];
     }
-    
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
   }
 
   public onSelectLevelName(id: string): void {
-    
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
   }
 
   // Filter by status 
@@ -467,16 +456,31 @@ export class ViewHistoryComponent implements OnInit {
     } else {
       delete this.selectedStatusLevels[item.status];
     }
+
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
     
   }
 
-  public onSelectStatusLevelName(id: string): void {
-    
+  public onSelectStatusLevelName(status: string, statusLevel: string): void {
+    this.selectedStatusLevels[status] = statusLevel;
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
   }
 
   // Filter by business date 
   public onSelectBusinesDate(d: string): void {
-    console.log(d);
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
     switch (d) {
       case 'Yesterday':
         // Logic to set yesterday's date in DD-MM-YYYY format
@@ -515,12 +519,20 @@ export class ViewHistoryComponent implements OnInit {
     
   }
 
+  public feedNameData(): void {
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
+  }
+
   private setYesterdayDate(): void {
     // Logic to set yesterday's date in DD-MM-YYYY format
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    this.selectedDate = this.formatDate(yesterday);
-    console.log("Date Yesterday", this.selectedDate);
+    this.selectedFromDate = this.formatDate(yesterday);
+    this.selectedToDate = this.formatDate(yesterday);
     
   }
 
@@ -533,8 +545,8 @@ export class ViewHistoryComponent implements OnInit {
     const lastSunday = new Date(today);
     lastSunday.setDate(today.getDate() - today.getDay()); // Setting it to last Sunday
 
-    this.selectedDate = `${this.formatDate(lastMonday)} and ${this.formatDate(lastSunday)}`;
-    console.log("Date Last week", this.selectedDate);
+    this.selectedFromDate = `${this.formatDate(lastMonday)}`;
+    this.selectedToDate = `${this.formatDate(lastSunday)}`;
   }
 
   private setThisMonthDates(): void {
@@ -543,8 +555,8 @@ export class ViewHistoryComponent implements OnInit {
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    this.selectedDate = `${this.formatDate(firstDayOfMonth)} - ${this.formatDate(lastDayOfMonth)}`;
-    console.log("Date this month", this.selectedDate);
+    this.selectedFromDate = `${this.formatDate(firstDayOfMonth)}`;
+    this.selectedToDate = `${this.formatDate(lastDayOfMonth)}`;
   }
 
   private formatDate(date: Date): string {
@@ -557,6 +569,11 @@ export class ViewHistoryComponent implements OnInit {
 
   // custom 
   onDateChange() {
+    if (this.disableButton) {
+      this.getRulJobs();
+    }
+    // Enable the button when a checkbox is edited
+    this.disableButton = false;
     // Check if both 'From' and 'To' dates are selected
     this.areDatesSelected = this.checkIfDatesSelected();
 
@@ -594,6 +611,106 @@ export class ViewHistoryComponent implements OnInit {
     return true; // Default to true if dates are not selected yet
   }
 
+  public transformDataToRuleTypes(data: any): any[] {
+    return Object.keys(data).map((key) => {
+      let ruleLevel = data[key];
+      // Check if the key is "Null Value" or "Zero Row Check" and set ruleLevel to ""
+      if (key === "Null Value" || key === "Zero Row Check") {
+        ruleLevel = "";
+      }
+
+      return {
+        "ruleTypeName": key,
+        "ruleLevel": ruleLevel
+      };
+    });
+  }
+
+  public transformDataToStatus(data: any): any[] {
+    return Object.keys(data).map((key) => {
+      let statusLevel = data[key];
+      // Check if the key is "Null Value" or "Zero Row Check" and set ruleLevel to ""
+      if (key != "Complete") {
+        statusLevel = "";
+      }
+
+      return {
+        "selectedStatus": key,
+        "selectedStatusResult": statusLevel
+      };
+    });
+  }
+
+  public changeFormatDate(dateString: string): string {
+    // Parse the date string into a Date object manually
+    const parts = dateString.split('-').map(part => parseInt(part, 10));
+    const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
+
+    const datePipe = new DatePipe('en-US');
+    return datePipe.transform(dateObject, 'dd-MM-yy');
+  }
+
+  public changeFormatDateTo(dateString: string): string {
+    // Parse the date string into a Date object manually
+    const parts = dateString.split('-').map(part => parseInt(part, 10));
+    const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
+
+    const datePipe = new DatePipe('en-US');
+    return datePipe.transform(dateObject, 'dd-MM-yy');
+  }
+
+  public applyFilter(): void {
+    this.loading = true;
+    this.filterPayload = this.transformDataToRuleTypes(this.selectedLevels);
+    this.statusPayload = this.transformDataToStatus(this.selectedStatusLevels);
+    // Used map to iterate through the array and modify values
+    this.statusPayload = this.statusPayload.map(item => {
+      let selectedStatusResult
+      if (item.selectedStatusResult === "true" || item.selectedStatusResult === "false") {
+        selectedStatusResult = item.selectedStatusResult === "true";
+      } else {
+        selectedStatusResult = item.selectedStatusResult;
+      }
+
+      return {
+        selectedStatus: item.selectedStatus,
+        selectedStatusResult: selectedStatusResult
+      };
+    });
+
+    const req = {
+      ruleTypes: this.filterPayload,
+      ruleJobStatus: this.statusPayload,
+      fromDate: this.changeFormatDate(this.selectedFromDate),
+      toDate: this.changeFormatDateTo(this.selectedToDate),
+      feedName: this.fg.controls.feedName.value === "" ? null : this.fg.controls.feedName.value,
+    }
+
+    this.ruleCreationService.filterHistoryData(this.userId, this.projectId, req).subscribe((response) => {
+      this.loading = false;
+      this.filtered = true;
+      this.historyList = response?.result;
+      this.reRunStatus = this.historyList.some(item => item.jobStatus === 'Failed' || item.jobStatus === 'Cancelled');
+      
+    }, (error) => {
+      this.loading = false;
+    });
+    
+  }
+
+  public clearFilterData(): void {
+    this.ruleTypeList.forEach(i => i.checked = false);
+    this.selectedLevels = {};
+    this.statusFilterList.forEach(item => item.checked = false);
+    this.selectedStatusLevels = {};
+    this.selectedFromBusinessDate = null;
+    this.selectedToBusinessDate = null;
+    this.selectedFeedName = null;
+    this.selectedbusinessDate = 'Yesterday';
+    this.getRulJobs();
+
+  }
+
   checkFromDate(): boolean {
     if (this.selectedFromBusinessDate && this.selectedToBusinessDate) {
       const fromDate = new Date(this.selectedFromBusinessDate.year, this.selectedFromBusinessDate.month - 1, this.selectedFromBusinessDate.day);
@@ -610,7 +727,7 @@ export class ViewHistoryComponent implements OnInit {
         const day = this.selectedFromBusinessDate.day.toString().padStart(2, '0');
         const month = this.selectedFromBusinessDate.month.toString().padStart(2, '0');
         const year = this.selectedFromBusinessDate.year;
-
+        this.selectedFromDate = `${day}-${month}-${year}`;
         return `${day}-${month}-${year}`;
     }
     return '';
@@ -621,7 +738,7 @@ export class ViewHistoryComponent implements OnInit {
         const day = this.selectedToBusinessDate.day.toString().padStart(2, '0');
         const month = this.selectedToBusinessDate.month.toString().padStart(2, '0');
         const year = this.selectedToBusinessDate.year;
-
+        this.selectedToDate = `${day}-${month}-${year}`;
         return `${day}-${month}-${year}`;
     }
     return '';

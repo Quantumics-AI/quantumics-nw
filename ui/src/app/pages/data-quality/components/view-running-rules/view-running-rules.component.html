@@ -34,7 +34,7 @@
                             <thead class="thead-light">
                                 <tr class="fixed-th">
                                     <th class="pd-l-24">Rule name</th>
-                                    <th class="pd-l-24">Status
+                                    <th class="pd-l-24">Job Status
                                         <em>
                                             <a id="lnkRefresh" placement="top" container="body" ngbTooltip="Refresh">
                                                 <img src="assets/img/refresh.svg" width="18" alt="refresh" (click)="refresh()">
@@ -53,10 +53,10 @@
                                     <td>
                                         <input type="checkbox" (change)="selectRule($event, view)" [checked]="view.isChecked" 
                                         *ngIf="view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess'">
-                                        <span *ngIf="view.ruleStatus == 'Active'">
+                                        <!-- <span *ngIf="view.ruleStatus == 'Active'">
                                             <input type="checkbox" (change)="selectReRule($event, view)"
                                             *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'">
-                                        </span>
+                                        </span> -->
                                         <!-- <a placement="top" (click)="reRun(view)" ngbTooltip="Re-Run"
                                         *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'">
                                             <img src="/assets/img/project/re-run.svg" >
@@ -111,7 +111,7 @@
                         <!-- <p class="tp1 fs-26">Running rules</p> -->
                         <img src="/assets/img/data-profile/no-datasets.svg" class="img-fluid">
                         <!-- <p class="tp1 mr-b-0 wm">Set business related rules for your dataset.</p> -->
-                        <p class="tp1 mr-b-24 mr-t-40">Currently no rule or set of rule is running.</p>
+                        <p class="tp1 mr-b-24 mr-t-40">Currently No rule is running</p>
                         <a [routerLink]="['/projects', projectId, 'data-quality']" 
                             class="btn btn-design mr-b-56">Run rule</a>
                     </div>
@@ -123,8 +123,8 @@
             <button class="btn btn-design mr-r-20" *ngIf="cancelBtn" (click)="cancelInprocess()"
             [disabled]="selectedJobIds.length === 0">Cancel</button>
 
-            <button class="btn btn-design" *ngIf="reRunStatus" (click)="reRunRuleFunction()"
-            [disabled]="selectedRules.length === 0">Rerun</button>
+            <!-- <button class="btn btn-design" *ngIf="reRunStatus" (click)="reRunRuleFunction()"
+            [disabled]="selectedRules.length === 0">Rerun</button> -->
         </div>
     </div>
 </app-loader>

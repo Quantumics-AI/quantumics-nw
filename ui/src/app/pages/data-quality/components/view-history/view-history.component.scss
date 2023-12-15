@@ -498,3 +498,40 @@
     text-overflow: ellipsis;
     max-width: 130px;
 }
+
+.fw-500 {
+    font-weight: 500;
+}
+
+.w-105 {
+    width: 105px;
+}
+
+.cal-input {
+    padding-left: 5px;
+    padding-right: 2px;
+}
+
+.form-control::placeholder {
+    font-size: var(--placeholder-font-size);
+}
+
+.mr-t-3 {
+    margin-top: -3px;
+}
+
+.rule-select {
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 100px;
+}
+
+.rule-status {
+    padding-left: 5px;
+    padding-right: 5px;
+    max-width: 95px;
+}
+
+.mr-0 {
+    margin-right: 0;
+}
