@@ -8,16 +8,13 @@
 
 package ai.quantumics.api.service.impl;
 
-import ai.quantumics.api.constants.QsConstants;
-import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
 import ai.quantumics.api.model.Projects;
 import ai.quantumics.api.model.QsRule;
-import ai.quantumics.api.model.QsRuleJob;
 import ai.quantumics.api.model.QsUserV2;
-import ai.quantumics.api.repo.RuleJobRepository;
 import ai.quantumics.api.repo.RuleRepository;
+import ai.quantumics.api.req.CancelJobRequest;
 import ai.quantumics.api.req.RuleTypes;
 import ai.quantumics.api.req.RuleTypesDTO;
 import ai.quantumics.api.service.ProjectService;
@@ -26,7 +23,6 @@ import ai.quantumics.api.service.RuleTypeService;
 import ai.quantumics.api.service.UserServiceV2;
 import ai.quantumics.api.util.DbSessionUtil;
 import ai.quantumics.api.util.PatternUtils;
-import ai.quantumics.api.util.RuleJobHelper;
 import ai.quantumics.api.util.ValidatorUtils;
 import ai.quantumics.api.vo.DataSourceDetails;
 import ai.quantumics.api.vo.RuleDetails;
@@ -35,17 +31,23 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,7 @@ import static ai.quantumics.api.constants.DatasourceConstants.FILE_NOT_ALIGN_WIT
 import static ai.quantumics.api.constants.DatasourceConstants.PUBLIC_SCHEMA;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_EXIST;
 import static ai.quantumics.api.constants.DatasourceConstants.RULE_NAME_NOT_EXIST;
+import static ai.quantumics.api.constants.QsConstants.BEARER_AUTH_TOKEN;
 import static ai.quantumics.api.constants.QsConstants.RULE_LEVEL_ALL;
 @Slf4j
 @Service
@@ -73,8 +76,10 @@ public class RuleServiceImpl implements RuleService {
 	private final ControllerHelper controllerHelper;
 	private final UserServiceV2 userService;
 	private final ValidatorUtils validatorUtils;
-	private final RuleJobRepository ruleJobRepository;
-	private final RuleJobHelper ruleJobHelper;
+	private final RestTemplate restTemplate;
+
+	@Value("${qs.service.end.point.url}")
+	private String qsServiceEndPointUrl;
 
 	public RuleServiceImpl(RuleRepository ruleRepositoryCi,
 						   DbSessionUtil dbUtilCi,
@@ -83,8 +88,7 @@ public class RuleServiceImpl implements RuleService {
 						   ControllerHelper controllerHelperCi,
 						   UserServiceV2 userServiceCi,
 						   ValidatorUtils validatorUtilsCi,
-						   RuleJobRepository ruleJobRepositoryCi,
-						   RuleJobHelper ruleJobHelperCi) {
+						   RestTemplate restTemplateCi) {
 		this.ruleRepository = ruleRepositoryCi;
 		this.dbUtil = dbUtilCi;
 		this.ruleTypeService = ruleTypeServiceCi;
@@ -92,8 +96,7 @@ public class RuleServiceImpl implements RuleService {
 		this.controllerHelper = controllerHelperCi;
 		this.userService = userServiceCi;
 		this.validatorUtils = validatorUtilsCi;
-		this.ruleJobRepository = ruleJobRepositoryCi;
-		this.ruleJobHelper = ruleJobHelperCi;
+		this.restTemplate = restTemplateCi;
 	}
 
 
@@ -310,7 +313,11 @@ public class RuleServiceImpl implements RuleService {
 			qsRule.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
 			ruleRepository.save(qsRule);
 			if(!RuleStatus.ACTIVE.getStatus().equals(ruleDetails.getStatus())){
-				cancelJobs(qsRule.getRuleId(), userId, projectId);
+				CancelJobRequest cancelJobRequest = new CancelJobRequest();
+				cancelJobRequest.setRuleId(qsRule.getRuleId());
+				cancelJobRequest.setUserId(userId);
+				cancelJobRequest.setProjectId(projectId);
+				submitCancelJobRequest(cancelJobRequest);
 			}
 			response.put("code", HttpStatus.SC_OK);
 			response.put("message", "Data updated successfully");
@@ -322,51 +329,22 @@ public class RuleServiceImpl implements RuleService {
 	}
 
 	@Async("qsThreadPool")
-	private void cancelJobs(int ruleId, int userId, int projectId) {
-		log.info("Invoking cancelRuleJobs for ruleId {}", ruleId);
+	public void submitCancelJobRequest(CancelJobRequest cancelJobRequest) {
+		ResponseEntity<String> postForEntity = null;
+		HttpHeaders headers = new HttpHeaders();
 		try {
-			dbUtil.changeSchema("public");
-			QsUserV2 userObj = userService.getUserById(userId);
-			if (userObj == null) {
-				log.error("Requested User with Id: " + userId + " not found.");
-				return;
+			URI url = new URI(qsServiceEndPointUrl + "/api/v1/rulejob/cancelJobs");
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.setBearerAuth(BEARER_AUTH_TOKEN);
+			HttpEntity<CancelJobRequest> request = new HttpEntity<>(cancelJobRequest, headers);
+			postForEntity = restTemplate.postForEntity(url, request, String.class);
+			org.springframework.http.HttpStatus statusCode = postForEntity.getStatusCode();
+			if (statusCode.is2xxSuccessful()) {
+				log.info("Rest Call Response : {}", postForEntity.getBody());
 			}
-			final Projects project = projectService.getProject(projectId, userId);
-			if (project == null) {
-				log.error("Requested project with Id: " + projectId + " for User with Id: " + userId + " not found.");
-				return;
-			}
-			dbUtil.changeSchema(project.getDbSchemaName());
-			List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
-			List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusIn(ruleId, statuses);
-			List<QsRuleJob> ruleJobsToUpdate = new ArrayList<>();
-			List<Integer> batchJobIds = new ArrayList<>();
-			if(org.apache.commons.collections.CollectionUtils.isEmpty(ruleJobs)) {
-				log.info("No rule jobs found for ruleId {} to cancel", ruleId);
-				return;
-			}
-			for (QsRuleJob ruleJob : ruleJobs) {
-				ruleJob.setUserId(userId);
-				ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
-				ruleJob.setModifiedDate(DateTime.now().toDate());
-				ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-				ruleJobsToUpdate.add(ruleJob);
-				if(ruleJob.getBatchJobId() >0) {
-					batchJobIds.add(ruleJob.getBatchJobId());
-				}
-			}
-			if(org.apache.commons.collections.CollectionUtils.isNotEmpty(ruleJobsToUpdate)) {
-				ruleJobRepository.saveAll(ruleJobsToUpdate);
-			}
-			if(org.apache.commons.collections.CollectionUtils.isNotEmpty(batchJobIds)) {
-				for (int batchJobId : batchJobIds) {
-					ruleJobHelper.cancelRuleJob(batchJobId);
-				}
-			}
-		} catch (final Exception ex) {
-			log.error("Error while Cancelling rule jobs: " + ex.getMessage());
+		} catch (final URISyntaxException | RestClientException e) {
+			log.error("Exception: establishing a session {}", e.getMessage());
 		}
-
 	}
 
 	@Override

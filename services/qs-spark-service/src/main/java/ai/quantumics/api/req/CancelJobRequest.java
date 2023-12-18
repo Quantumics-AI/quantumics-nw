@@ -9,4 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CancelJobRequest {
     private List<Integer> jobIds;
+    private Integer ruleId;
+    private Integer userId;
+    private Integer projectId;
 }

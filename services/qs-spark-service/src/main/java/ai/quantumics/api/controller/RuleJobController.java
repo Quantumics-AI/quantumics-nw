@@ -76,6 +76,17 @@ public class RuleJobController {
   }
 
   @ApiOperation(value = "rulejob", response = Json.class)
+  @PostMapping("/batch/submit")
+  @ApiResponses(
+          value = {
+                  @ApiResponse(code = 200, message = "OKAY"),
+                  @ApiResponse(code = 409, message = "Failure message")
+          })
+  public ResponseEntity<Object> submitBatchJob(@RequestBody final RunRuleJobRequest ruleJobRequest) {
+    return ruleJobService.submitBatchRuleJob(ruleJobRequest);
+  }
+
+  @ApiOperation(value = "rulejob", response = Json.class)
   @PutMapping("/{userId}/{projectId}")
   @ApiResponses(
           value = {
@@ -88,6 +99,20 @@ public class RuleJobController {
           @PathVariable(value = "projectId") final int projectId)
           throws Exception {
     return ruleJobService.cancelRuleJobs(ruleJobRequest, userId, projectId);
+  }
+
+  @ApiOperation(value = "rulejob", response = Json.class)
+  @PostMapping("/cancelJobs")
+  @ApiResponses(
+          value = {
+                  @ApiResponse(code = 200, message = "OKAY"),
+                  @ApiResponse(code = 409, message = "Failure message")
+          })
+  public ResponseEntity<Object> cancelRuleJobs(
+          @RequestBody final CancelJobRequest cancelJobRequest)
+          throws Exception {
+
+    return ruleJobService.cancelRuleJobs(cancelJobRequest, cancelJobRequest.getUserId(), cancelJobRequest.getProjectId());
   }
 
   @ApiOperation(value = "RuleJobs", response = Json.class)

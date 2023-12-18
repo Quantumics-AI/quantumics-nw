@@ -1,5 +1,5 @@
 api:
-  exceptions: /authorization,/createuser,/resetpassword,/reqresetpswd,/validateresetpswdreq,/awsLanding,/stripe/events/webhook,api-docs,swagger-ui,/wsinit,/actuator,/validateToken,/QuantumSparkServiceAPI/api/v1/ops/file,/QuantumSparkServiceAPI/api/v1/ops/udf,/QuantumSparkServiceAPI/api/v1/ops/join,/QuantumSparkServiceAPI/api/v1/aggregate,/QuantumSparkServiceAPI/api/v1/ops/eng,/QuantumSparkServiceAPI/api/v1/ops/qswsrun,/QuantumSparkServiceAPI/api/v1/runjob/cleanse,/QuantumSparkServiceAPI/api/v1/projects/cleanprojects,/QuantumSparkServiceAPI/api/v1/pipeline/executepipeline
+  exceptions: /authorization,/createuser,/resetpassword,/reqresetpswd,/validateresetpswdreq,/awsLanding,/stripe/events/webhook,api-docs,swagger-ui,/wsinit,/actuator,/validateToken,/QuantumSparkServiceAPI/api/v1/ops/file,/QuantumSparkServiceAPI/api/v1/ops/udf,/QuantumSparkServiceAPI/api/v1/ops/join,/QuantumSparkServiceAPI/api/v1/aggregate,/QuantumSparkServiceAPI/api/v1/ops/eng,/QuantumSparkServiceAPI/api/v1/ops/qswsrun,/QuantumSparkServiceAPI/api/v1/runjob/cleanse,/QuantumSparkServiceAPI/api/v1/projects/cleanprojects,/QuantumSparkServiceAPI/api/v1/pipeline/executepipeline,/QuantumSparkServiceAPI/api/v1/rulejob/batch/submit,/QuantumSparkServiceAPI/api/v1/rulejob/cancelJobs
 
 retry:
   max:
