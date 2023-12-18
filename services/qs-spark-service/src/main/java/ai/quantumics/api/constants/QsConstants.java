@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class QsConstants {
+  public static final String BEARER_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODgzMjE3ODksInVzZXJfbmFtZSI6InF1YW50dW1zcGFyayIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJqdGkiOiI4NzUxYTZlMi0zZmFiLTRhZWItOGY5MS1jMmExMTkzMmMyNjkiLCJjbGllbnRfaWQiOiJtb2RlbENsaWVudEFwcCIsInNjb3BlIjpbInJlYWRfcHJvZmlsZSJdfQ.-pPHIIJUCRlR31P2pHbkJCS-pYT3_oi24Yi8CkyA4ME";
 
   public static final String CODE = "###$CODE;";
   public static final String DEF = "###$DEF;";

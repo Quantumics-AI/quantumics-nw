@@ -3,21 +3,32 @@ package ai.quantumics.api.util;
 import ai.quantumics.api.adapter.AwsAdapter;
 import ai.quantumics.api.livy.LivyActions;
 import ai.quantumics.api.model.QsRuleJob;
+import ai.quantumics.api.req.RunRuleJobRequest;
 import ai.quantumics.api.vo.RuleDetails;
 import ai.quantumics.api.vo.RuleJobOutput;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Date;
 
 import static ai.quantumics.api.constants.QsConstants.ACCEPTANCE_PER;
 import static ai.quantumics.api.constants.QsConstants.APP_RULE_DETAILS;
+import static ai.quantumics.api.constants.QsConstants.BEARER_AUTH_TOKEN;
 import static ai.quantumics.api.constants.QsConstants.COLUMNS_DETAILS;
 import static ai.quantumics.api.constants.QsConstants.COLUMN_LEVEL;
 import static ai.quantumics.api.constants.QsConstants.DATA_COMPLETENESS;
@@ -55,6 +66,7 @@ public class RuleJobHelper {
 
     private final AwsAdapter awsAdapter;
     private final LivyActions livyActions;
+    private final RestTemplate restTemplate;
 
     @Value("${qs.rule.etl.output}")
     private String qsEtlScriptBucket;
@@ -62,13 +74,36 @@ public class RuleJobHelper {
     @Value("${qs.rule.job.output}")
     private String qsRuleJobBucket;
 
-    public RuleJobHelper(AwsAdapter awsAdapterCi, LivyActions livyActionsCi) {
+    @Value("${qs.service.end.point.url}")
+    private String qsServiceEndPointUrl;
+
+
+
+    public RuleJobHelper(AwsAdapter awsAdapterCi, LivyActions livyActionsCi, RestTemplate restTemplateCi) {
         this.awsAdapter = awsAdapterCi;
         this.livyActions = livyActionsCi;
+        this.restTemplate = restTemplateCi;
     }
 
-
     @Async("qsThreadPool")
+    public void submitRuleJobRequest(RunRuleJobRequest runRuleJobRequest) {
+        ResponseEntity<String> postForEntity = null;
+        HttpHeaders headers = new HttpHeaders();
+        try {
+            URI url = new URI(qsServiceEndPointUrl + "/api/v1/rulejob/batch/submit");
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(BEARER_AUTH_TOKEN);
+            HttpEntity<RunRuleJobRequest> request = new HttpEntity<>(runRuleJobRequest, headers);
+            postForEntity = restTemplate.postForEntity(url, request, String.class);
+            HttpStatus statusCode = postForEntity.getStatusCode();
+            if (statusCode.is2xxSuccessful()) {
+                log.info("Rest Call Response : {}", postForEntity.getBody());
+            }
+        } catch (final URISyntaxException | RestClientException e) {
+            log.error("Exception: establishing a session {}", e.getMessage());
+        }
+    }
+
     public void submitRuleJob(QsRuleJob ruleJob, RuleDetails ruleDetails, String modifiedBy, int projectId) throws Exception {
         final StringBuilder fileContents = new StringBuilder();
         final String jobName = getJobName(ruleJob);

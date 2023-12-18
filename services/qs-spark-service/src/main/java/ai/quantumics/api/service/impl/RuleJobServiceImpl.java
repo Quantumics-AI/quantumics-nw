@@ -172,7 +172,12 @@ public class RuleJobServiceImpl implements RuleJobService {
 
                 ruleJob = ruleJobRepository.save(ruleJob);
                 RuleDetails ruleDetails = convertToRuleDetails(rule, ruleJob);
-                ruleJobHelper.submitRuleJob(ruleJob, ruleDetails, controllerHelper.getFullName(userObj.getQsUserProfile()), projectId);
+                RunRuleJobRequest runRuleJobRequest = new RunRuleJobRequest();
+                runRuleJobRequest.setRuleJob(ruleJob);
+                runRuleJobRequest.setRuleDetails(ruleDetails);
+                runRuleJobRequest.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                runRuleJobRequest.setProjectId(projectId);
+                ruleJobHelper.submitRuleJobRequest(runRuleJobRequest);
             }
             response.put("code", HttpStatus.SC_OK);
             if (inProcessRulesCount > 0) {
@@ -193,6 +198,20 @@ public class RuleJobServiceImpl implements RuleJobService {
 
     @Override
     public ResponseEntity<Object> runBatchRuleJob(RunRuleJobRequest ruleJobRequest) {
+        final Map<String, Object> response = new HashMap<>();
+        try {
+            ruleJobHelper.submitRuleJobRequest(ruleJobRequest);
+            response.put("code", HttpStatus.SC_OK);
+            response.put("message", "Rule job submitted successfully for ruleId: " + ruleJobRequest.getRuleJob().getRuleId());
+        } catch (final Exception ex) {
+            response.put("code", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            response.put("message", "Error while submitting rule job:  " + ex.getMessage());
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Override
+    public ResponseEntity<Object> submitBatchRuleJob(RunRuleJobRequest ruleJobRequest) {
         final Map<String, Object> response = new HashMap<>();
         try {
             ruleJobHelper.submitRuleJob(ruleJobRequest.getRuleJob(), ruleJobRequest.getRuleDetails(), ruleJobRequest.getModifiedBy(), ruleJobRequest.getProjectId());
@@ -226,16 +245,38 @@ public class RuleJobServiceImpl implements RuleJobService {
             }
 
             dbUtil.changeSchema(project.getDbSchemaName());
-            List<QsRuleJob> ruleJobs = ruleJobRepository.findByJobIdInAndActiveIsTrue(ruleJobRequest.getJobIds());
+            List<QsRuleJob> ruleJobs = new ArrayList<>();
+            if(ruleJobRequest.getRuleId() != null && ruleJobRequest.getRuleId() > 0) {
+                List<String> statuses = Arrays.asList(RuleJobStatus.INPROCESS.getStatus(), RuleJobStatus.NOT_STARTED.getStatus(), RuleJobStatus.IN_QUEUE.getStatus());
+                ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusIn(ruleJobRequest.getRuleId(), statuses);
+            } else if(CollectionUtils.isNotEmpty(ruleJobRequest.getJobIds())) {
+                ruleJobs = ruleJobRepository.findByJobIdInAndActiveIsTrue(ruleJobRequest.getJobIds());
+            }
+            List<QsRuleJob> ruleJobsToUpdate = new ArrayList<>();
+            List<Integer> batchJobIds = new ArrayList<>();
+            if(CollectionUtils.isEmpty(ruleJobs)) {
+                log.info("No rule jobs found to cancel");
+                response.put("code", HttpStatus.SC_OK);
+                response.put("message", "No rule jobs found to cancel");
+                return ResponseEntity.ok().body(response);
+            }
             for (QsRuleJob ruleJob : ruleJobs) {
-                    ruleJob.setUserId(userId);
-                    ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
-                    ruleJob.setModifiedDate(DateTime.now().toDate());
-                    ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
-                    ruleJobRepository.save(ruleJob);
-                    if(ruleJob.getBatchJobId() >0) {
-                        ruleJobHelper.cancelRuleJob(ruleJob.getBatchJobId());
-                    }
+                ruleJob.setUserId(userId);
+                ruleJob.setJobStatus(RuleJobStatus.CANCELLED.getStatus());
+                ruleJob.setModifiedDate(DateTime.now().toDate());
+                ruleJob.setModifiedBy(controllerHelper.getFullName(userObj.getQsUserProfile()));
+                ruleJobsToUpdate.add(ruleJob);
+                if(ruleJob.getBatchJobId() >0) {
+                    batchJobIds.add(ruleJob.getBatchJobId());
+                }
+            }
+            if(CollectionUtils.isNotEmpty(ruleJobsToUpdate)) {
+                ruleJobRepository.saveAll(ruleJobsToUpdate);
+            }
+            if(CollectionUtils.isNotEmpty(batchJobIds)) {
+                for (int batchJobId : batchJobIds) {
+                    ruleJobHelper.cancelRuleJob(batchJobId);
+                }
             }
             response.put("code", HttpStatus.SC_OK);
             response.put("message", "Rule Jobs Cancelled successfully");
