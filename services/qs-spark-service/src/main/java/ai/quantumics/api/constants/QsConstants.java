@@ -142,9 +142,9 @@ public class QsConstants {
   public static final String NULL_VALUE = "Null Value";
   public static final String ZERO_ROW_CHECK = "Zero Row Check";
   public static final String DUPLICATE_VALUE = "Duplicate Value";
-  public static final String DUPLICATE_ROW = "Duplicate Row";
-  public static final String DUPLICATE_COLUMN_VALUE = "Column";
-  public static final String DUPLICATE_MULTI_COLUMN_VALUE = "Multiple Column";
+  public static final String DUPLICATE_ROW = "Rows";
+  public static final String DUPLICATE_COLUMN_VALUE = "Single Column";
+  public static final String DUPLICATE_MULTI_COLUMN_VALUE = "Multiple Columns";
   public static final String THRESHOLD_ERROR = "Batch job aborted, as the job execution time exceeded the threshold. Couldn't capture the batch job log";
 
   public static final String RULE_LEVEL_ALL = "All";
