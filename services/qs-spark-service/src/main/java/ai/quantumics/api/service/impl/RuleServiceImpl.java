@@ -8,7 +8,6 @@
 
 package ai.quantumics.api.service.impl;
 
-import ai.quantumics.api.constants.QsConstants;
 import ai.quantumics.api.enums.RuleJobStatus;
 import ai.quantumics.api.enums.RuleStatus;
 import ai.quantumics.api.helper.ControllerHelper;
@@ -341,7 +340,7 @@ public class RuleServiceImpl implements RuleService {
 			List<QsRuleJob> ruleJobs = ruleJobRepository.findByRuleIdAndActiveIsTrueAndJobStatusIn(ruleId, statuses);
 			List<QsRuleJob> ruleJobsToUpdate = new ArrayList<>();
 			List<Integer> batchJobIds = new ArrayList<>();
-			if(org.apache.commons.collections.CollectionUtils.isEmpty(ruleJobs)) {
+			if(org.apache.commons.collections4.CollectionUtils.isEmpty(ruleJobs)) {
 				log.info("No rule jobs found for ruleId {} to cancel", ruleId);
 				return;
 			}
@@ -355,10 +354,10 @@ public class RuleServiceImpl implements RuleService {
 					batchJobIds.add(ruleJob.getBatchJobId());
 				}
 			}
-			if(org.apache.commons.collections.CollectionUtils.isNotEmpty(ruleJobsToUpdate)) {
+			if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(ruleJobsToUpdate)) {
 				ruleJobRepository.saveAll(ruleJobsToUpdate);
 			}
-			if(org.apache.commons.collections.CollectionUtils.isNotEmpty(batchJobIds)) {
+			if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(batchJobIds)) {
 				for (int batchJobId : batchJobIds) {
 					ruleJobHelper.cancelRuleJob(batchJobId);
 				}

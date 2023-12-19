@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
@@ -345,7 +345,7 @@ public class RuleJobServiceImpl implements RuleJobService {
             Map<String, String> ruleTypeAndLevelMap;
             Map<String, String> resultMap;
             if(CollectionUtils.isNotEmpty(ruleJobDTO.getRuleTypes()) || CollectionUtils.isNotEmpty(ruleJobDTO.getRuleJobStatus()) || StringUtils.isNotEmpty(ruleJobDTO.getFeedName()) || StringUtils.isNotEmpty(ruleJobDTO.getFromDate()) || StringUtils.isNotEmpty(ruleJobDTO.getToDate())) {
-                String feedName = ruleJobDTO.getFeedName();
+                String feedName = ruleJobDTO.getFeedName().toLowerCase();
                 String fromDate = ruleJobDTO.getFromDate();
                 String toDate = ruleJobDTO.getToDate();
                 List<RuleTypes> ruleTypes = ruleJobDTO.getRuleTypes();
