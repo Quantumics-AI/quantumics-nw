@@ -92,8 +92,8 @@ export class RuleCreationService {
     return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/getRuleByName/${userId}/${projectId}/${rulename}?status=${statusParam}`);
   }
   // QuantumSparkServiceAPI/api/v1/qsrules/searchRule/1/1/rule7
-  public getSearchRule(userId: number, projectId: number, searchRule: string, pageNumber: number, sizeLength: number): Observable<any> {
-    return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/searchRule/${userId}/${projectId}/${searchRule}?page=${pageNumber}&size=${sizeLength}`);
+  public getSearchRule(userId: number, projectId: number, searchRule: string,  status: string,  pageNumber: number, sizeLength: number): Observable<any> {
+    return this.http.get(`/QuantumSparkServiceAPI/api/v1/qsrules/searchRule/${userId}/${projectId}/${searchRule}?status=${status}&page=${pageNumber}&size=${sizeLength}`);
   }
 
   // http://localhost:8082/QuantumSparkServiceAPI/api/v1/ruletypes/1?allRuleTypes=true&sourceOnly=true

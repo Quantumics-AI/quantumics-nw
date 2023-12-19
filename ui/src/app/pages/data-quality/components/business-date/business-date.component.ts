@@ -74,7 +74,7 @@ export class BusinessDateComponent {
       // this.loading = false;
       // this.ruleId = [];
       this.modal.close(response);
-      this.snakbar.open(response.message, '', 7000);
+      this.snakbar.open(response.message, '', 5000);
       
     }, (error) => {
       // this.loading = false;

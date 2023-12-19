@@ -110,6 +110,15 @@ export class DataQualityListComponent implements OnInit {
     this.getRulesDelete();
     this.getRuleTypeList();
     sessionStorage.clear();
+    // const storedStatus = localStorage.getItem('ruleStatus');
+    // if (storedStatus) {
+    //   this.selectedFilterStatus = storedStatus;
+    //   this.selectedStatus = storedStatus;
+    //   this.ruleStatus = storedStatus;
+    //   this.getStatusRules();
+    // } else {
+    //   this.getRules();
+    // }
   }
 
   public getRules(): void {
@@ -137,6 +146,18 @@ export class DataQualityListComponent implements OnInit {
     this.ruleCreationService.getAllRuletypes(this.projectId, true, true).subscribe((response) => {
       this.loading = false;
       this.ruleTypeList = response.result;
+      const storedStatus = localStorage.getItem('ruleStatus');
+      if (storedStatus) {
+        if (storedStatus == 'Inactive' || storedStatus == 'Deleted') {
+          localStorage.removeItem('ruleStatus');
+        } else {
+          this.loadFilterData();
+        }
+      } else {
+        // this.getRules();
+        this.loadFilterData();
+      }
+      
     }, (error) => {
       this.snakbar.open(error);
       this.loading = false;
@@ -153,7 +174,7 @@ export class DataQualityListComponent implements OnInit {
     this.selectedStatus = 'Search'
     this.buttonDisabled = true;
     
-    this.ruleCreationService.getSearchRule(this.userId, this.projectId, this.searchString, this.pageNumebr, this.pageLength).subscribe((response) => {
+    this.ruleCreationService.getSearchRule(this.userId, this.projectId, this.searchString, this.ruleStatus, this.pageNumebr, this.pageLength).subscribe((response) => {
       
       if (response.code === 400) {
         this.searchNull = true;
@@ -174,6 +195,29 @@ export class DataQualityListComponent implements OnInit {
     }, (error) => {
       
     });
+  }
+
+  loadFilterData() {
+    const storedData = localStorage.getItem('filterType');
+  
+    if (storedData) {
+      this.filterPayload = JSON.parse(storedData);
+  
+      // Now you need to update the selected values in your UI based on this.filterPayload
+      // Iterate through this.filterPayload and update the corresponding checkboxes and select options
+      for (const item of this.filterPayload) {
+        // Update checkbox state
+        const selectedRule = this.ruleTypeList.find(rule => rule.ruleTypeName === item.ruleTypeName);
+        if (selectedRule) {
+          selectedRule.checked = true;
+        }
+  
+        // Update select option state
+        this.selectedLevels[item.ruleTypeName] = item.ruleLevel;
+      }
+
+      this.applyFilter();
+    }
   }
 
   public getRulesInactive(): void {
@@ -224,7 +268,8 @@ export class DataQualityListComponent implements OnInit {
   }
 
   public viewRunning(): void {
-    this.router.navigate([`projects/${this.projectId}/data-quality/view-rules`]);
+    this.router.navigate([]).then(() => { window.open(`/projects/${this.projectId}/data-quality/view-rules`, '_blank'); });
+    // this.router.navigate([`projects/${this.projectId}/data-quality/view-rules`]);
     // const modalRef = this.modalService.open(ViewRunningRulesComponent, { size: 'lg', windowClass: 'modal-size', scrollable: false });
     // modalRef.componentInstance.userId = this.userId;
     // modalRef.componentInstance.projectId = this.projectId;
@@ -238,7 +283,8 @@ export class DataQualityListComponent implements OnInit {
   }
 
   public viewRunHistory(): void {
-    this.router.navigate([`projects/${this.projectId}/data-quality/view-history`]);
+    this.router.navigate([]).then(() => { window.open(`/projects/${this.projectId}/data-quality/view-history`, '_blank'); });
+    // this.router.navigate([`projects/${this.projectId}/data-quality/view-history`]);
   }
 
   onCheckboxChange(item: any): void {
@@ -248,12 +294,20 @@ export class DataQualityListComponent implements OnInit {
       delete this.selectedLevels[item.ruleTypeName];
     }
 
-    if (this.disableButton) {
-      this.getStatusRules();
-    }
+    // if (this.disableButton) {
+    //   this.getStatusRules();
+    // }
     
     // Enable the button when a checkbox is edited
     this.disableButton = false;
+
+    if (Object.keys(this.selectedLevels).length > 0) {
+    } else {
+      this.getStatusRules();
+      localStorage.removeItem('filterType');
+      
+    }
+    
   }
 
   public isButtonEnabled(): boolean {
@@ -301,6 +355,7 @@ export class DataQualityListComponent implements OnInit {
       ruleTypes: this.filterPayload
     };
     this.loading = true;
+    localStorage.setItem('filterType', JSON.stringify(this.filterPayload));
     this.ruleCreationService.filterRuleData(this.userId, this.projectId, this.selectedStatus, this.pageNumebr, this.pageLength, req).subscribe((response) => {
     
       this.loading = false;
@@ -466,12 +521,25 @@ export class DataQualityListComponent implements OnInit {
   public onItemChange(value: string): void {
     this.ruleStatus = value;
     this.selectedStatus = value;
+    if (value == 'Active') {
+      localStorage.removeItem('ruleStatus');
+    } else {
+      localStorage.setItem('ruleStatus', value);
+    }
+    
     this.getStatusRules();
     // Uncheck all checkboxes after applying the filter
     this.ruleTypeList.forEach(item => item.checked = false);
 
     // Reset the selected levels
     this.selectedLevels = {};
+
+    this.searchNull = false;
+    this.searchTerm = { ruleName: '' };
+    this.searchDiv = false;
+    this.buttonDisabled = true;
+    this.isSearch = false;
+    localStorage.removeItem('filterType');
   }
 
   public getStatusRules(): void {

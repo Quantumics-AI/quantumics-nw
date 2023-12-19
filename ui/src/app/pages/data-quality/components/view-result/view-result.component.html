@@ -56,14 +56,14 @@
             <div class="rd">
                 <p class="p2 text-center fsw">{{output?.ruleTypeName}}</p>
                 <p class="p2 text-center fsw" [ngClass]="{'mr-b-0': columnName}">
-                    <span *ngIf="output?.levelName == 'Multiple Column'">
+                    <span *ngIf="output?.levelName == 'Multiple Columns'">
                        Duplicate Data-Combined Column Check
                     </span>
-                    <span *ngIf="output?.levelName == 'Duplicate Row'">
-                        Duplicate Row Check
+                    <span *ngIf="output?.levelName == 'Rows'">
+                        Duplicate Rows Check
                     </span>
-                    <span *ngIf="output?.levelName == 'Column'">
-                        Duplicate Data-Column Check
+                    <span *ngIf="output?.levelName == 'Single Column'">
+                        Duplicate Data-Single Column Check
                     </span>
                 </p>
                 <p *ngIf="columnName" class=" text-center form-text body-text-muted">({{columnName}})</p>
@@ -178,7 +178,7 @@
             <span *ngIf="!output.match" class="fail">Failed</span>
         </p>
         <div class="btn-div text-center">
-            <button class="btn btn-design" (click)="modal.close();">Okay</button>
+            <button class="btn btn-design" (click)="modal.close();">Ok</button>
         </div>
     <!-- </div> -->
 </div>

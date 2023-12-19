@@ -83,6 +83,8 @@ export class ViewHistoryComponent implements OnInit {
   public filtered: boolean = false;
   public disableButton: boolean = false;
   public selectedFeedName: any;
+  public dateFromRange: any;
+  public dateToRange: any;
 
   constructor(
     // public modal: NgbActiveModal,
@@ -300,17 +302,17 @@ export class ViewHistoryComponent implements OnInit {
       if (Array.isArray(parsedOutput)) {
         // Check if it's an array and contains an item with 'match' property
         const hasMatch = parsedOutput.some(item => item.match);
-        return hasMatch ? 'Match' : 'MisMatch';
+        return hasMatch ? 'Match' : 'Mismatch';
       } else if (parsedOutput.match !== undefined) {
         // Check if it's an object with 'match' property
-        return parsedOutput.match ? 'Match' : 'MisMatch';
+        return parsedOutput.match ? 'Match' : 'Mismatch';
       } else {
         // If it doesn't have 'match' property, default to 'MisMatch'
-        return 'MisMatch';
+        return 'Mismatch';
       }
     } catch (error) {
       // Handle the case where JSON parsing fails
-      return 'MisMatch';
+      return 'Mismatch';
     }
   }
 
@@ -600,12 +602,12 @@ export class ViewHistoryComponent implements OnInit {
   // Function to check the date difference
   checkDateDifference(): boolean {
     if (this.selectedFromBusinessDate && this.selectedToBusinessDate) {
-      const fromDate = new Date(this.selectedFromBusinessDate.year, this.selectedFromBusinessDate.month - 1, this.selectedFromBusinessDate.day);
-      const toDate = new Date(this.selectedToBusinessDate.year, this.selectedToBusinessDate.month - 1, this.selectedToBusinessDate.day);
+      this.dateFromRange = new Date(this.selectedFromBusinessDate.year, this.selectedFromBusinessDate.month - 1, this.selectedFromBusinessDate.day);
+      this.dateToRange = new Date(this.selectedToBusinessDate.year, this.selectedToBusinessDate.month - 1, this.selectedToBusinessDate.day);
 
-      const differenceInMonths = Math.abs((toDate.getFullYear() - fromDate.getFullYear()) * 12 + toDate.getMonth() - fromDate.getMonth());
+      const differenceInDays = Math.floor((this.dateToRange - this.dateFromRange) / (1000 * 60 * 60 * 24));
 
-      return differenceInMonths <= 3;
+      return differenceInDays <= 90;
     }
 
     return true; // Default to true if dates are not selected yet

@@ -23,8 +23,8 @@
 }
   
 .td-text td {
-    padding-top: 16px !important;
-    padding-bottom: 16px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
     padding-left: 24px;
     padding-right: 24px;
 }
@@ -326,7 +326,7 @@
 
 .list-height {
     // height: calc(100vh - 250px);
-    height: 36vh;
+    height: 38vh;
 }
 
 // filter rule type 
@@ -534,4 +534,12 @@
 
 .mr-0 {
     margin-right: 0;
+}
+
+.lh-12 {
+    line-height: 12px;
+}
+
+.mr-r-10 {
+    margin-right: 10px;
 }

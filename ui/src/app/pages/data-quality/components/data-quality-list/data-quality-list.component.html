@@ -81,7 +81,7 @@
                                 <div class="form-check form-check-inline align-start">
                                     <label class="form-check-label rules" for="inlineCheckbox1">Rule Type:</label>
                                 </div>
-                                <ul class="list-group">
+                                <ul class="list-group w-320">
                                     <li class="list-group-item pd-0 br-n" *ngFor="let item of ruleTypeList; let i = index">
                                         <div class="form-group dif mr-b-5">
                                             <div class="form-check form-check-inline">
@@ -97,11 +97,15 @@
                                                     <option *ngFor="let level of item.level" [value]="level.levelName">{{level.levelName}}</option>
                                                 </select>
                                             </div>
-                                            <div *ngIf="item.ruleTypeName == 'Zero Row Check'" class="mr-l-50">
+                                            <!-- <div *ngIf="item.ruleTypeName == 'Zero Row Check'" class="mr-l-50">
                                                 <button class="btn btn-design" [disabled]="!isButtonEnabled() || disableButton"
-                                                (click)="applyFilter(); disableButton = true;">Okay</button>
-                                            </div>
+                                                (click)="applyFilter(); disableButton = true;">Ok</button>
+                                            </div> -->
                                         </div>
+                                    </li>
+                                    <li class="list-group-item pd-0 br-n">
+                                        <button class="btn btn-design float-right ok-btn" [disabled]="!isButtonEnabled() || disableButton"
+                                        (click)="applyFilter(); disableButton = true;">Ok</button>
                                     </li>
                                 </ul>
                             </div>

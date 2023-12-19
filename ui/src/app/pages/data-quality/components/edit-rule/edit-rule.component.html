@@ -354,7 +354,7 @@
                         <p class="rule-t p2">Rule Types*:</p>
     
                         <ng-container *ngFor="let item of ruleTypesData; let i = index;">
-                            <div class="form-group">
+                            <div class="form-group" *ngIf="selectedMainRuleType === item.ruleTypeName">
                               <div class="form-check form-check-inline">
                                 <input
                                   class="form-check-input cp"
@@ -373,8 +373,8 @@
                                     <ng-container *ngIf="selectedMainRuleType != 'Null Value'; else nullValue">
                                         <!-- Sub-level radio buttons -->
                                         <div *ngFor="let level of item.level; let j = index;">
-                                            <div class="form-group dif">
-                                                <div class="form-check form-check-inline">
+                                            <div class="form-group dif" *ngIf="selectedSubLevel === level.levelName">
+                                                <div class="form-check form-check-inline" >
                                                     <input
                                                         class="form-check-input cp"
                                                         type="radio"
@@ -388,43 +388,76 @@
                                                 </div>
                                                 <!-- Conditionally display input and select elements based on columnLevel -->
                                                 <ng-container *ngIf="selectedSubLevel === level.levelName">
-                                                    <div *ngIf="!level.columnLevel" class="dif">
+                                                    <div *ngIf="!level.columnLevel">
                                                         <ng-container *ngIf="selectedSubLevel != 'Table Level'">
-                                                            <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                            formControlName="percentage" autocomplete="off">
-                                                            <span class="pr">%</span>
+                                                            <div class="dif">
+                                                                <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                                formControlName="percentage" (input)="validateInput($event)">
+                                                                <span class="pr">%</span>
+                                                            </div>
+                                                            <div *ngIf="fg.get('percentage').hasError('invalidPercentage')" class="text-error fs-12">
+                                                                Please enter a number between 0 and 20
+                                                            </div>
+                                                            <div *ngIf="fg.get('percentage').hasError('emptyPercentage')" class="text-error fs-12">
+                                                                Please enter value inside Acceptance Percentage Field
+                                                            </div>
                                                         </ng-container>
                                                     </div>
+                                                    
                                                     <div *ngIf="level.columnLevel" class="dif">
                                                         <!-- for single column -->
-                                                        <select *ngIf="selectedSubLevel != 'Multiple Column'" class="form-control input-design in-text mr-r-20" 
-                                                        formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                                            <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                            <option *ngFor="let i of completenessData" [value]="i">
-                                                                {{i}}
-                                                            </option>
-                                                        </select>
+                                                        <ng-container *ngIf="selectedSubLevel != 'Multiple Columns'">
+                                                            <div class="dif">
+                                                                <div style="position: relative; display: flex;">
+                                                                    <select  class="form-control input-design in-text mr-r-20" 
+                                                                    formControlName="selectColumnAttribute" [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                                        <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                                        <option *ngFor="let i of completenessData" [value]="i">
+                                                                            {{i}}
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </ng-container>
+                                                        
         
                                                         <!-- for multi column  -->
-                                                        <ng-select *ngIf="selectedSubLevel === 'Multiple Column'" id="dpt" class="custom mr-r-20"
-                                                            formControlName="selectColumnAttribute" [multiple]="true"
-                                                            placeholder="Select Attributes" 
-                                                            bindLabel="name" groupBy="item" [selectableGroup]="true"
-                                                            bindValue="id" [(ngModel)]="selectedMultipleAttributeName"
-                                                            [closeOnSelect]="false" [items]="completenessData">
-        
-                                                            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-                                                                <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
-                                                            </ng-template>
-                                                        </ng-select>
+                                                        <ng-container *ngIf="selectedSubLevel === 'Multiple Columns'" >
+                                                            <div class="dif">
+                                                                <div style="position: relative; display: flex;">
+                                                                    <ng-select  id="dpt" class="custom mr-r-20"
+                                                                        formControlName="selectColumnAttribute" [multiple]="true"
+                                                                        placeholder="Select Attributes" 
+                                                                        bindLabel="name" groupBy="item" [selectableGroup]="true"
+                                                                        bindValue="id" [(ngModel)]="selectedMultipleAttributeName"
+                                                                        [closeOnSelect]="false" [items]="completenessData">
+                    
+                                                                        <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                                                            <input id="item-{{index}}" type="checkbox" [ngModel]="item$.selected"/> <span [title]="item" class="mr-l-8">{{item}}</span>
+                                                                        </ng-template>
+                                                                    </ng-select>
+                                                                </div>
+                                                            </div>
+                                                        </ng-container>
+                                                        
         
                                                         <ng-container *ngIf="selectedSubLevel != 'Column level'">
-                                                            <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                                            formControlName="percentage" autocomplete="off">
-                                                            <span class="pr">%</span>
+                                                            <div class="dif">
+                                                                <div style="position: relative; display: flex;">
+                                                                    <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                                    formControlName="percentage" (input)="validateInput($event)">
+                                                                    <span class="pr">%</span>
+
+                                                                    <div *ngIf="fg.get('percentage').hasError('invalidPercentage')" class="text-error fs-12 err-div-acc">
+                                                                        Please enter a number between 0 and 20
+                                                                    </div>
+                                                                    <div *ngIf="fg.get('percentage').hasError('emptyPercentage')" class="text-error fs-12 err-div-acc">
+                                                                        Please enter value inside Acceptance Percentage Field
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                            </div>
                                                         </ng-container>
-                                        
-                                                        
                                                     </div>
                                                 </ng-container>
                                             </div>
@@ -432,15 +465,34 @@
                                     </ng-container>
                                     <ng-template #nullValue>
                                         <div class="form-group mr-b-0 dif">
-                                            <select class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
-                                            [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
-                                                <option [value]="undefined" disabled selected> Select Attributes </option>
-                                                <option *ngFor="let i of completenessData" [value]="i">
-                                                    {{i}}
-                                                </option>
-                                            </select>
-                                            <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
-                                            formControlName="percentage" autocomplete="off">
+                                            <div class="dif">
+                                                <div style="position: relative; display: flex;">
+                                                    <select class="form-control input-design in-text mr-r-20" formControlName="selectColumnAttribute" 
+                                                    [(ngModel)]="selectedAttributeName" placeholder="Select Attributes">
+                                                        <option [value]="undefined" disabled selected> Select Attributes </option>
+                                                        <option *ngFor="let i of completenessData" [value]="i">
+                                                            {{i}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="dif">
+                                                <div style="position: relative; display: flex;">
+                                                    <input type="text" pattern="^[0-9]+$" class="form-control input-design" placeholder="Acceptance Percentage"
+                                                    formControlName="percentage" (input)="validateInput($event)">
+                                                    <span class="pr">%</span>
+    
+                                                    <div *ngIf="fg.get('percentage').hasError('invalidPercentage')" class="text-error fs-12 err-div left-12">
+                                                        Please enter a number between 0 and 20.
+                                                    </div>
+                                                    <div *ngIf="fg.get('percentage').hasError('emptyPercentage')" class="text-error fs-12 err-div left-12">
+                                                        Please enter value inside Acceptance Percentage Field
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- <input type="text" class="form-control input-design" placeholder="Acceptance Percentage"
+                                            formControlName="percentage" autocomplete="off"> -->
                                         </div>
                                     </ng-template>
                                 </ng-container>
