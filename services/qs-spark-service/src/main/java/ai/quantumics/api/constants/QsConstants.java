@@ -306,9 +306,9 @@ public class QsConstants {
     return localDate;
   }
 
-  public static String convertToDDMMYYYY(LocalDate date) {
+  public static String convertToYYYYMMDD(LocalDate date) {
     // Define the desired date format
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     // Format the LocalDate object to a String
     return date.format(formatter);
