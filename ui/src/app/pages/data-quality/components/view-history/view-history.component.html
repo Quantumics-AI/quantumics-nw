@@ -121,11 +121,11 @@
                                     From date and To date are required
                                 </div>
 
-                                <div *ngIf="!isValidDateRange" class="text-error fs-10 err">
-                                    Difference between 'From' date and 'To' date in Business date field should not be more than 3 months
+                                <div *ngIf="!isValidDateRange" class="text-error fs-10 err lh-12">
+                                    Difference between 'From' date and 'To' date in Business date field should not be more than 3 months (90 Days)
                                 </div>
 
-                                <div *ngIf="!isValidFromDate" class="text-error fs-10 err">
+                                <div *ngIf="!isValidFromDate" class="text-error fs-10 err lh-12">
                                     Please check 'From' date can't be bigger than 'To' dates in Business Date field
                                 </div>
                             </div>
@@ -169,7 +169,7 @@
                         <table class="table m-0 table-fixed table-striped">
                             <thead class="thead-light">
                                 <tr class="fixed-th">
-                                    <th class="pd-l-24">Rule name</th>
+                                    <th class="pd-l-24">Rule Name</th>
                                     <th class="pd-l-24">Rule Type</th>
                                     <th class="pd-l-24">Job Status
                                         <em>
@@ -192,7 +192,7 @@
                                         <!-- <input type="checkbox" (change)="selectRule($event, view)" [checked]="view.isChecked" 
                                         *ngIf="view.jobStatus === 'Not Started' || view.jobStatus === 'Inprocess'"> -->
                                         <span *ngIf="view.ruleStatus == 'Active'">
-                                            <input type="checkbox" (change)="selectReRule($event, view)"
+                                            <input type="checkbox" class="mr-r-10" (change)="selectReRule($event, view)"
                                             *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'">
                                         </span>
                                         
@@ -202,7 +202,7 @@
                                         *ngIf="view.jobStatus === 'Failed' || view.jobStatus === 'Cancelled'">
                                             <img src="/assets/img/project/re-run.svg" >
                                         </a> -->
-                                        <span class="mr-l-10" title="{{view?.ruleName}}">{{view?.ruleName}}</span>
+                                        <span title="{{view?.ruleName}}">{{view?.ruleName}}</span>
                                         
                                     </td>
                                     <td class="text-over">
@@ -233,7 +233,7 @@
                                         
                                     </td>
                                     <td>{{view?.businessDate}}</td>
-                                    <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'MisMatch'}">
+                                    <td [ngClass]="{'greenStatus': parseJobOutput(view?.jobOutput) === 'Match', 'redStatus': parseJobOutput(view?.jobOutput) === 'Mismatch'}">
                                         {{ view?.jobOutput ? parseJobOutput(view?.jobOutput) : '' }}
                                     </td>
                                     <td class="vr-l">

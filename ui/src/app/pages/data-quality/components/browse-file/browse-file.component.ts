@@ -218,13 +218,14 @@ export class BrowseFileComponent implements OnInit {
   }
 
   public getFileData(): void {
+    this.loading = true;
     this.ruleCreationService.getFileContent(this.userId, +this.projectId, this.bucketName, this.filePath, this.regionName, this.accesType).subscribe((res) => {
       
       this.headers = res.headers;
       this.fileContent = res.content;
       this.columnType = res.columnDatatype;
       this.rowCount = res?.rowCount;
-      
+      this.loading = false;
       if (this.rowCount == 500) {
         this.getRowCount();
       } else {
@@ -235,6 +236,7 @@ export class BrowseFileComponent implements OnInit {
       // this.filePath = "";
       this.openNodes = [];
     }, (error) => {
+      this.loading = false;
       this.snakbar.open(error);
       this.filePath = "";
       this.openNodes.pop();

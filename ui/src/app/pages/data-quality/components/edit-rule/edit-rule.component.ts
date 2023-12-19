@@ -15,6 +15,33 @@ import { StatusDeleteConfirmationComponent } from '../status-delete-confirmation
 function alwaysInvalid(control: AbstractControl): { alwaysInvalid: true } {
   return { alwaysInvalid: true };
 }
+
+function acceptancePercentageValidator(control: FormControl) {
+  const inputValue = control.value;
+  // Convert inputValue to string if it's not
+  const inputValueString = typeof inputValue === 'string' ? inputValue : inputValue.toString();
+  const replacedValue = inputValueString.replace(/[^0-9]/g, '');
+  if (replacedValue === null || replacedValue === '') {
+    return { emptyPercentage: true }; // Accept empty input
+  }
+
+  // Replace non-numeric characters
+  // const replacedValue = inputValueString.replace(/[^0-9]/g, '');
+
+  // Check if the replaced value is a whole number (no decimals)
+  // debugger
+  if (!/^[0-9]+$/.test(replacedValue)) {
+    return { invalidPercentage: true };
+  }
+
+  const numericValue = parseInt(replacedValue, 10);
+  if (isNaN(numericValue) || numericValue < 0 || numericValue > 20) {
+    return { invalidPercentage: true };
+  }
+
+  return null;
+}
+
 @Component({
   selector: 'app-edit-rule',
   templateUrl: './edit-rule.component.html',
@@ -134,7 +161,7 @@ export class EditRuleComponent implements OnInit {
       subLavelRadio: new FormControl({ value: '', disabled: true }),
       selectColumnAttribute: new FormControl({ value: '', disabled: true }),
       selectMultipleAttribute: new FormControl({ value: '', disabled: true }),
-      percentage: new FormControl({ value: '', disabled: true }),
+      percentage: new FormControl({ value: '', disabled: false }, [Validators.pattern('^[0-9]*$'),acceptancePercentageValidator,]),
       //
       status: new FormControl('', Validators.required),
       dummyValidator: ['', [alwaysInvalid]],
@@ -195,15 +222,16 @@ export class EditRuleComponent implements OnInit {
       // this.fg.controls.synonymTerm.setValue(result?.synonymTerm);
       //Types
       setTimeout(() => {
+        this.selectedMainRuleType = this.fetchEditRule?.ruleDetails.ruleTypeName;
         this.fg.controls.ruleType.setValue(this.fetchEditRule?.ruleDetails.ruleTypeName);
         this.fg.controls.subLavelRadio.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.levelName);
         this.selectedSubLevel = this.fetchEditRule?.ruleDetails.ruleLevel.levelName;
-        if(this.fetchEditRule?.ruleDetails.ruleLevel.levelName != 'Multiple Column') {
+        if(this.fetchEditRule?.ruleDetails.ruleLevel.levelName != 'Multiple Columns') {
           this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
           this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
           this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns[0];
         }
-        if(this.fetchEditRule?.ruleDetails.ruleLevel.levelName == 'Multiple Column') {
+        if(this.fetchEditRule?.ruleDetails.ruleLevel.levelName == 'Multiple Columns') {
           
           this.fg.controls.selectColumnAttribute.setValue(this.fetchEditRule?.ruleDetails.ruleLevel.columns);
           this.fetchEditRule?.ruleDetails.ruleLevel.columns.forEach(c => {
@@ -222,7 +250,7 @@ export class EditRuleComponent implements OnInit {
         //   this.completenessData.push(this.fetchEditRule?.ruleDetails.ruleLevel.columns[0]);
         //   this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns[0];
         // this.selectedAttributeName = this.fetchEditRule?.ruleDetails.ruleLevel.columns;
-      }, 5000); // 5000 milliseconds (5 seconds)
+      }, 3000); // 5000 milliseconds (5 seconds)
       
       this.initializeCheckedDays();
     }, (error) => {
@@ -434,6 +462,20 @@ export class EditRuleComponent implements OnInit {
     }
   }
 
+  validateInput(event: any): void {
+    this.editableForm = true;
+    const inputElement = event.target;
+    const inputValue = inputElement.value;
+  
+    // Remove any non-numeric characters, including decimals
+    const sanitizedValue = inputValue.replace(/[^0-9]/g, '');
+  
+    // Update the input value with the sanitized value
+    inputElement.value = sanitizedValue;
+    this.fg.controls.percentage.setValue(sanitizedValue);
+    // debugger
+  }
+
   public onSelectDataConnections1(d: string): void {
     const connectionBucket = this.dataConnectionList.find(e => e.id == +d);
     this.bucketSourceOne = []
@@ -549,7 +591,7 @@ export class EditRuleComponent implements OnInit {
       }
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
-      if (this.fg.controls.subLavelRadio.value == 'Multiple Column'){
+      if (this.fg.controls.subLavelRadio.value == 'Multiple Columns'){
         this.saveRulePayload = {
           ruleId: this.ruleId,
           ruleName:this.fg.controls.ruleName.value,

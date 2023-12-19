@@ -192,7 +192,7 @@
                                         <label for="inputName" class="p2">File Pattern*</label>
                                         <!-- <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
                                         formControlName="sourcePatternPath" #patternPath readonly> -->
-                                        <p class="p2 fs-12">s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME</p>
+                                        <p class="p2 fs-12 mr-b-0">s3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME</p>
                                         <div class="text-error fs-12" *ngIf="isPattern"> 
                                             Please check, the selected file is not aligned with the File Pattern
                                         </div>
@@ -289,7 +289,7 @@
                                                 <label for="inputName" class="p2">File Pattern*</label>
                                                 <!-- <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
                                                 formControlName="sourcePatternPath" #patternPath readonly> -->
-                                                <p class="p2 fs-12">s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME</p>
+                                                <p class="p2 fs-12 mr-b-0">s3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME</p>
                                             </div>
 
                                             <div class="form-group">
@@ -381,7 +381,7 @@
                                                 <label for="inputName" class="p2">File Pattern*</label>
                                                 <!-- <input type="text" class="form-control input-design" placeholder="s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME" 
                                                 formControlName="sourcePatternPathTwo" #patternPathTwo readonly> -->
-                                                <p class="p2 fs-12">s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME</p>
+                                                <p class="p2 fs-12 mr-b-0">s3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME</p>
                                             </div>
 
                                             <div class="form-group">
@@ -441,8 +441,8 @@
                                     <!-- Sub-level radio buttons -->
                                     <div *ngFor="let level of item.level; let j = index;">
                                         <div class="form-group dif"
-                                        [ngClass]="{'mr-b-55': level.levelName == 'Column' && fg.get('selectColumnAttribute').hasError('required'),
-                                        'mr-b-10': selectedSubLevel != 'Column'}">
+                                        [ngClass]="{'mr-b-55': level.levelName == 'Single Column' && fg.get('selectColumnAttribute').hasError('required'),
+                                        'mr-b-10': selectedSubLevel != 'Single Column'}">
                                             <div class="form-check form-check-inline">
                                                 <input
                                                     class="form-check-input cp"
@@ -475,7 +475,7 @@
                                                 
                                                 <div *ngIf="level.columnLevel" class="dif">
                                                     <!-- for single column -->
-                                                    <ng-container  *ngIf="selectedSubLevel != 'Multiple Column'">
+                                                    <ng-container  *ngIf="selectedSubLevel != 'Multiple Columns'">
                                                         <div class="dif">
                                                             <div style="position: relative; display: flex;">
                                                                 <select id="ab" class="form-control input-design in-text mr-r-20" 
@@ -498,7 +498,7 @@
                                                     
 
                                                     <!-- for multi column  -->
-                                                    <ng-container *ngIf="selectedSubLevel === 'Multiple Column'" >
+                                                    <ng-container *ngIf="selectedSubLevel === 'Multiple Columns'" >
                                                         <div class="dif">
                                                             <div style="position: relative; display: flex;">
                                                                 <ng-select id="dpt" class="custom mr-r-20 wid" formControlName="selectColumnAttribute" 
@@ -518,12 +518,12 @@
                                                                     Please select up to 5 columns for comparison.
                                                                 </div>
                                                                 <div *ngIf="fg.get('selectColumnAttribute').hasError('minlength')" class="text-error fs-12 err-div-acc">
-                                                                    Please choose atleast 2 columns in the Duplicate-Multiple Column Value Rule Type
+                                                                    Please choose atleast 2 columns in the Duplicate-Multiple Columns Value Rule Type
                                                                 </div>
                                                                 <!-- <div class="err-div" *ngIf="fg.get('selectColumnAttribute').invalid && fg.get('selectColumnAttribute').dirty || fg.get('selectColumnAttribute').touched"> -->
                                                                     <div class="text-error fs-12 err-div-acc" *ngIf="fg.get('selectColumnAttribute').hasError('required')">
                                                                         <!-- <span><img class="h-14" src="assets/img/side-bar/alert.svg"></span>&nbsp;  -->
-                                                                        Please choose Column in the Duplicate - Multiple Column Value Rule Type
+                                                                        Please choose Column in the Duplicate - Multiple Columns Value Rule Type
                                                                     </div>
                                                                 <!-- </div> -->
                                                             </div>

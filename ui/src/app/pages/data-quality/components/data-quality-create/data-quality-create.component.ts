@@ -146,7 +146,7 @@ export class DataQualityCreateComponent implements OnInit {
       region: new FormControl (''),
       accessType: new FormControl(''),
       sourceFolderPath: new FormControl('', Validators.required),
-      sourcePatternPath: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
+      sourcePatternPath: new FormControl('s3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME', Validators.required),
       //
       sourceDataSourceTwo: new FormControl('aws', Validators.required),
       subDataSourceTwo: new FormControl('s3', Validators.required),
@@ -155,7 +155,7 @@ export class DataQualityCreateComponent implements OnInit {
       regionTwo: new FormControl (''),
       accessTypeTwo: new FormControl(''),
       sourceFolderPathTwo: new FormControl('', Validators.required),
-      sourcePatternPathTwo: new FormControl('s3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', Validators.required),
+      sourcePatternPathTwo: new FormControl('s3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME', Validators.required),
       //types
       ruleType: new FormControl('', Validators.required),
       subLavelRadio: new FormControl('', Validators.required),
@@ -477,18 +477,18 @@ export class DataQualityCreateComponent implements OnInit {
     this.selectedSubLevel = value;
     console.log("sub level -", value);
 
-    if (value == 'Duplicate Row') {
+    if (value == 'Rows') {
       this.fg.get('selectColumnAttribute')?.clearValidators();
     }
 
-    if (value == 'Column') {
+    if (value == 'Single Column') {
       console.log("...", this.selectedMainRuleType);
-      this.selectedSubColumn = "in the Duplicate - Column Value Rule Type";
+      this.selectedSubColumn = "in the Duplicate - Single Column Value Rule Type";
       
       this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
     }
     
-    if (value == "Multiple Column"){
+    if (value == "Multiple Columns"){
       // this.fg.get('selectColumnAttribute').setValidators([Validators.required]);
       this.fg.get('selectColumnAttribute').setValidators([Validators.required, Validators.minLength(2), Validators.maxLength(5)]);
     }
@@ -732,7 +732,7 @@ export class DataQualityCreateComponent implements OnInit {
       }
       // console.log("Rule save payload:", JSON.stringify(req));
     } else {
-      if (this.fg.controls.subLavelRadio.value == 'Multiple Column') {
+      if (this.fg.controls.subLavelRadio.value == 'Multiple Columns') {
         this.saveRulePayload = {
           ruleName:this.fg.controls.ruleName.value,
           ruleDescription:this.fg.controls.ruleDescription.value,

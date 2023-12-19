@@ -41,7 +41,7 @@
     font-style: normal;
     font-weight: 400;
     font-size: 14px;
-    line-height: 36px;
+    line-height: 24px;
     color: #212244;
     border-bottom: 1px solid #E2E8F2;
 }
@@ -294,7 +294,7 @@
 
 .list-height {
     // height: calc(100vh - 250px);
-    height: 40vh;
+    height: 44vh;
 }
 
 .h-405 {
@@ -455,4 +455,10 @@
 
 .mr-t-5 {
     margin-top: 5px;
+}
+
+.ok-btn {
+    height: auto !important;
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
