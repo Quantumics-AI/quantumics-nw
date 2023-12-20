@@ -85,6 +85,7 @@ export class ViewHistoryComponent implements OnInit {
   public selectedFeedName: any;
   public dateFromRange: any;
   public dateToRange: any;
+  public filterCollapse: boolean = false;
 
   constructor(
     // public modal: NgbActiveModal,
@@ -744,5 +745,10 @@ export class ViewHistoryComponent implements OnInit {
         return `${day}-${month}-${year}`;
     }
     return '';
+  }
+
+  // Collapse Filter Part
+  public collapseFilter(view: boolean): void {
+    this.filterCollapse = view;
   }
 }

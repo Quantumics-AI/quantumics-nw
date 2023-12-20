@@ -84,6 +84,7 @@ export class DataQualityListComponent implements OnInit {
   public showActive: number;
   public showInactive: number;
   public showDeleted: number;
+  public filterCollapse: boolean = false;
 
   constructor(
     private readonly router: Router,
@@ -640,5 +641,10 @@ export class DataQualityListComponent implements OnInit {
 
   public onSelectRuleType(type: string): void {
 
+  }
+
+  // Collapse Filter Part
+  public collapseFilter(view: boolean): void {
+    this.filterCollapse = view;
   }
 }
