@@ -147,7 +147,7 @@ export class EditRuleComponent implements OnInit {
       sourceBucketOne: new FormControl({ value: '', disabled: true }),
       region: new FormControl({ value: '', disabled: true }),
       sourceFolderPath: new FormControl({ value: '', disabled: true }),
-      sourcePatternPath: new FormControl({ value: 's3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', disabled: true }),
+      sourcePatternPath: new FormControl({ value: 's3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME', disabled: true }),
       //
       sourceDataSourceTwo: new FormControl({ value: 'aws', disabled: true }),
       subDataSourceTwo: new FormControl({ value: 's3', disabled: true }),
@@ -155,7 +155,7 @@ export class EditRuleComponent implements OnInit {
       sourceBucketTwo: new FormControl({ value: '', disabled: true }),
       regionTwo: new FormControl({ value: '', disabled: true }),
       sourceFolderPathTwo: new FormControl({ value: '', disabled: true }),
-      sourcePatternPathTwo: new FormControl({ value: 's3://BUCKET_NAME/FEED_NAME/DDMMYYYY/FILENAME', disabled: true }),
+      sourcePatternPathTwo: new FormControl({ value: 's3://BUCKET_NAME/FEED_NAME/YYYYMMDD/FILENAME', disabled: true }),
       //types
       ruleType: new FormControl({ value: '', disabled: true }),
       subLavelRadio: new FormControl({ value: '', disabled: true }),
