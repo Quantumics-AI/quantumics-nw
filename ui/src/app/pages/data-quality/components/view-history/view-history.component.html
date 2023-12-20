@@ -21,8 +21,19 @@
                     </a>
                 </div>
                 <div class="mt-3 bg-c pd-5">
-                    <p class="p2 mr-b-5 fw-600">Filter By</p>
-                    <div class="row">
+                    <div class="p2 mr-b-5 fw-600">Filter By
+                        <span class="mr-l-17">
+                            <span *ngIf="filterCollapse">
+                                <img class="cp h-10" (click)="collapseFilter(false)"
+                                src="/assets/img/data-profile/downArrow.svg">
+                            </span>
+                            <span *ngIf="!filterCollapse">
+                                <img class="cp h-10" (click)="collapseFilter(true)"
+                                src="/assets/img/data-profile/upArrow.svg">
+                            </span>
+                        </span>
+                    </div>
+                    <div class="row" *ngIf="!filterCollapse">
                         <div class="col mx-w pd-l-15">
                             <div class="df">
                                 <div class="form-check form-check-inline align-start">
@@ -165,7 +176,8 @@
             </div>
             <ng-container *ngIf="historyList.length else noJobs">
                 <div class="card-body pd-0">
-                    <div class="table-responsive br list-height">
+                    <div class="table-responsive br list-height"
+                    [ngClass]="{'reTableHight': filterCollapse}">
                         <table class="table m-0 table-fixed table-striped">
                             <thead class="thead-light">
                                 <tr class="fixed-th">

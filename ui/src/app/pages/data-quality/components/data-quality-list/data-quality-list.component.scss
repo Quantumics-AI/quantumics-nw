@@ -209,7 +209,7 @@
 }
 
 .mr-b-8 {
-    margin-bottom: 8px;
+    margin-bottom: 8px !important;
 }
 
 .mr-r-35 {
@@ -461,4 +461,28 @@
     height: auto !important;
     padding-top: 3px;
     padding-bottom: 3px;
+}
+
+.w-300 {
+    width: 300px;
+}
+
+.mr-l-2 {
+    margin-left: 200px;
+}
+
+.mr-l-17 {
+    margin-left: 17px;
+}
+
+.reTableHight {
+    height: 56vh !important;
+}
+
+.h-10 {
+    height: 10px;
+}
+
+.mr-b-45 {
+    margin-right: 45px;
 }
