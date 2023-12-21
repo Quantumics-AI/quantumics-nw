@@ -121,7 +121,7 @@
                                         </div>
                                     </li>
                                     <li class="list-group-item pd-0 br-n">
-                                        <button class="btn btn-design float-right ok-btn" [disabled]="!isButtonEnabled() || disableButton"
+                                        <button class="btn btn-design ok-btn" [disabled]="!isButtonEnabled() || disableButton"
                                         (click)="applyFilter(); disableButton = true;">Ok</button>
                                     </li>
                                 </ul>
@@ -136,34 +136,34 @@
                                 <table class="table m-0 table-fixed table-striped">
                                     <thead class="thead-light">
                                         <tr class="fixed-th">
-                                            <th class="pd-l-24"><label class="mr-b-0">
+                                            <th class="pd-l-24 pd-r-0"><label class="mr-b-0">
                                                 <input *ngIf="isActive" type="checkbox" [(ngModel)]="selectAllChecked" (change)="selectRuleAll($event)"></label>
                                             </th>
-                                            <th class="pd-l-24">Rule Name</th>
-                                            <th class="pd-l-24">
+                                            <th class="pd-l-24 pd-r-0">Rule Name</th>
+                                            <th class="pd-l-24 pd-r-0">
                                                 Rule Type
                                                 <span> <img class="cp h-12" (click)="sortRuleType()"
                                                     src="/assets/img/data-profile/sort.svg"></span>
                                             </th>
-                                            <th class="pd-l-24">Created By</th>
-                                            <th class="pd-l-24">
+                                            <th class="pd-l-24 pd-r-0">Created By</th>
+                                            <th class="pd-l-24 pd-r-0 w-155">
                                                 Created Date
                                                 <span> <img class="cp h-12" (click)="sortCreatedDate()"
                                                     src="/assets/img/data-profile/sort.svg"></span>
                                             </th>
-                                            <th class="pd-l-24">
+                                            <th class="pd-l-24 pd-r-0 w-155">
                                                 Modified Date
                                                 <span> <img class="cp h-12" (click)="sortModifiedDate()"
                                                     src="/assets/img/data-profile/sort.svg"></span>
                                             </th>
-                                            <th class="pd-l-24">Status</th>
-                                            <th class="pd-l-24">Action</th>
+                                            <th class="pd-l-24 pd-r-0">Status</th>
+                                            <th class="pd-l-24 pd-r-0 w-80">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <ng-container *ngIf="!searchNull">
                                             <tr class="td-text" *ngFor="let dataQuality of dataQualityList">
-                                                <td class="pt-2"> <label>
+                                                <td class="pt-2 pd-r-0"> <label class="mr-b-0">
                                                     <input *ngIf="dataQuality.status == 'Active'" type="checkbox" [(ngModel)]="dataQuality.selected" (change)="selectRule($event, dataQuality)">
                                                 </label></td>
                                                 <td class="fn text-over">
@@ -179,13 +179,13 @@
                                                         {{dataQuality?.ruleDetails?.ruleTypeName}}
                                                     </span> 
                                                 </td>
-                                                <td>{{dataQuality?.createdBy}}</td>
-                                                <td>
+                                                <td class="text-over">{{dataQuality?.createdBy}}</td>
+                                                <td class="text-over">
                                                     <!-- {{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}} -->
                                                     {{convertToUKTimeZone(dataQuality?.createdDate)  }}
                                                 </td>
                                                 <!-- <td class="cp">{{dataQuality?.createdDate | date: 'dd-MM-yy, hh:mm a':'en-GB'}}</td> -->
-                                                <td>
+                                                <td class="text-over">
                                                     {{convertToUKTimeZone(dataQuality?.modifiedDate)}}
                                                     <!-- {{convertToUKTime(dataQuality?.modifiedDate)}} -->
                                                 </td>
