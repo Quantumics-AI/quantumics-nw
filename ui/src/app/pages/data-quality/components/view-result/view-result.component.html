@@ -174,8 +174,8 @@
         </ng-container>
         
         <p class="p2 text-center fsw">
-            <span *ngIf="output.match" class="pass">Passed</span>
-            <span *ngIf="!output.match" class="fail">Failed</span>
+            <span *ngIf="output.pass" class="pass">Passed</span>
+            <span *ngIf="!output.pass" class="fail">Failed</span>
         </p>
         <div class="btn-div text-center">
             <button class="btn btn-design" (click)="modal.close();">Ok</button>
