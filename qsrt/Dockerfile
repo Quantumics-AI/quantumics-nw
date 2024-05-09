@@ -10,7 +10,7 @@ COPY webpack.config.js /frontend/
 RUN npm run build
 
 #FROM python:3.7-slim-buster
-FROM python:3.7-slim
+FROM python:3.13.0b1-slim
 
 EXPOSE 5000
 
