@@ -40,3 +40,4 @@ azure-kusto-data
 pyexasol==0.9.1
 python-rapidjson==0.8.0
 pyodbc==4.0.28
+requests>=2.32.0 # not directly required, pinned by Snyk to avoid a vulnerability
