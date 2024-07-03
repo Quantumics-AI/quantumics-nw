@@ -72,7 +72,7 @@
     "react-ace": "^6.1.0",
     "react-dom": "^16.8.3",
     "react-dropdown-tree-select": "^2.4.1",
-    "react-folder-tree": "^3.0.0",
+    "react-folder-tree": "^4.0.0",
     "react-grid-layout": "^0.18.2",
     "react-icons": "^3.11.0",
     "react-pivottable": "^0.9.0",
