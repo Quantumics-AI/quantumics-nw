@@ -6,3 +6,4 @@
 # These can be removed when upgrading to Python 3.x
 importlib-metadata>=0.19  # remove when on 3.8
 importlib_resources==1.0.2  # remove when on 3.7
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
