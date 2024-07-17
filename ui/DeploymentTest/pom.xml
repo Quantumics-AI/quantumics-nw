@@ -34,7 +34,7 @@
 	<dom4j.version>1.6.1</dom4j.version>
 	<xmlbeans.version>2.6.0</xmlbeans.version>
 	<itext.version>4.2.1</itext.version>
-	<cucumber-reporting.version>4.7.0</cucumber-reporting.version>
+	<cucumber-reporting.version>5.8.2</cucumber-reporting.version>
 	<testng.version>6.8</testng.version>
 	<jre.level>1.8</jre.level>
 	<jdk.level>1.8</jdk.level>
