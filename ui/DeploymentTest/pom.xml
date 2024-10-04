@@ -27,14 +27,14 @@
     <maven.compiler.version>2.3.2</maven.compiler.version>
 	<selenium.version>3.141.59</selenium.version>
 	<junit.version>4.11</junit.version>
-	<appium.version>7.0.0</appium.version>
+	<appium.version>8.6.0</appium.version>
 	<poi.version>3.12</poi.version>
 	<poi-ooxml.version>3.9</poi-ooxml.version>
 	<poi-ooxml-schemas.version>3.12</poi-ooxml-schemas.version>
 	<dom4j.version>1.6.1</dom4j.version>
 	<xmlbeans.version>2.6.0</xmlbeans.version>
 	<itext.version>4.2.1</itext.version>
-	<cucumber-reporting.version>4.7.0</cucumber-reporting.version>
+	<cucumber-reporting.version>5.8.0</cucumber-reporting.version>
 	<testng.version>6.8</testng.version>
 	<jre.level>1.8</jre.level>
 	<jdk.level>1.8</jdk.level>
@@ -95,7 +95,7 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>htmlunit-driver</artifactId>
-			<version>2.29.0</version>
+			<version>4.8.1</version>
 		</dependency>
 		
 		<dependency>
