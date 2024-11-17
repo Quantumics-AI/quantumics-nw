@@ -1,4 +1,4 @@
-FROM maven:3.6.3-jdk-8
+FROM maven:3.8.6-jdk-8
 RUN apt-get update && apt-get upgrade -y
 COPY services/qs-us /usr/src/app/qs-us
 WORKDIR /usr/src/app/qs-us
