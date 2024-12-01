@@ -1184,7 +1184,7 @@ public class LivyActions {
 
             if (LivySessionState.success.toString().equals(batchJobState)) {
                 jobName = jobName.replace(".py", "");
-                S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                S3Object s3Object = awsAdapter.fetchObject(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName + "/");
                 if(s3Object == null) { //Error in livy job
                     List<String> logMsgs = livyClient.getApacheLivyBatchJobLog(batchJobId, mapper);
                     String batchJobLog = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(logMsgs);
@@ -1204,7 +1204,8 @@ public class LivyActions {
                     }
                     RuleJobOutput ruleJobOutput = objectMapper.readValue(stringBuilder.toString(), RuleJobOutput.class);
                     updateRuleJobEntry(ruleJobId, RuleJobStatus.COMPLETE.getStatus(), ruleJobOutput.getJobOutput(), modifiedBy, projectId, null);
-                    awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName);
+                    log.info("Rule output has been saved, deleting the rule output ");
+                    awsAdapter.deleteFolderAndContents(bucketName, RULE_OUTPUT_FOLDER + "/" + jobName + "/");
                 }
                 log.info("Completed running the Rule Job...");
             } else {

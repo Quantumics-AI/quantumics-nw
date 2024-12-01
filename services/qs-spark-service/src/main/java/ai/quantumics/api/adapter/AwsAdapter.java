@@ -2781,6 +2781,7 @@ public class AwsAdapter {
 
 	public void deleteFolderAndContents(String bucketName, String folderKey) {
 		try {
+			log.info("Trying to fetch the S3 Object in Bucket: {} and Key: {}", bucketName, folderKey);
 			amazonS3Client.listObjects(bucketName, folderKey).getObjectSummaries()
 					.forEach(objectSummary -> {
 						amazonS3Client.deleteObject(new DeleteObjectRequest(bucketName, objectSummary.getKey()));
