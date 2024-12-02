@@ -279,7 +279,7 @@ public class AwsAdapter {
 		S3Object s3Object = null;
 		try {
 			log.info("Trying to fetch the S3 Object in Bucket: {} and Key: {}", bucketNameLoc, path);
-
+			log.info("Amazon s3 client region: " + amazonS3Client.getRegion());
 			ObjectListing objectListing = amazonS3Client.listObjects(bucketNameLoc, path);
 			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
 				log.info("Key: {}", objectSummary.getKey());
