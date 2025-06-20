@@ -40,3 +40,5 @@ azure-kusto-data
 pyexasol==0.9.1
 python-rapidjson==0.8.0
 pyodbc==4.0.28
+protobuf>=4.25.8 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=2.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
