@@ -7,7 +7,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.7.2</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ai.quantumics</groupId>
 	<artifactId>qs-gateway</artifactId>
@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.14.0</version>
+			<version>2.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
