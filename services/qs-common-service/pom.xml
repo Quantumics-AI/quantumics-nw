@@ -7,7 +7,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.7.0</version>
-		<relativePath />
+		<relativePath/>
 	</parent>
 	<groupId>com.qs.api</groupId>
 	<artifactId>QSCommonService</artifactId>
@@ -19,7 +19,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-cloud.version>Hoxton.SR8</spring-cloud.version>
-		<aws.sdk.version>1.12.272</aws.sdk.version>
+		<aws.sdk.version>1.12.787</aws.sdk.version>
 		<log4j2.version>2.17.1</log4j2.version>
 	</properties>
 
@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.14.0</version>
+			<version>2.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -179,7 +179,7 @@
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
-			<version>1.5</version>
+			<version>1.6.0</version>
 		</dependency>
 		
 	</dependencies>
