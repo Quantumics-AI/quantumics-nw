@@ -9,7 +9,7 @@ RUN npm install
 
 # Build prod - output path should be specified orelse directory not found error will thrown during build.
 RUN npm run build
-FROM nginx:alpine
+FROM nginx:1.29.3-alpine3.22
 
 # Expose port
 EXPOSE 7000 443
