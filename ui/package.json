@@ -21,7 +21,7 @@
   },
   "private": true,
   "dependencies": {
-    "@angular-devkit/build-angular": "^15.2.4",
+    "@angular-devkit/build-angular": "^16.2.0",
     "@angular/animations": "^15.2.3",
     "@angular/cdk": "^11.2.13",
     "@angular/common": "^15.2.3",
@@ -57,7 +57,7 @@
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
     "jspdf": "^2.5.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "mxgraph": "^4.2.2",
     "ng-circle-progress": "^1.7.1",
     "ng-intercom": "^8.0.2",
